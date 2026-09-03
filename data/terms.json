@@ -1,0 +1,293 @@
+{
+  "description": "Smallest n in S(f) = {n : rad(n) | f(n)} whose covering digraph has girth k.",
+  "generated_by": "python -c (see README)",
+  "reference": "https://doi.org/10.1515/integers-2012-0044",
+  "functions": {
+    "sigma": [
+      {
+        "girth": 2,
+        "n": 6,
+        "factorization": "2 * 3",
+        "omega": 2,
+        "cycle": [
+          2,
+          3
+        ],
+        "edges": {
+          "2": 3,
+          "3": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 3,
+        "n": 234,
+        "factorization": "2 * 3^2 * 13",
+        "omega": 3,
+        "cycle": [
+          2,
+          3,
+          13
+        ],
+        "edges": {
+          "2": 3,
+          "3": 13,
+          "13": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 4,
+        "n": 137214,
+        "factorization": "2 * 3^4 * 7 * 11^2",
+        "omega": 4,
+        "cycle": [
+          2,
+          3,
+          7,
+          11
+        ],
+        "edges": {
+          "2": 3,
+          "3": 11,
+          "7": 2,
+          "11": 7
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 5,
+        "n": 275900625,
+        "factorization": "3^2 * 5^4 * 7^3 * 11 * 13",
+        "omega": 5,
+        "cycle": [
+          3,
+          5,
+          7,
+          11,
+          13
+        ],
+        "edges": {
+          "3": 13,
+          "5": 11,
+          "7": 5,
+          "11": 3,
+          "13": 7
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 6,
+        "n": 180141399900,
+        "factorization": "2^2 * 3^4 * 5^2 * 7^2 * 11^4 * 31",
+        "omega": 6,
+        "cycle": [
+          2,
+          3,
+          5,
+          7,
+          11,
+          31
+        ],
+        "edges": {
+          "2": 7,
+          "3": 11,
+          "5": 31,
+          "7": 3,
+          "11": 5,
+          "31": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      }
+    ],
+    "sigma*": [
+      {
+        "girth": 2,
+        "n": 6,
+        "factorization": "2 * 3",
+        "omega": 2,
+        "cycle": [
+          2,
+          3
+        ],
+        "edges": {
+          "2": 3,
+          "3": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 3,
+        "n": 6615,
+        "factorization": "3^3 * 5 * 7^2",
+        "omega": 3,
+        "cycle": [
+          3,
+          5,
+          7
+        ],
+        "edges": {
+          "3": 7,
+          "5": 3,
+          "7": 5
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 4,
+        "n": 4380453,
+        "factorization": "3^3 * 7^3 * 11 * 43",
+        "omega": 4,
+        "cycle": [
+          3,
+          7,
+          11,
+          43
+        ],
+        "edges": {
+          "3": 7,
+          "7": 43,
+          "11": 3,
+          "43": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 5,
+        "n": 540765225,
+        "factorization": "3^2 * 5^2 * 7^5 * 11 * 13",
+        "omega": 5,
+        "cycle": [
+          3,
+          5,
+          7,
+          11,
+          13
+        ],
+        "edges": {
+          "3": 5,
+          "5": 13,
+          "7": 11,
+          "11": 3,
+          "13": 7
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 6,
+        "n": 474549075,
+        "factorization": "3^2 * 5^2 * 7^3 * 11 * 13 * 43",
+        "omega": 6,
+        "cycle": [
+          3,
+          5,
+          7,
+          11,
+          13,
+          43
+        ],
+        "edges": {
+          "3": 5,
+          "5": 13,
+          "7": 43,
+          "11": 3,
+          "13": 7,
+          "43": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 7,
+        "n": 4485174218525,
+        "factorization": "5^2 * 7^3 * 11^3 * 13 * 19 * 37 * 43",
+        "omega": 7,
+        "cycle": [
+          5,
+          7,
+          11,
+          13,
+          19,
+          37,
+          43
+        ],
+        "edges": {
+          "5": 13,
+          "7": 43,
+          "11": 37,
+          "13": 7,
+          "19": 5,
+          "37": 19,
+          "43": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      }
+    ],
+    "phi*": [
+      {
+        "girth": 2,
+        "n": 12,
+        "factorization": "2^2 * 3",
+        "omega": 2,
+        "cycle": [
+          2,
+          3
+        ],
+        "edges": {
+          "2": 3,
+          "3": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 3,
+        "n": 66825,
+        "factorization": "3^5 * 5^2 * 11",
+        "omega": 3,
+        "cycle": [
+          3,
+          5,
+          11
+        ],
+        "edges": {
+          "3": 11,
+          "5": 3,
+          "11": 5
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      },
+      {
+        "girth": 4,
+        "n": 1120454775,
+        "factorization": "3^11 * 5^2 * 11 * 23",
+        "omega": 4,
+        "cycle": [
+          3,
+          5,
+          11,
+          23
+        ],
+        "edges": {
+          "3": 23,
+          "5": 3,
+          "11": 5,
+          "23": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true
+      }
+    ]
+  }
+}

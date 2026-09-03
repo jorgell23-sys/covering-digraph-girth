@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+title: "Smallest witnesses by girth for rad(n) | f(n)"
+message: "If you use this work, please cite it as below."
+type: dataset
+authors:
+  - family-names: "Ellena"
+    given-names: "Jorge"
+abstract: >-
+  For a multiplicative function f, let S(f) be the set of integers n with
+  rad(n) dividing f(n), and let the covering digraph of n have the primes
+  dividing n as vertices with an edge q -> p whenever p divides f(q^e), where
+  q^e is the exact power of q in n. This work computes the smallest member of
+  S(f) of each girth, for f = sigma, sigma* and phi*, and proves that any such
+  minimal witness of girth k has exactly k distinct prime factors and a covering
+  digraph that is a pure directed cycle. That theorem turns the search into the
+  construction of cycles over small primes, which yields three values beyond the
+  reach of exhaustive search, the largest near 4.5e12. All results are verified
+  by two independent implementations and cross-checked against the count of
+  prime-abundant numbers published by Pollack and Pomerance (2012).
+keywords:
+  - number theory
+  - arithmetic functions
+  - sum of divisors
+  - prime-abundant numbers
+  - covering digraph
+  - girth
+  - integer sequences
+license: CC-BY-4.0
+version: 1.0.0
+date-released: "2026-09-03"
+references:
+  - type: article
+    title: "Prime-Perfect Numbers"
+    authors:
+      - family-names: "Pollack"
+        given-names: "Paul"
+      - family-names: "Pomerance"
+        given-names: "Carl"
+    journal: "INTEGERS: Electronic Journal of Combinatorial Number Theory"
+    volume: "12A"
+    year: 2012
+    notes: "Paper A14"
+    doi: "10.1515/integers-2012-0044"

@@ -1,0 +1,18 @@
+{
+  "title": "Smallest witnesses by girth for rad(n) | f(n)",
+  "upload_type": "dataset",
+  "license": "cc-by-4.0",
+  "creators": [
+    { "name": "Ellena, Jorge" }
+  ],
+  "keywords": [
+    "number theory", "arithmetic functions", "sum of divisors",
+    "prime-abundant numbers", "covering digraph", "girth", "integer sequences"
+  ],
+  "related_identifiers": [
+    { "identifier": "10.1515/integers-2012-0044",
+      "relation": "references", "scheme": "doi" },
+    { "identifier": "https://oeis.org/A175200",
+      "relation": "references", "scheme": "url" }
+  ]
+}
