@@ -3,7 +3,7 @@ title: "Smallest witnesses by girth for rad(n) | f(n)"
 message: "If you use this work, please cite it as below."
 type: dataset
 authors:
-  - family-names: "Ellena"
+  - family-names: "Ellena Godoy"
     given-names: "Jorge"
 abstract: >-
   For a multiplicative function f, let S(f) be the set of integers n with

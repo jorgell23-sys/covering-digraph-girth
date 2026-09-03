@@ -134,6 +134,11 @@ by people who never saw it.
 
 See [`CITATION.cff`](CITATION.cff), or use the "Cite this repository" button.
 
+## Author
+
+**Jorge Ellena Godoy**, who is responsible for the correctness of everything
+here.
+
 ## How this was produced
 
 The system design and research direction are the author's. The mathematical

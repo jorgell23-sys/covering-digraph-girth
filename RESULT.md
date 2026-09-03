@@ -240,6 +240,11 @@ given girth" sequence.
 
 ---
 
+## Author
+
+**Jorge Ellena Godoy** — author and responsible for the correctness of
+everything published here.
+
 ## How this was produced
 
 The system design and the direction of this research are the author's. The

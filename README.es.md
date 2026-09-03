@@ -122,6 +122,10 @@ por gente que nunca lo vio.
   cintura es otra pregunta, que no se toca acá.
 - **No afirma tener interés matemático.** Eso lo juzga quien lo lea.
 
+## Autor
+
+**Jorge Ellena Godoy**, responsable de la corrección de todo lo que hay acá.
+
 ## Cómo se produjo
 
 El diseño del sistema y la dirección de la investigación son del autor. Los
