@@ -234,8 +234,15 @@ code, with the lemma switched on and off (`python src/exact.py <f> <k>
 | `sigma*` | 6 | 12940 | 4397 | 2.9x |
 | `sigma*` | 7 | 643175 | 97608 | 6.6x |
 | `phi*` | 4 | 136898 | 23430 | 5.8x |
+| `sigma` | 7 | **74731325** | **4658867** | **16.0x** |
 
-In all five rows the value found is **identical**, which is what has to happen
+The last row is the one that says most, for two reasons. It is the large case —
+287 seconds against 23 — and **the 74731325 nodes with the lemma switched off
+reproduce, to the digit, the "74.7 million" that version 2 published** for that
+same run. So the switch turns off exactly what is new here and nothing else: the
+16x is not shared with any other change.
+
+In all six rows the value found is **identical**, which is what has to happen
 if both lemmas are correct: (+) does not change the answer, it changes the cost
 of reaching it.
 
