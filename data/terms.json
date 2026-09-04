@@ -1,6 +1,6 @@
 {
-  "description": "Smallest n in S(f) = {n : rad(n) | f(n)} whose covering digraph has girth k.",
-  "generated_by": "python -c (see README)",
+  "description": "Smallest n in S(f) = {n : rad(n) | f(n)} whose covering digraph has girth k. Every term is proved minimal: the cutoff lemma bounds the largest prime a smaller witness could use, so the enumeration is exhaustive.",
+  "generated_by": "python src/exact.py <function> <girth>",
   "reference": "https://doi.org/10.1515/integers-2012-0044",
   "functions": {
     "sigma": [
@@ -18,7 +18,11 @@
           "3": 2
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 3,
+        "largest_prime": 3,
+        "first_computed_here": false
       },
       {
         "girth": 3,
@@ -36,7 +40,11 @@
           "13": 2
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 14,
+        "largest_prime": 13,
+        "first_computed_here": false
       },
       {
         "girth": 4,
@@ -46,8 +54,8 @@
         "cycle": [
           2,
           3,
-          7,
-          11
+          11,
+          7
         ],
         "edges": {
           "2": 3,
@@ -56,7 +64,11 @@
           "11": 7
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 213,
+        "largest_prime": 11,
+        "first_computed_here": false
       },
       {
         "girth": 5,
@@ -65,10 +77,10 @@
         "omega": 5,
         "cycle": [
           3,
-          5,
+          13,
           7,
-          11,
-          13
+          5,
+          11
         ],
         "edges": {
           "3": 13,
@@ -78,7 +90,11 @@
           "13": 7
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 4288,
+        "largest_prime": 13,
+        "first_computed_here": false
       },
       {
         "girth": 6,
@@ -87,10 +103,10 @@
         "omega": 6,
         "cycle": [
           2,
-          3,
-          5,
           7,
+          3,
           11,
+          5,
           31
         ],
         "edges": {
@@ -102,7 +118,73 @@
           "31": 2
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 41420,
+        "largest_prime": 31,
+        "first_computed_here": false
+      },
+      {
+        "girth": 7,
+        "n": 7746928876851255,
+        "factorization": "3^2 * 5 * 7^4 * 13 * 19 * 37 * 2801^2",
+        "omega": 7,
+        "cycle": [
+          3,
+          13,
+          7,
+          2801,
+          37,
+          19,
+          5
+        ],
+        "edges": {
+          "3": 13,
+          "5": 3,
+          "7": 2801,
+          "13": 7,
+          "19": 5,
+          "37": 19,
+          "2801": 37
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 2589844,
+        "largest_prime": 2801,
+        "first_computed_here": true
+      },
+      {
+        "girth": 8,
+        "n": 31674203849435875,
+        "factorization": "5^3 * 7^2 * 13^2 * 19 * 31^2 * 61 * 83 * 331",
+        "omega": 8,
+        "cycle": [
+          5,
+          13,
+          61,
+          31,
+          331,
+          83,
+          7,
+          19
+        ],
+        "edges": {
+          "5": 13,
+          "7": 19,
+          "13": 61,
+          "19": 5,
+          "31": 331,
+          "61": 31,
+          "83": 7,
+          "331": 83
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 1452412,
+        "largest_prime": 331,
+        "first_computed_here": true
       }
     ],
     "sigma*": [
@@ -120,7 +202,11 @@
           "3": 2
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 3,
+        "largest_prime": 3,
+        "first_computed_here": false
       },
       {
         "girth": 3,
@@ -129,8 +215,8 @@
         "omega": 3,
         "cycle": [
           3,
-          5,
-          7
+          7,
+          5
         ],
         "edges": {
           "3": 7,
@@ -138,7 +224,11 @@
           "7": 5
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 58,
+        "largest_prime": 7,
+        "first_computed_here": false
       },
       {
         "girth": 4,
@@ -148,8 +238,8 @@
         "cycle": [
           3,
           7,
-          11,
-          43
+          43,
+          11
         ],
         "edges": {
           "3": 7,
@@ -158,7 +248,11 @@
           "43": 11
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 854,
+        "largest_prime": 43,
+        "first_computed_here": false
       },
       {
         "girth": 5,
@@ -168,9 +262,9 @@
         "cycle": [
           3,
           5,
+          13,
           7,
-          11,
-          13
+          11
         ],
         "edges": {
           "3": 5,
@@ -180,7 +274,11 @@
           "13": 7
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 4246,
+        "largest_prime": 13,
+        "first_computed_here": false
       },
       {
         "girth": 6,
@@ -190,10 +288,10 @@
         "cycle": [
           3,
           5,
-          7,
-          11,
           13,
-          43
+          7,
+          43,
+          11
         ],
         "edges": {
           "3": 5,
@@ -204,7 +302,11 @@
           "43": 11
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 1503,
+        "largest_prime": 43,
+        "first_computed_here": false
       },
       {
         "girth": 7,
@@ -213,12 +315,12 @@
         "omega": 7,
         "cycle": [
           5,
-          7,
-          11,
           13,
-          19,
+          7,
+          43,
+          11,
           37,
-          43
+          19
         ],
         "edges": {
           "5": 13,
@@ -230,7 +332,43 @@
           "43": 11
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 44064,
+        "largest_prime": 43,
+        "first_computed_here": false
+      },
+      {
+        "girth": 8,
+        "n": 2386830845734335,
+        "factorization": "3^3 * 5 * 7^3 * 11^2 * 13^2 * 31^2 * 43 * 61",
+        "omega": 8,
+        "cycle": [
+          3,
+          7,
+          43,
+          11,
+          61,
+          31,
+          13,
+          5
+        ],
+        "edges": {
+          "3": 7,
+          "5": 3,
+          "7": 43,
+          "11": 61,
+          "13": 5,
+          "31": 13,
+          "43": 11,
+          "61": 31
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 281925,
+        "largest_prime": 61,
+        "first_computed_here": true
       }
     ],
     "phi*": [
@@ -248,7 +386,11 @@
           "3": 2
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 3,
+        "largest_prime": 3,
+        "first_computed_here": false
       },
       {
         "girth": 3,
@@ -257,8 +399,8 @@
         "omega": 3,
         "cycle": [
           3,
-          5,
-          11
+          11,
+          5
         ],
         "edges": {
           "3": 11,
@@ -266,7 +408,11 @@
           "11": 5
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 182,
+        "largest_prime": 11,
+        "first_computed_here": false
       },
       {
         "girth": 4,
@@ -275,9 +421,9 @@
         "omega": 4,
         "cycle": [
           3,
-          5,
+          23,
           11,
-          23
+          5
         ],
         "edges": {
           "3": 23,
@@ -286,7 +432,37 @@
           "23": 11
         },
         "in_S": true,
-        "is_pure_cycle": true
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 13664,
+        "largest_prime": 23,
+        "first_computed_here": false
+      },
+      {
+        "girth": 5,
+        "n": 1663175056640625,
+        "factorization": "3^11 * 5^9 * 11 * 19 * 23",
+        "omega": 5,
+        "cycle": [
+          3,
+          23,
+          11,
+          5,
+          19
+        ],
+        "edges": {
+          "3": 23,
+          "5": 19,
+          "11": 5,
+          "19": 3,
+          "23": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 7445747,
+        "largest_prime": 23,
+        "first_computed_here": true
       }
     ]
   }

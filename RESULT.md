@@ -1,9 +1,18 @@
 # Smallest witnesses by girth for rad(n) | f(n)
 
-**Version 1.0 — 2026-09-03**
+**Version 2.0 — 2026-09-03**
 
 Every number in this document can be checked by running `python verify.py`,
 which takes about two seconds and needs nothing installed.
+
+**What changed in version 2.** Version 1 published a table of smallest witnesses
+and said, honestly, what it could not guarantee: *"the answer is only minimal
+among the primes examined."* That made every value a conjecture verified as far
+as somebody had looked. Version 2 proves a **cutoff lemma** that bounds, in
+terms of any witness already known, the largest prime a smaller witness could
+possibly use. With that bound the enumeration is finite, the search terminates,
+and the values become **proved minima**. Four further values fall out, and an
+irregularity in the growth that the earlier terms could not reveal.
 
 ---
 
@@ -55,11 +64,11 @@ smaller member of `S(sigma)` has girth 3.
 
 ---
 
-## 2. The theorem
+## 2. Theorem 1 — the shape of a smallest witness
 
-> **Theorem.** Let `f` be multiplicative and `k >= 2`. If some `n` in `S(f)` has
-> girth `k`, then the smallest such `n` has exactly `k` distinct prime factors,
-> and its covering digraph is a pure directed cycle of length `k`.
+> **Theorem 1.** Let `f` be multiplicative and `k >= 2`. If some `n` in `S(f)`
+> has girth `k`, then the smallest such `n` has exactly `k` distinct prime
+> factors, and its covering digraph is a pure directed cycle of length `k`.
 
 *Proof.* Let `n` be the smallest member of `S(f)` of girth `k`, and let `C` be a
 directed cycle of length `k` in `D_f(n)`.
@@ -88,82 +97,203 @@ Step 2 is a fact about digraphs, not about arithmetic, and should be assumed
 known. What this work contributes is joining it to Step 1, which uses the
 multiplicativity of `f`.
 
-**Verified independently of the proof:** all fourteen published terms satisfy
+**Verified independently of the proof:** all eighteen published terms satisfy
 both conclusions (check 3 of `verify.py`), and among the 353 members of `S(f)`
 with girth at least 3 below 2·10^7, not one has a chord in its minimal cycle.
 
 ---
 
-## 3. The theorem as an algorithm
+## 3. Theorem 2 — the cutoff lemma, and why it is the point
 
-The theorem changes how the smallest witness can be found.
+Theorem 1 turns the search into building cycles over small primes. It does not
+say **how small**. Without an answer to that, a search can only ever report
+"nothing cheaper among the primes I looked at".
 
-Sieving for a witness of girth 6 under `sigma` is hopeless. The counts per girth
-below 10^9 are:
+> **Theorem 2 (cutoff lemma).** Let `f` be one of `sigma`, `sigma*`, `phi*`, let
+> `n` be a smallest witness of girth `k`, and let `P` be the largest prime
+> dividing `n`. Then
+>
+>     n  >=  P * a_f(P) * primorial(k-2)                                  (*)
+>
+> where `primorial(j)` is the product of the `j` smallest primes and
+>
+>     a_sigma(P)  = ceil(P/2),    a_sigma*(P) = P - 1,    a_phi*(P) = P + 1.
 
-| girth | 2 | 3 | 4 | 5 |
-|---|---:|---:|---:|---:|
-| members of `S(sigma)` | 4138 | 1065 | 122 | **2** |
+*Proof.* By Theorem 1, `n` has exactly `k` distinct primes
+`q_1, ..., q_k` and `D_f(n)` is the cycle `q_1 -> ... -> q_k -> q_1`. Let
+`P = q_j`, let `q_{j-1}` be its predecessor on the cycle and let `q^e` be the
+exact power of `q_{j-1}` dividing `n`. That the edge exists means `P | f(q^e)`,
+and since `P` is positive, `P <= f(q^e)`. From the closed forms:
 
-The counts fall by factors 3.9, then 8.7, then **61** — and the factor keeps
-growing. Even assuming it stopped growing, expecting a single witness of girth 6
-would need about 30 times more members, and since the count grows like
-`x^(1/3)`, that means sieving to roughly `10^13`. With a more realistic factor,
-`10^14` to `10^15`.
+| `f` | `f(q^e)` | consequence of `P <= f(q^e)` |
+|---|---|---|
+| `sigma` | `(q^(e+1)-1)/(q-1) < 2 q^e` | `q^e > P/2`, i.e. `q^e >= ceil(P/2)` |
+| `sigma*` | `q^e + 1` | `q^e >= P - 1` |
+| `phi*` | `q^e - 1` | `q^e >= P + 1` |
 
-But if the smallest witness **is** a pure `k`-cycle on `k` primes, one can build
-it instead: for each ordered pair `(q, p)` find the least `e` with
-`p | f(q^e)` — the cost of that edge — and search for the `k`-cycle of least
-product. The bound stops being the size of `n` and becomes how many primes to
-examine.
+Now `n` is the product of its `k` exact prime powers. Split them into three
+groups, disjoint because `k >= 2` forces `P` and its predecessor to be distinct
+vertices:
 
-**One caution, learned the hard way.** Building a cycle is not enough: the girth
-must be verified afterwards. Choosing the least exponent per edge can create
-*extra* edges among the same primes, and those chords shorten the cycle. The
-first version of the search proposed `n = 120 = 2^3 * 3 * 5` as the smallest
-witness of girth 3 under `sigma`, on the cycle `2 -> 5 -> 3 -> 2`; the true
-girth of 120 is 2. Every candidate is now checked with an independent girth
-computation.
+- the power of `P` itself contributes at least `P`;
+- the power of `q_{j-1}` contributes at least `a_f(P)`, by the table;
+- the remaining `k-2` are powers of primes distinct from each other and from
+  those two, so each contributes at least its own prime, and a product of `k-2`
+  distinct primes is at least the product of the `k-2` smallest. ∎
+
+**Corollary — the search becomes finite.** If **any** witness `N` of girth `k`
+is known, the smallest one is at most `N`, so by (*) its largest prime satisfies
+
+    P  <=  the largest P with  P * a_f(P) * primorial(k-2) < N
+
+which is of order `sqrt(N / primorial(k-2))`. Enumerating cycles over the primes
+up to that bound is therefore exhaustive: what comes out is **the** minimum.
+
+The bound is computed by bisection over integers, never by a floating-point
+square root: rounding the wrong way would discard exactly the boundary case the
+lemma exists to cover.
+
+**Every published term satisfies (\*)**, and its largest prime lies inside the
+cutoff derived from it — check 7 of `verify.py`. If that ever failed, every
+"proved minimal" here would be worth nothing.
 
 ---
 
-## 4. The terms
+## 4. The search, and a correction to version 1
+
+`src/construct.py` fixed, for each edge `q -> p`, the **smallest** exponent `e`
+with `p | f(q^e)`; assembled `n`; checked the girth; and if a chord appeared, it
+discarded the whole prime cycle.
+
+That can lose witnesses. The edges leaving `q` **depend on the exponent**:
+raising `e` changes the entire out-neighbourhood of `q` and can *remove* the
+chord the minimal exponent created. A prime cycle discarded with minimal
+exponents may be valid with a larger one.
+
+`src/exact.py` searches over `(prime, exponent)` pairs and requires the absence
+of chords **while building**. On adding the `m`-th vertex it demands, then and
+there:
+
+1. `q_m` divides `f(q_{m-1}^{e_{m-1}})` — the edge exists;
+2. `q_m` divides no earlier `f(q_i^{e_i})` — nothing else points at it;
+3. `f(q_m^{e_m})` is divisible by no prime already placed — no edge backwards.
+
+Any violation of 2 or 3 would close a directed cycle shorter than `k`.
+
+**The correction changed no value.** All fourteen terms of version 1 were
+reproduced digit for digit. So the earlier restriction had lost nothing *in
+these cases* — which was not known before, and now is.
+
+**One caution kept from version 1.** Building a cycle is not enough: the girth
+must be verified afterwards from the integer. The first version of the search
+proposed `n = 120 = 2^3 * 3 * 5` as the smallest witness of girth 3 under
+`sigma`, on the cycle `2 -> 5 -> 3 -> 2`; the true girth of 120 is 2. Every
+candidate is still checked with an independent girth computation before it is
+accepted.
+
+---
+
+## 5. The terms
+
+**All eighteen are proved minimal.** The four in bold had not been computed
+before.
 
 | girth | `sigma` | `sigma*` | `phi*` |
 |---:|---:|---:|---:|
 | 2 | 6 | 6 | 12 |
 | 3 | 234 | 6615 | 66825 |
-| 4 | 137214 | 4380453 | **1120454775** |
-| 5 | 275900625 | 540765225 | — |
-| 6 | **180141399900** | 474549075 | — |
-| 7 | — | **4485174218525** | — |
+| 4 | 137214 | 4380453 | 1120454775 |
+| 5 | 275900625 | 540765225 | **1663175056640625** |
+| 6 | 180141399900 | 474549075 | |
+| 7 | **7746928876851255** | 4485174218525 | |
+| 8 | **31674203849435875** | **2386830845734335** | |
 
-The three values in bold were **not reachable by sieving** and were obtained
-with the construction. Their factorizations:
+Factorizations and cycles of the four new terms:
 
-    sigma,  girth 6:  180141399900   = 2^2 * 3^4 * 5^2 * 7^2 * 11^4 * 31
-                      cycle 2 -> 7 -> 3 -> 11 -> 5 -> 31 -> 2
+    sigma,  girth 7:  7746928876851255   = 3^2 * 5 * 7^4 * 13 * 19 * 37 * 2801^2
+                      cycle 3 -> 13 -> 7 -> 2801 -> 37 -> 19 -> 5 -> 3
 
-    phi*,   girth 4:  1120454775     = 3^11 * 5^2 * 11 * 23
-                      cycle 3 -> 23 -> 11 -> 5 -> 3
+    sigma,  girth 8:  31674203849435875  = 5^3 * 7^2 * 13^2 * 19 * 31^2 * 61 * 83 * 331
+                      cycle 5 -> 13 -> 61 -> 31 -> 331 -> 83 -> 7 -> 19 -> 5
 
-    sigma*, girth 7:  4485174218525  = 5^2 * 7^3 * 11^3 * 13 * 19 * 37 * 43
-                      cycle 5 -> 13 -> 7 -> 43 -> 11 -> 37 -> 19 -> 5
+    sigma*, girth 8:  2386830845734335   = 3^3 * 5 * 7^3 * 11^2 * 13^2 * 31^2 * 43 * 61
+                      cycle 3 -> 7 -> 43 -> 11 -> 61 -> 31 -> 13 -> 5 -> 3
 
-The last one is about `4.5 * 10^12`, far beyond any exhaustive search.
+    phi*,   girth 5:  1663175056640625   = 3^11 * 5^9 * 11 * 19 * 23
+                      cycle 3 -> 23 -> 11 -> 5 -> 19 -> 3
+
+**What "proved" cost.** The gap between the two columns below is the whole
+result: the search had to rule out every prime in the left column to be able to
+say the answer uses the one on the right.
+
+| | every prime examined up to | largest prime in the answer |
+|---|---:|---:|
+| `sigma`, girth 7 | 2 589 844 | 2801 |
+| `sigma`, girth 8 | 1 452 412 | 331 |
+| `sigma*`, girth 8 | 281 925 | 61 |
+| `phi*`, girth 5 | 7 445 747 | 23 |
+
+The largest run — `sigma`, girth 7 — walked 74.7 million nodes of the search
+tree in 341 seconds. Re-proving all eighteen takes about eighteen minutes:
+`python verify.py --exact` — 1098 seconds when this was written.
+
+**Which run the claim rests on.** The first exploratory search for `sigma` at
+girth 7 was launched with a cutoff computed as a floating-point square root,
+which came out as 2 589 817 — **twenty-seven below the exact bound**. It did not
+change the answer, but a cutoff that stops short of what the lemma requires
+proves nothing, and that is precisely why `prime_cutoff()` bisects over
+integers. The minimality claims here rest on the verifier's runs, which
+recompute the cutoff by bisection and sweep the full range.
 
 ---
 
-## 5. Non-monotonicity: an isolated event
+## 6. Growth: no law, and the eighth term is what shows it
+
+Version 1 could not address how fast the smallest witness grows. With eight
+terms for `sigma` it can be addressed, and the answer is negative:
+
+| `k` | `sigma`: smallest witness | digits | ratio to previous | `ln n / k^2` |
+|---:|---:|---:|---:|---:|
+| 2 | 6 | 1 | — | 0.448 |
+| 3 | 234 | 3 | 39 | 0.606 |
+| 4 | 137214 | 6 | 586 | 0.739 |
+| 5 | 275900625 | 9 | 2011 | 0.777 |
+| 6 | 180141399900 | 12 | 653 | 0.720 |
+| 7 | 7746928876851255 | 16 | **43005** | 0.747 |
+| 8 | 31674203849435875 | 17 | **4.09** | 0.594 |
+
+Four consecutive terms — `k = 4` to `7` — have `ln n / k^2` between 0.72 and
+0.78, which invites reading `n ~ exp(0.75 k^2)`. That reading predicts
+`n_8 ~ 2.7 * 10^20`. **The true value is `3.2 * 10^16`, four orders of magnitude
+below.**
+
+The factorizations show why. The girth-7 minimum is **forced to use 2801^2** —
+with seven primes no cheap cycle closes — and that factor alone costs 7.8
+million. The girth-8 minimum closes with primes no larger than 331 and small
+exponents: **the eighth vertex is nearly free, and it avoids the expensive
+prime.**
+
+> Adding a prime can make the cycle **cheaper**, not dearer.
+
+That is the same mechanism behind the one known decrease in these sequences —
+`sigma*` from girth 5 to 6, where admitting the prime 43 let `7^5` drop to `7^3`
+— but here it does not invert the sequence; it stalls it. The term still grows,
+and grows four thousand times less than the earlier trend demanded.
+
+**So: with eight terms there is no law to state, and what supported the previous
+one was the sample.**
+
+---
+
+## 7. Non-monotonicity: still an isolated event
 
 The sequence of smallest witnesses is **not** increasing for `sigma*`:
 
-    6,  6615,  4380453,  540765225,  474549075,  4485174218525
+    6,  6615,  4380453,  540765225,  474549075,  4485174218525,  2386830845734335
                                           ^ the only decrease
 
-The smallest witness of girth 6 is *smaller* than the one of girth 5. The reason
-is visible in the factorizations, which share the skeleton
-`3^2 * 5^2 * 11 * 13 = 32175`, differing in a single factor:
+The two numbers involved share the skeleton `3^2 * 5^2 * 11 * 13 = 32175`,
+differing in a single factor:
 
 | | factor | value |
 |---|---|---:|
@@ -172,47 +302,56 @@ is visible in the factorizations, which share the skeleton
 
 Closing the 5-cycle forces the exponent of 7 up to `7^5`. Extending to a 6-cycle
 admits a new prime, 43, and **that allows the exponent to drop to `7^3`**.
-Adding a vertex came out cheaper than raising an exponent.
 
-**This is not a property of `sigma*`.** With the new terms:
+**It is not a property of `sigma*`.** Across the eighteen terms:
 
 | f | previous | next | decrease? |
 |---|---:|---:|---|
 | `sigma` (5 → 6) | 275900625 | 180141399900 | no |
+| `sigma` (6 → 7) | 180141399900 | 7746928876851255 | no |
+| `sigma` (7 → 8) | 7746928876851255 | 31674203849435875 | no |
 | `sigma*` (5 → 6) | 540765225 | 474549075 | **yes** |
 | `sigma*` (6 → 7) | 474549075 | 4485174218525 | no |
+| `sigma*` (7 → 8) | 4485174218525 | 2386830845734335 | no |
 | `phi*` (3 → 4) | 66825 | 1120454775 | no |
+| `phi*` (4 → 5) | 1120454775 | 1663175056640625 | no |
 
-The decrease happens once, at `sigma*` from 5 to 6, and nowhere else among the
-terms known. In `sigma` the sixth vertex costs 31 **and** forces 11 and 3 up to
-the fourth power; in `phi*` the fourth pushes 3 to the eleventh. Where there is
-no shortcut, the minimum grows.
+One decrease in eight consecutive pairs. What section 6 adds is that the same
+mechanism operates without producing a decrease: at `sigma` from 7 to 8 it
+merely flattens the growth.
 
 ---
 
-## 6. What this does not claim
+## 8. What this does not claim
 
 - **It does not claim the sequences are infinite.** Whether a witness of every
   girth exists is a separate question, untouched here.
-- **It does not claim the terms are minimal beyond the primes examined.** The
-  construction is exhaustive only within its prime set. The published values
-  were checked at two different bounds (20 primes, up to 71; and 26 primes, up
-  to 101) and did not change.
+- **It does not claim minimality for girths beyond the table.** The cutoff lemma
+  needs a known witness to start from; without one the bound is infinite.
+  Finding the *first* witness of a new girth is still a heuristic search, and
+  only afterwards does it become a proof.
+- **It does not claim the growth has a functional form.** It claims the opposite:
+  the form four terms supported breaks at the fifth.
+- **It does not explain why the eighth term is cheap.** The mechanism is visible
+  in the factorizations, but that describes one case; it does not predict when
+  it recurs.
 - **It does not claim novelty.** See [PRIOR_ART.md](PRIOR_ART.md): searches of
   OEIS and four bibliographic sources found nothing, with a positive control
   that does find the relevant literature. **Not found is not the same as new**,
-  and Step 2 of the proof is elementary graph theory that likely exists under
-  another name.
+  and both Theorem 2 and Step 2 of Theorem 1 are short arguments over elementary
+  closed forms, so they may well exist under other words.
 - **It does not claim mathematical interest.** That is for a human reader to
   judge.
 
 ---
 
-## 7. Reproducing everything
+## 9. Reproducing everything
 
     python verify.py            # all checks, ~2 seconds, no dependencies
+    python verify.py --exact    # also re-proves the large terms (~25 minutes)
     python verify.py --full     # also re-derives the sieved terms (needs numpy)
 
+    python src/exact.py sigma 8
     python src/construct.py sigma 6
     python src/sieve.py 1000000000
 

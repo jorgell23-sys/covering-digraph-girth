@@ -2,8 +2,9 @@
 
 *(English version: [README.md](README.md))*
 
-Tres números enteros que no habían sido calculados, y un teorema chico que hace
-posible calcularlos.
+Dieciocho números enteros, cada uno **demostradamente** el más chico de su
+clase — cuatro de ellos nunca calculados antes — y el teorema chico que hace
+posible demostrarlo.
 
 **Todo esto se comprueba en dos segundos:**
 
@@ -13,7 +14,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-Sin instalar nada. Imprime PASS o FAIL para cada una de las 56 comprobaciones.
+Sin instalar nada. Corre 116 comprobaciones e imprime PASS o FAIL para cada una.
 
 ---
 
@@ -51,38 +52,72 @@ de grafos sobre esa familia.
 |---:|---:|---:|---:|
 | 2 | 6 | 6 | 12 |
 | 3 | 234 | 6615 | 66825 |
-| 4 | 137214 | 4380453 | **1120454775** |
-| 5 | 275900625 | 540765225 | — |
-| 6 | **180141399900** | 474549075 | — |
-| 7 | — | **4485174218525** | — |
+| 4 | 137214 | 4380453 | 1120454775 |
+| 5 | 275900625 | 540765225 | **1663175056640625** |
+| 6 | 180141399900 | 474549075 | |
+| 7 | **7746928876851255** | 4485174218525 | |
+| 8 | **31674203849435875** | **2386830845734335** | |
 
-Los tres en negrita estaban **fuera del alcance de cualquier búsqueda por
-enumeración**. El último ronda los 4,5 × 10¹².
+Los cuatro en negrita no habían sido calculados. **Y los dieciocho son ahora
+mínimos demostrados**, que es lo que agrega la versión 2 de este repositorio.
 
-## Por qué no se podían encontrar, y cómo se encontraron
+## La diferencia entre «el más chico que encontramos» y «el más chico»
 
-Los testigos de cintura alta son rarísimos. Hasta 10⁹ con `sigma` hay 4138 de
-cintura 2, 1065 de cintura 3, 122 de cintura 4 — y **2** de cintura 5. Los
-conteos caen por un factor que además crece. Hallar uno de cintura 6 barriendo
-enteros exigiría llegar a unos **10¹³**.
+La versión 1 decía, con honestidad, lo que no podía garantizar:
 
-La salida es un teorema chico:
+> *La respuesta es mínima sólo entre los primos examinados. Un primo más grande
+> podría, en principio, dar un ciclo más barato.*
 
-> Si algún `n` tiene cintura `k`, el **menor** de ellos tiene exactamente `k`
-> primos distintos, y su grafo es un ciclo dirigido puro de largo `k`.
+O sea que cada valor era una conjetura verificada hasta donde alguien miró.
+Cerrar ese hueco cuesta un lema.
 
-Entonces, en vez de barrer enteros, se **arman ciclos** con primos chicos y se
-elige el más barato. El problema deja de ser el tamaño de `n` y pasa a ser
-cuántos primos hay que mirar.
+Sea `n` un menor testigo de cintura `k` y sea `P` su mayor primo. Su antecesor
+en el ciclo aporta una potencia `q^e` con `P | f(q^e)`, así que `P ≤ f(q^e)`, y
+las formas cerradas dan `q^e ≥ P/2` para `sigma`, `≥ P−1` para `sigma*` y
+`≥ P+1` para `phi*`. Los `k−2` primos restantes son distintos, así que:
+
+```
+n  ≥  P · a_f(P) · (producto de los k−2 primos más chicos)
+```
+
+Leído al revés, eso es un **corte**: si se conoce cualquier testigo `N`, el menor
+es a lo sumo `N`, así que su mayor primo no puede pasar de aproximadamente
+`sqrt(N / primorial(k−2))`. Enumerar ciclos sobre los primos por debajo de eso
+es exhaustivo, y la respuesta deja de depender de hasta dónde miró alguien.
+
+Para `phi*` con cintura 5 el corte es **7 445 747**. Hubo que descartar todos los
+primos por debajo de eso para poder decir que el mayor primo de la respuesta es
+**23**.
 
 La demostración, con sus límites, está en [RESULT.md](RESULT.md) (en inglés).
 
 ## Algo que vale la pena mirar
 
+Entre la cintura 7 y la 8 con `sigma`, el menor testigo crece por un factor de
+apenas **4,09** — después de haber crecido por un factor de **43 005** en el paso
+anterior.
+
+```
+sigma, cintura 7:  3² · 5 · 7⁴ · 13 · 19 · 37 · 2801²
+sigma, cintura 8:  5³ · 7² · 13² · 19 · 31² · 61 · 83 · 331
+```
+
+Con siete primos no se cierra ningún ciclo barato, y el mínimo está **obligado a
+usar 2801²** — 7,8 millones sólo por ese factor. Con ocho primos disponibles, el
+ciclo cierra sin pasar de 331. **El vértice de más sale casi gratis, y con él se
+compra la salida del primo caro.**
+
+Y eso importa más allá de la curiosidad: `ln n / k²` se queda entre 0,72 y 0,78
+para `k = 4, 5, 6, 7`, lo que invita a leer `n ≈ exp(0,75 k²)` y predice
+`n₈ ≈ 2,7 × 10²⁰`. El valor real es `3,2 × 10¹⁶`. **Cuatro términos sostenían una
+ley y el quinto la rompió.**
+
+## La sucesión que baja
+
 Con `sigma*`, la sucesión de mínimos **baja** una vez:
 
 ```
-6,  6615,  4380453,  540765225,  474549075,  4485174218525
+6,  6615,  4380453,  540765225,  474549075,  4485174218525,  2386830845734335
                           ↑ más chico que el anterior
 ```
 
@@ -98,14 +133,16 @@ Cerrar el ciclo de 5 obliga a `7⁵`. Alargarlo a 6 deja entrar un primo nuevo, 
 43, **y eso permite bajar el exponente a `7³`**. Agregar un vértice salió más
 barato que subir un exponente.
 
-Pasa exactamente una vez entre todos los términos conocidos: es un accidente de
-ese primo, no una propiedad de la función.
+Pasa una vez en ocho pares consecutivos. Lo que agrega la versión 2 es que el
+mismo mecanismo funciona **sin** producir una bajada: en `sigma` de 7 a 8 sólo
+aplana el crecimiento.
 
 ## Cómo está comprobado
 
-Los dos métodos **no comparten ninguna lógica** — la criba no sabe nada de
-ciclos, y la construcción nunca mira un entero que no venga de uno — y coinciden
-en todos los términos que ambos alcanzan.
+Los tres métodos **no comparten ninguna lógica** — la criba no sabe nada de
+ciclos, la construcción nunca mira un entero que no venga de uno, y la búsqueda
+exacta no acepta nada sin recalcular la cintura desde el entero mismo — y
+coinciden en todos los términos que más de uno alcanza.
 
 Y hay un control externo: la criba cuenta **5327** elementos hasta 10⁹ sin
 contar `n = 1`. Pollack y Pomerance publicaron **5328** contándolo. Coinciden
@@ -120,6 +157,10 @@ por gente que nunca lo vio.
   [PRIOR_ART.md](PRIOR_ART.md).
 - **No afirma que las sucesiones sean infinitas.** Si existe testigo de toda
   cintura es otra pregunta, que no se toca acá.
+- **No afirma minimalidad más allá de la tabla.** El lema de corte necesita un
+  testigo conocido para arrancar; hallar el primero de una cintura nueva sigue
+  siendo una búsqueda heurística, y recién después se vuelve demostración.
+- **No afirma que el crecimiento tenga una ley.** Afirma lo contrario.
 - **No afirma tener interés matemático.** Eso lo juzga quien lo lea.
 
 ## Autor
@@ -130,7 +171,7 @@ por gente que nunca lo vio.
 
 El diseño del sistema y la dirección de la investigación son del autor. Los
 resultados matemáticos los produjo un sistema automático (Claude, de Anthropic)
-bajo esa dirección. Todos los cálculos se verificaron con dos implementaciones
+bajo esa dirección. Todos los cálculos se verificaron con implementaciones
 independientes y se cruzaron contra trabajo publicado. El autor responde por la
 corrección de todo lo que hay acá.
 

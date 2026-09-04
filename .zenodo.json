@@ -3,16 +3,31 @@
   "upload_type": "dataset",
   "license": "cc-by-4.0",
   "creators": [
-    { "name": "Ellena Godoy, Jorge" }
+    {
+      "name": "Ellena Godoy, Jorge"
+    }
   ],
   "keywords": [
-    "number theory", "arithmetic functions", "sum of divisors",
-    "prime-abundant numbers", "covering digraph", "girth", "integer sequences"
+    "number theory",
+    "arithmetic functions",
+    "sum of divisors",
+    "prime-abundant numbers",
+    "covering digraph",
+    "girth",
+    "integer sequences"
   ],
   "related_identifiers": [
-    { "identifier": "10.1515/integers-2012-0044",
-      "relation": "references", "scheme": "doi" },
-    { "identifier": "https://oeis.org/A175200",
-      "relation": "references", "scheme": "url" }
-  ]
+    {
+      "identifier": "10.1515/integers-2012-0044",
+      "relation": "references",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "https://oeis.org/A175200",
+      "relation": "references",
+      "scheme": "url"
+    }
+  ],
+  "version": "2.0.0",
+  "description": "Smallest members of S(f) = {n : rad(n) | f(n)} by the girth of their covering digraph, for f = sigma, sigma* and phi*. Eighteen values, all proved minimal by a cutoff lemma that bounds the largest prime a smaller witness could use; four of them had not been computed before. Verified by independent implementations and cross-checked against Pollack and Pomerance (2012)."
 }

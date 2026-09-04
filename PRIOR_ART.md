@@ -4,7 +4,8 @@
 exactly what was searched so that a reader can judge how much the absence is
 worth — and repeat it.
 
-Searches performed **2026-09-03**.
+Searches performed **2026-09-03** (version 1), repeated and extended the same
+day for **version 2**.
 
 ---
 
@@ -16,27 +17,24 @@ A14. They are catalogued as [A175200](https://oeis.org/A175200), submitted by
 Michel Lagneau in 2010.
 
 Nothing in this repository claims that set as its own. What is computed here is
-a **graph invariant over that family**.
+a **graph invariant over that family**, and — new in version 2 — a bound that
+makes computing it a proof rather than a search.
 
 ## 2. OEIS — the sequences
 
-| query | result |
+All three complete sequences, with the version-2 terms included:
+
+| sequence | result |
 |---|---|
-| `6, 234, 137214, 275900625, 180141399900` | **not in OEIS** |
-| `6, 6615, 4380453, 540765225, 474549075, 4485174218525` | **not in OEIS** |
+| `sigma`: 6, 234, 137214, 275900625, 180141399900, 7746928876851255, 31674203849435875 | **not in OEIS** |
+| `sigma*`: 6, 6615, 4380453, 540765225, 474549075, 4485174218525, 2386830845734335 | **not in OEIS** |
+| `phi*`: 12, 66825, 1120454775, 1663175056640625 | **not in OEIS** |
 
 OEIS asks that simple transformations be checked too, since a sequence may be
-catalogued doubled or shifted. All five variants were searched:
+catalogued doubled or shifted. All five variants were searched for each — as is,
+without the first term, each term ± 1, each term doubled.
 
-| variant | result |
-|---|---|
-| as is | not found |
-| without the first term | not found |
-| each term + 1 | not found |
-| each term − 1 | not found |
-| each term doubled | not found |
-
-Result: **`NOT UNDER ANY SIMPLE TRANSFORMATION`**.
+Result for all three: **`NOT UNDER ANY SIMPLE TRANSFORMATION`**.
 
 ## 3. OEIS — the individual values
 
@@ -44,41 +42,76 @@ Each new value was searched on its own digits, across all ~380,000 sequences:
 
 | value | entries containing it |
 |---|---:|
-| `180141399900` | **0** |
-| `1120454775` | **0** |
-| `4485174218525` | **0** |
+| `180141399900` *(v1)* | **0** |
+| `1120454775` *(v1)* | **0** |
+| `4485174218525` *(v1)* | **0** |
+| `7746928876851255` *(v2)* | **0** |
+| `31674203849435875` *(v2)* | **0** |
+| `2386830845734335` *(v2)* | **0** |
+| `1663175056640625` *(v2)* | **0** |
 
 ## 4. Bibliographic databases
 
-Searched: **zbMATH**, **OpenAlex**, **Crossref**, **arXiv**. All four responded
-in every query.
+Searched: **zbMATH**, **OpenAlex**, **Crossref**, **arXiv**. Which of the four
+answered varies between queries and is recorded below; a source that did not
+answer contributes nothing either way.
 
 The method requires terms that must appear **together** in a title or abstract;
 without that, any query matches something, since the individual words of a
 mathematical statement appear everywhere.
 
-| terms required together | result |
-|---|---|
-| `prime` *(positive control)* | **finds** Pollack & Pomerance, *Prime-Perfect Numbers* (2012) |
-| `girth` + `multiplicative` | nothing |
-| `cycle` + `divisor` + `smallest` | nothing |
-| `radical` + `sigma` | nothing |
+| terms required together | sources that answered | result |
+|---|---|---|
+| `prime` *(positive control)* | zbMATH, OpenAlex, Crossref | **finds** Pollack & Pomerance, *Prime-Perfect Numbers* (2012) |
+| `multiplicative function` + `girth` | zbMATH, Crossref, arXiv | nothing |
+| `prime divisor` + `girth` | zbMATH, Crossref | nothing |
+| `largest prime` + `radical` | zbMATH, OpenAlex, Crossref | nothing |
+| `cycle` + `divisor` + `smallest` | zbMATH, Crossref, arXiv | nothing |
+| `arithmetic function` + `minimal` | zbMATH, Crossref | nothing |
 
 **The positive control is the point.** A search that finds nothing is worthless
 unless it can be shown to find something when there is something to find. It
 does: it retrieves the paper that defines the underlying set.
 
-### A false positive worth recording
+### Two false positives, and the rule they produced
 
-An earlier attempt required `girth` + `digraph` together and reported
-*APPEARS IN THE LITERATURE*. That was wrong. Those two words appear together in
-any digraph paper — colouring, the Caccetta–Häggkvist conjecture, expander
-graphs — and in none of them about arithmetic functions.
+**Version 1** required `girth` + `digraph` together and reported *APPEARS IN THE
+LITERATURE*. That was wrong. Those two words appear together in any digraph
+paper — colouring, the Caccetta–Häggkvist conjecture, expander graphs — and in
+none of them about arithmetic functions. The rule written down at the time was:
+*required terms must pin down both halves of the object, not one.*
 
-**Required terms must pin down both halves of the object**, not one. The
-corrected queries above each demand an arithmetic term alongside the graph term.
+**Version 2 broke the same rule again**, which is why it is now recorded here
+rather than only in prose. Requiring `girth` + `multiplicative` returned
+*Diameter and girth of the multiplicative zero-divisor graph of multiplicative
+lattices* (2016), [doi:10.1142/s1793557116500716](https://doi.org/10.1142/s1793557116500716).
+That paper has nothing to do with this one: "multiplicative" there qualifies a
+**lattice**, not an arithmetic function.
 
-## 5. Analogous sequences that do exist
+Version 1's table listed `girth` + `multiplicative` as returning nothing. **That
+entry was wrong and is corrected here.** With the object named as a phrase —
+`multiplicative function` — the query returns nothing, which is the row in the
+table above.
+
+The lesson, now enforced rather than written down: **a one-word required term
+matches that word in any field's sense**, so a verdict resting on one arrives
+with the caveat attached. The positive control above is deliberately one word
+and is deliberately loose; that is what a control is for. Note that it also
+retrieves a paper on the NLRP3 inflammasome, which is exactly the failure mode
+in miniature.
+
+## 5. The cutoff lemma specifically
+
+The lemma of version 2 — bounding the largest prime of a minimal witness by
+`sqrt(N / primorial(k-2))`, so that the enumeration is finite — is a three-step
+argument over the closed forms of `sigma`, `sigma*` and `phi*` on prime powers.
+Nothing of that shape appeared in the searches above.
+
+That is a weak statement and is meant to be. Arguments of this kind are the sort
+of thing that exists in a paper's Lemma 2.1 without appearing in its title or
+abstract, which is all these databases index.
+
+## 6. Analogous sequences that do exist
 
 Sequences of the form "smallest object of girth n" are an established genre:
 
@@ -90,21 +123,21 @@ Sequences of the form "smallest object of girth n" are an established genre:
 They are about **graphs**; this one is about **divisibility**. The shape of the
 question is the same.
 
-## 6. What all this is worth
+## 7. What all this is worth
 
 `NOT FOUND IN WHAT WAS SEARCHED` — and that is the strongest statement
 available.
 
 It may exist under other words, in a source not searched, or as an exercise in a
-book no index covers. In particular, **Step 2 of the proof in
+book no index covers. In particular, **Step 2 of Theorem 1 in
 [RESULT.md](RESULT.md) is elementary graph theory** — that a chord in a minimal
 cycle would produce a shorter one — and is likely known under another name. What
 did not appear is the conjunction: the girth of the covering digraph **of a
-multiplicative function**.
+multiplicative function**, and a cutoff that turns its computation into a proof.
 
 Proving that something has never been known is not possible by searching. What
-is possible is to say precisely where one looked, and that is what this file
-does.
+is possible is to say precisely where one looked, to say when the looking was
+wrong, and to correct it. That is what this file does.
 
 ## Reproducing these searches
 
