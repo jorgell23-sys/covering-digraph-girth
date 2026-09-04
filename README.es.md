@@ -2,9 +2,9 @@
 
 *(English version: [README.md](README.md))*
 
-Dieciocho números enteros, cada uno **demostradamente** el más chico de su
-clase — cuatro de ellos nunca calculados antes — y el teorema chico que hace
-posible demostrarlo.
+Diecinueve números enteros, cada uno **demostradamente** el más chico de su
+clase — cinco de ellos nunca calculados antes — y los teoremas chicos que hacen
+posible demostrarlo **sin conocer ninguna respuesta de antemano**.
 
 **Todo esto se comprueba en dos segundos:**
 
@@ -14,7 +14,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-Sin instalar nada. Corre 116 comprobaciones e imprime PASS o FAIL para cada una.
+Sin instalar nada. Corre 220 comprobaciones e imprime PASS o FAIL para cada una.
 
 ---
 
@@ -57,9 +57,12 @@ de grafos sobre esa familia.
 | 6 | 180141399900 | 474549075 | |
 | 7 | **7746928876851255** | 4485174218525 | |
 | 8 | **31674203849435875** | **2386830845734335** | |
+| 9 | | **9928651387877145** | |
 
-Los cuatro en negrita no habían sido calculados. **Y los dieciocho son ahora
-mínimos demostrados**, que es lo que agrega la versión 2 de este repositorio.
+Los cinco en negrita no habían sido calculados, y **los diecinueve son mínimos
+demostrados**. El último es el caso interesante: no se conocía ningún testigo de
+cintura 9 para `sigma*`, así que la versión 2 no podía calcularlo en absoluto.
+La versión 3 saca la necesidad de conocer uno.
 
 ## La diferencia entre «el más chico que encontramos» y «el más chico»
 
@@ -88,6 +91,72 @@ es exhaustivo, y la respuesta deja de depender de hasta dónde miró alguien.
 Para `phi*` con cintura 5 el corte es **7 445 747**. Hubo que descartar todos los
 primos por debajo de eso para poder decir que el mayor primo de la respuesta es
 **23**.
+
+## Arrancar sin conocer la respuesta
+
+Ese corte está enunciado **en función de un testigo ya conocido**, así que la
+versión 2 no podía tocar una cintura de la que nadie hubiera exhibido un
+ejemplo. Lo decía de sí misma, y llamaba a hallar el primer testigo *«una
+búsqueda heurística»*.
+
+Era falso, y la versión 2 tenía el material para verlo. La búsqueda por debajo
+de `N` es **exhaustiva**: no devuelve «el mejor que vi» sino «el menor que hay,
+si hay alguno por debajo de `N`». Así que lo único que faltaba era un `N` de
+arranque que no le debiera nada a una respuesta conocida. Un testigo de cintura
+`k` tiene exactamente `k` primos distintos, así que su mayor primo es al menos
+`p_k`, y la cota del corte crece con él:
+
+```
+n  ≥  p_k · a_f(p_k) · (producto de los k−2 primos más chicos)
+```
+
+Se arranca ahí, se duplica hasta que aparezca algo, y **lo primero que aparece
+es el mínimo**: nada más chico está por debajo de este `N`, y nada en absoluto
+estaba por debajo de los anteriores, que ya se barrieron. Duplicar es una
+técnica vieja; lo que la vuelve una demostración acá es la exhaustividad que
+tiene debajo.
+
+```bash
+python src/exact.py "sigma*" 9 --no-seed     # sin darle ningún testigo
+```
+
+No saber la respuesta cuesta un factor de alrededor de **4** en nodos visitados,
+medido sobre los términos donde los dos métodos pueden correr. Se paga una sola
+vez por cintura.
+
+## Dónde termina, con un número
+
+Los dos términos siguientes no salieron, y la versión 3 puede decir exactamente
+por qué. La búsqueda barrió todo lo que hay por debajo de `1,24·10²¹` para `sigma`
+con cintura 9 y por debajo de `1,3·10¹⁸` para `phi*` con cintura 6, y no encontró
+nada: eso son teoremas. El constructor exhibe testigos en `8,3·10²⁴` y
+`4,2·10²²`: eso está verificado, pero no es mínimo. Así que los dos términos
+quedan **acorralados**, y cerrar el cerco exigiría cribar **5700 millones** y
+**14 000 millones** de primos. Eso no entra en memoria.
+
+Antes el límite era «hace falta un testigo conocido», que es una condición sobre
+lo que otros hayan publicado. Ahora es un número de primos: una condición sobre
+la máquina.
+
+## Otra cosa que vale la pena mirar
+
+Con `phi*`, cada mínimo **divide** al siguiente:
+
+```
+cintura 3:  3^5  → 11 → 5^2                 66825
+cintura 4:  3^11 → 23 → 11 → 5^2            1120454775
+cintura 5:  3^11 → 23 → 11 → 5^9 → 19       1663175056640625
+```
+
+Cada ciclo es el anterior con **un vértice insertado y un exponente subido**, y
+de ahí sale la divisibilidad. El testigo exhibido de cintura 6 continúa la
+cadena. **Predicción:** el mínimo verdadero de cintura 6 también será múltiplo de
+`1663175056640625`. Lo refuta cualquier testigo más chico que no lo sea.
+
+Y la lectura que parecía obvia —*el salto es chico cuando los dos testigos
+comparten mucho*— es **falsa**: el salto más grande de los dieciséis pares
+consecutivos es uno donde el término anterior divide al siguiente. `verify.py`
+recalcula esa tabla.
 
 La demostración, con sus límites, está en [RESULT.md](RESULT.md) (en inglés).
 
@@ -157,10 +226,15 @@ por gente que nunca lo vio.
   [PRIOR_ART.md](PRIOR_ART.md).
 - **No afirma que las sucesiones sean infinitas.** Si existe testigo de toda
   cintura es otra pregunta, que no se toca acá.
-- **No afirma minimalidad más allá de la tabla.** El lema de corte necesita un
-  testigo conocido para arrancar; hallar el primero de una cintura nueva sigue
-  siendo una búsqueda heurística, y recién después se vuelve demostración.
-- **No afirma que el crecimiento tenga una ley.** Afirma lo contrario.
+- **No afirma minimalidad más allá de la tabla.** Ya no queda ningún obstáculo
+  de principio —la búsqueda sin semilla saca la necesidad de un testigo de
+  arranque— pero cada cintura de más cuesta tiempo de máquina, y sólo se afirman
+  las cinturas efectivamente calculadas.
+- **No afirma que duplicar sea la mejor forma de arrancar.** Es la más simple que
+  conserva la demostración; una búsqueda por mejor-primero no repetiría trabajo.
+- **No afirma que el crecimiento tenga una ley.** Afirma lo contrario, y el
+  término nuevo agrega a la causa: `sigma*` crece por un factor de apenas
+  **4,16** de la cintura 8 a la 9.
 - **No afirma tener interés matemático.** Eso lo juzga quien lo lea.
 
 ## Autor

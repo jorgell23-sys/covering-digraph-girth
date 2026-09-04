@@ -4,8 +4,8 @@
 exactly what was searched so that a reader can judge how much the absence is
 worth — and repeat it.
 
-Searches performed **2026-09-03** (version 1), repeated and extended the same
-day for **version 2**.
+Searches performed **2026-09-03** (versions 1 and 2), and repeated and extended
+**2026-09-04** for **version 3**.
 
 ---
 
@@ -27,7 +27,7 @@ All three complete sequences, with the version-2 terms included:
 | sequence | result |
 |---|---|
 | `sigma`: 6, 234, 137214, 275900625, 180141399900, 7746928876851255, 31674203849435875 | **not in OEIS** |
-| `sigma*`: 6, 6615, 4380453, 540765225, 474549075, 4485174218525, 2386830845734335 | **not in OEIS** |
+| `sigma*`: 6, 6615, 4380453, 540765225, 474549075, 4485174218525, 2386830845734335, 9928651387877145 | **not in OEIS** |
 | `phi*`: 12, 66825, 1120454775, 1663175056640625 | **not in OEIS** |
 
 OEIS asks that simple transformations be checked too, since a sequence may be
@@ -49,6 +49,7 @@ Each new value was searched on its own digits, across all ~380,000 sequences:
 | `31674203849435875` *(v2)* | **0** |
 | `2386830845734335` *(v2)* | **0** |
 | `1663175056640625` *(v2)* | **0** |
+| `9928651387877145` *(v3)* | **0** |
 
 ## 4. Bibliographic databases
 
@@ -68,6 +69,10 @@ mathematical statement appear everywhere.
 | `largest prime` + `radical` | zbMATH, OpenAlex, Crossref | nothing |
 | `cycle` + `divisor` + `smallest` | zbMATH, Crossref, arXiv | nothing |
 | `arithmetic function` + `minimal` | zbMATH, Crossref | nothing |
+| `covering digraph` + `girth` *(v3)* | zbMATH, OpenAlex, Crossref, arXiv | nothing |
+| `rad(n)` + `sigma(n)` *(v3)* | zbMATH, OpenAlex, Crossref, arXiv | nothing |
+| `unitary sigma` + `girth` *(v3)* | zbMATH, OpenAlex, Crossref, arXiv | nothing |
+| `sigma(n)` + `radical` *(v3, positive control)* | zbMATH, OpenAlex, Crossref, arXiv | **finds** work on the sum-of-divisors function |
 
 **The positive control is the point.** A search that finds nothing is worthless
 unless it can be shown to find something when there is something to find. It
@@ -111,7 +116,29 @@ That is a weak statement and is meant to be. Arguments of this kind are the sort
 of thing that exists in a paper's Lemma 2.1 without appearing in its title or
 abstract, which is all these databases index.
 
-## 6. Analogous sequences that do exist
+## 6. The seedless search specifically (version 3)
+
+Theorem 5 of [RESULT.md](RESULT.md) says that doubling a bound over an
+exhaustive search finds the minimum with no seed. **The doubling itself is
+standard** and is not claimed: it is *exponential search* / *galloping search*,
+textbook material since Bentley and Yao (1976), *An almost optimal algorithm for
+unbounded searching*, Information Processing Letters 5(3).
+
+What is claimed is only the combination with Theorem 2 — that the search below a
+bound is exhaustive rather than heuristic, which is what turns the doubling into
+a proof — and the universal floor (Theorem 4) that gives it somewhere to start.
+Both are two-line arguments over the same closed forms as Theorem 2, and the
+same caveat applies: arguments of this shape live inside papers without reaching
+their titles or abstracts.
+
+**Version 2 got this wrong in the other direction**, and it is recorded here for
+the same reason the two false positives above are. It wrote that finding a first
+witness was *"still a heuristic search"* — a claim about what its own method
+could not do, made without checking, and false. The exhaustiveness that refutes
+it was proved in that same document. A limit stated about one's own work is a
+claim like any other and needs the same checking.
+
+## 7. Analogous sequences that do exist
 
 Sequences of the form "smallest object of girth n" are an established genre:
 
@@ -123,7 +150,7 @@ Sequences of the form "smallest object of girth n" are an established genre:
 They are about **graphs**; this one is about **divisibility**. The shape of the
 question is the same.
 
-## 7. What all this is worth
+## 8. What all this is worth
 
 `NOT FOUND IN WHAT WAS SEARCHED` — and that is the strongest statement
 available.
@@ -133,7 +160,8 @@ book no index covers. In particular, **Step 2 of Theorem 1 in
 [RESULT.md](RESULT.md) is elementary graph theory** — that a chord in a minimal
 cycle would produce a shorter one — and is likely known under another name. What
 did not appear is the conjunction: the girth of the covering digraph **of a
-multiplicative function**, and a cutoff that turns its computation into a proof.
+multiplicative function**, a cutoff that turns its computation into a proof, and
+a floor that lets that computation start from nothing.
 
 Proving that something has never been known is not possible by searching. What
 is possible is to say precisely where one looked, to say when the looking was

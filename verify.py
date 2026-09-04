@@ -36,8 +36,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src
 from arithmetic import (covering_digraph, factorize, girth, in_S,  # noqa: E402
                         is_pure_cycle, rad)
 from construct import smallest_witness  # noqa: E402
-from exact import (cycle_floor, exact_smallest, prime_cutoff,  # noqa: E402
-                   primorial, predecessor_floor)
+from exact import (cycle_floor, exact_smallest, per_arc_floor,  # noqa: E402
+                   prime_cutoff, primorial, predecessor_floor,
+                   smallest_without_seed, universal_floor)
 
 # --------------------------------------------------------------------------
 # The published claims. Everything below is checked, nothing is assumed.
@@ -48,7 +49,8 @@ TERMS = {
     "sigma":  {2: 6, 3: 234, 4: 137214, 5: 275900625, 6: 180141399900,
                7: 7746928876851255, 8: 31674203849435875},
     "sigma*": {2: 6, 3: 6615, 4: 4380453, 5: 540765225, 6: 474549075,
-               7: 4485174218525, 8: 2386830845734335},
+               7: 4485174218525, 8: 2386830845734335,
+               9: 9928651387877145},
     "phi*":   {2: 12, 3: 66825, 4: 1120454775, 5: 1663175056640625},
 }
 
@@ -56,7 +58,51 @@ TERMS = {
 #: behind --exact: sigma girth 7 examines every prime below 2.6 million.
 EXACT_FAST = {"sigma": [2, 3, 4, 5], "sigma*": [2, 3, 4, 5, 6],
               "phi*": [2, 3, 4]}
-EXACT_SLOW = {"sigma": [6, 7, 8], "sigma*": [7, 8], "phi*": [5]}
+EXACT_SLOW = {"sigma": [6, 7, 8], "sigma*": [7, 8, 9], "phi*": [5]}
+
+def cycle_of(n, f):
+    """The cycle of a pure-cycle term, as [(prime, exponent), ...] in order.
+
+    The per-arc bound is a statement about the ARCS, so it needs the cyclic
+    order and not just the factorisation. That order is **not** written down
+    anywhere here: it is read off the covering digraph, which for these terms
+    is a pure cycle, so every vertex has exactly one outgoing arc and following
+    them from any start recovers the whole cycle. Writing the cycles out by
+    hand would be transcribing something the digraph already determines.
+    """
+    factors = factorize(n)
+    digraph = covering_digraph(n, f)
+    start = min(factors)
+    order, seen, q = [], set(), start
+    while q not in seen:
+        seen.add(q)
+        order.append((q, factors[q]))
+        out = digraph[q]
+        if len(out) != 1:
+            return None                     # not a pure cycle: caller reports
+        q = out[0]
+    if q != start or len(order) != len(factors):
+        return None
+    return order
+
+#: The next two terms, bracketed. The lower bound is a theorem -- the seedless
+#: search swept everything below it and found nothing -- but re-proving it takes
+#: hours, so it is recorded rather than rechecked here. The upper bound is a
+#: witness exhibited by the constructor, and THAT is rechecked below: it is
+#: verified to be in S(f), to have the stated girth, and to be a pure cycle.
+#: It is not claimed to be minimal.
+BRACKETS = {
+    ("sigma", 9): {
+        "no_witness_below": 1239376200655897100288,
+        "primes_swept": 69681011,
+        "witness": 8324995955560453359590400,
+    },
+    ("phi*", 6): {
+        "no_witness_below": 1344781885607247872,
+        "primes_swept": 80023266,
+        "witness": 41542332517979068359375,
+    },
+}
 
 #: Which terms were found by exhaustive sieving up to 10^9, and so can be
 #: reproduced by construction as a cross-check between two independent methods.
@@ -184,8 +230,109 @@ def main(argv=None):
         print("  (sigma 6-8, sigma* 7-8 and phi* 5 skipped: use --exact)")
 
     # ----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    print("\n9. The per-arc lemma: (*) <= (+) <= n for every term")
+    # ----------------------------------------------------------------------
+    # (+)  n >= prod_i max(q_i, a_f(q_{i+1})), the per-arc cost lemma. It
+    # strengthens (*), so both inequalities have to hold at once: if (+) ever
+    # exceeded n the search would be pruning away the answer, and if (+) fell
+    # below (*) the strengthening would be empty.
+    for f, by_girth in sorted(TERMS.items()):
+      for k, n in sorted(by_girth.items()):
+        cycle = cycle_of(n, f)
+        if not check(cycle is not None,
+                     "%-7s girth %d: the digraph of %d is a single cycle"
+                     % (f, k, n)):
+            continue
+        product = 1
+        for q, e in cycle:
+            product *= q ** e
+        check(product == n,
+              "%-7s girth %d: the cycle read off the digraph rebuilds %d"
+              % (f, k, n))
+        star = cycle_floor(max(q for q, _ in cycle), k, f)
+        arc = per_arc_floor(cycle, f)
+        check(star <= arc <= n,
+              "%-7s girth %d: (*) %d <= (+) %d <= n %d" % (f, k, star, arc, n))
+
+    # ----------------------------------------------------------------------
+    print("\n10. The universal floor, and the search that needs no seed")
+    # ----------------------------------------------------------------------
+    # (++) n >= p_k * a_f(p_k) * primorial(k-2) mentions no known witness,
+    # which is what lets the search start from nothing. If it ever exceeded a
+    # term, the seedless search would begin above the answer and skip it.
+    for f, by_girth in TERMS.items():
+        for k, n in sorted(by_girth.items()):
+            check(n >= universal_floor(k, f),
+                  "%-7s girth %d: %d >= universal floor %d"
+                  % (f, k, n, universal_floor(k, f)))
+    seedless = dict(EXACT_FAST)
+    if args.exact:
+        for f, ks in EXACT_SLOW.items():
+            seedless[f] = sorted(seedless.get(f, []) + ks)
+    for f, girths in seedless.items():
+        for k in girths:
+            got, _fac, _cyc, limit, _nodes, rounds = smallest_without_seed(f, k)
+            check(got == TERMS[f][k],
+                  "%-7s girth %d found with NO seed, in %d rounds: %s"
+                  % (f, k, rounds, got))
+    if not args.exact:
+        print("  (the large terms are seedless-checked only under --exact)")
+
+    # ----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    print(chr(10) + "11. The next two terms are bracketed, and the bracket holds")
+    # ----------------------------------------------------------------------
+    for (f, k), data in sorted(BRACKETS.items()):
+        n = data["witness"]
+        digraph = covering_digraph(n, f)
+        check(in_S(n, f) and girth(digraph) == k and is_pure_cycle(digraph),
+              "%-7s girth %d: the exhibited witness %d is in S(f), has girth "
+              "%d and is a pure cycle" % (f, k, n, k))
+        check(data["no_witness_below"] < n,
+              "%-7s girth %d: the bracket is consistent, %d < %d"
+              % (f, k, data["no_witness_below"], n))
+        check(len(factorize(n)) == k,
+              "%-7s girth %d: the witness has exactly %d distinct primes"
+              % (f, k, k))
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12. In phi*, each minimum divides the next")
+    # ----------------------------------------------------------------------
+    # Two links, not a law -- and the prediction that the third holds is the
+    # falsifiable part. The exhibited girth-6 witness does continue the chain,
+    # which is checked here; the true minimum of girth 6 is unknown.
+    phi = TERMS["phi*"]
+    for a, b in ((3, 4), (4, 5)):
+        check(phi[b] % phi[a] == 0,
+              "phi*    m(%d) divides m(%d): %d divides %d"
+              % (a, b, phi[a], phi[b]))
+    check(BRACKETS[("phi*", 6)]["witness"] % phi[5] == 0,
+          "phi*    the exhibited girth-6 witness continues the chain: "
+          "%d divides it" % phi[5])
+    check(phi[3] % phi[2] != 0,
+          "phi*    the chain does NOT reach back to girth 2: %d does not "
+          "divide %d" % (phi[2], phi[3]))
+    # And the correlation that looked obvious, recomputed rather than asserted:
+    # the largest jump of all is one where the previous term divides the next,
+    # so sharing and jump size are unrelated.
+    pairs = []
+    for f, by_girth in TERMS.items():
+        ks = sorted(by_girth)
+        for a, b in zip(ks, ks[1:]):
+            pairs.append((by_girth[b] / by_girth[a], f, a, b,
+                          by_girth[b] % by_girth[a] == 0))
+    pairs.sort()
+    biggest = pairs[-1]
+    check(biggest[4],
+          "the largest jump of the %d consecutive pairs (%s %d->%d, factor "
+          "%.0f) is one where the previous term DIVIDES the next -- so sharing "
+          "does not explain jump size"
+          % (len(pairs), biggest[1], biggest[2], biggest[3], biggest[0]))
+
+    # ----------------------------------------------------------------------
     if args.full:
-        print("\n9. Re-deriving the sieved terms from scratch (slow)")
+        print("\n13. Re-deriving the sieved terms from scratch (slow)")
         try:
             from sieve import sieve_terms
         except ImportError as exc:
@@ -197,7 +344,7 @@ def main(argv=None):
                     check(found.get(f, {}).get(k) == TERMS[f][k],
                           "%-7s girth %d re-derived by sieving" % (f, k))
     else:
-        print("\n9. Full re-derivation by sieving: skipped (use --full)")
+        print("\n13. Full re-derivation by sieving: skipped (use --full)")
 
     # ----------------------------------------------------------------------
     elapsed = time.time() - started

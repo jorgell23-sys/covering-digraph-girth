@@ -78,6 +78,7 @@ Usage
 """
 
 import argparse
+import time
 import os
 import random
 import sys
@@ -236,6 +237,13 @@ def prime_cutoff(bound, k, f):
     return lo
 
 
+#: Whether the per-arc cost lemma is applied on top of (*). A switch and not
+#: an option, because its only legitimate use is to MEASURE: with False the
+#: search must return exactly the same values and visit many more nodes. If it
+#: returned different values, one of the two lemmas would be wrong.
+PER_ARC_LEMMA = True
+
+
 class _Search:
     """Enumerate pure k-cycles and keep the one of least product."""
 
@@ -281,14 +289,40 @@ class _Search:
         return [t for t in items if t[2] <= budget]
 
     def _floor(self, used, missing):
-        product, count = 1, 0
+        """Lower bound on what the `missing` unplaced vertices contribute.
+
+        Two bounds, the larger wins (per-arc cost lemma):
+
+        1. **By the primes.** The missing vertices carry distinct primes, none
+           of them used, so together they contribute at least the product of
+           the `missing` smallest free primes.
+
+        2. **By the closure.** While at least one vertex is unplaced, the one
+           that CLOSES the cycle -- the predecessor of ``q_1`` -- is among
+           them, and its prime power satisfies ``q^e >= a_f(q_1)`` because
+           ``q_1 | f(q^e)``. The search always starts at the LARGEST prime, so
+           ``q_1 = max(used)`` and that ``a_f`` is the largest available. The
+           other ``missing - 1`` contribute at least the product of the
+           ``missing - 1`` smallest free primes.
+
+        The second dominates almost always: with ``q_1 ~ 1e6`` under sigma,
+        ``a_f(q_1) ~ 5e5`` against a five-digit primorial.
+        """
+        free = []
         for x in self._small:
-            if count == missing:
+            if len(free) == missing:
                 break
             if x not in used:
-                product *= x
-                count += 1
-        return product
+                free.append(x)
+        by_primes = 1
+        for x in free:
+            by_primes *= x
+        if missing < 1 or not PER_ARC_LEMMA:
+            return by_primes
+        by_closure = predecessor_floor(max(used), self.f)
+        for x in free[:missing - 1]:
+            by_closure *= x
+        return max(by_primes, by_closure)
 
     def run(self):
         for i, start in enumerate(self.primes):
@@ -302,8 +336,8 @@ class _Search:
         return self.best
 
     def _from(self, start):
-        # the k-1 remaining vertices contribute at least primorial(k-1)
-        margin = max(1, self.bound // primorial(self.k - 1))
+        # the k-1 remaining vertices contribute at least _floor()
+        margin = max(1, self.bound // self._floor({start}, self.k - 1))
         for p, e, power in self.successors(start, margin):
             if p >= start:
                 continue
@@ -323,10 +357,16 @@ class _Search:
         if budget <= 1:
             return
         closing = (m + 1 == self.k)
+        # the closing vertex has to pay a_f(q_1): its prime power is what makes
+        # q_1 | f(q^e). Same per-arc lemma, applied to the last vertex.
+        least = (predecessor_floor(path[0][0], self.f)
+                 if (closing and PER_ARC_LEMMA) else 1)
         for p, e, power in self.successors(nxt, budget):
             total = product * power
             if total >= self.bound:
                 break
+            if power < least:
+                continue
             value = self.value(nxt, e)
             back = [x[0] for x in path if value % x[0] == 0]
             if closing:
@@ -353,6 +393,56 @@ class _Search:
             self.bound = product
 
 
+def per_arc_floor(cycle, f):
+    """(+) The per-arc lower bound for a pure cycle given as [(q, e), ...].
+
+    ``n >= prod_i max(q_i, a_f(q_{i+1}))``, indices mod k. Strictly stronger
+    than (*), which is what is left of it after keeping only the two factors
+    that involve the largest prime.
+    """
+    k = len(cycle)
+    out = 1
+    for i, (q, _e) in enumerate(cycle):
+        nxt = cycle[(i + 1) % k][0]
+        out *= max(q, predecessor_floor(nxt, f))
+    return out
+
+
+def universal_floor(k, f):
+    """(++) Lower bound for EVERY witness of girth k, knowing none of them.
+
+    A witness of girth k has exactly k distinct primes (pure-cycle theorem),
+    so its largest prime P satisfies ``P >= p_k``, the k-th prime; and
+    ``cycle_floor`` is increasing in P. Hence
+
+        n >= p_k * a_f(p_k) * primorial(k - 2)
+
+    This is what lets the search start with **no seed at all**: it gives an N
+    below which nothing exists.
+    """
+    p_k = primes_up_to(100 * (k + 3))[k - 1]
+    return cycle_floor(p_k, k, f)
+
+
+def _search_below(f, k, bound, heartbeat=0):
+    """Exhaustive search for the smallest witness of girth k below `bound`.
+
+    Returns ``(n, factorisation, cycle, prime_limit, nodes)`` or
+    ``(None, nodes)`` if there is none. Exhaustive is the operative word: the
+    cutoff lemma bounds the largest prime any witness below `bound` could use,
+    so "nothing found" means "there is none", not "we did not look far enough".
+    """
+    limit = prime_cutoff(bound, k, f)
+    search = _Search(f, k, limit, bound)
+    search.heartbeat = heartbeat
+    found = search.run()
+    if found is None:
+        return None, search.nodes
+    product, path = found
+    return (product, {q: e for q, e, _ in path},
+            [q for q, _, _ in path], limit, search.nodes)
+
+
 def exact_smallest(f, k, known_witness, heartbeat=0):
     """The smallest witness of girth k, proved.
 
@@ -362,15 +452,47 @@ def exact_smallest(f, k, known_witness, heartbeat=0):
     If the search finds nothing below `known_witness`, then `known_witness`
     itself is the minimum -- it is attained, and nothing smaller exists.
     """
-    limit = prime_cutoff(known_witness + 1, k, f)
-    search = _Search(f, k, limit, known_witness + 1)
-    search.heartbeat = heartbeat
-    found = search.run()
-    if found is None:                                # cannot happen: the seed
+    out = _search_below(f, k, known_witness + 1, heartbeat)
+    if out[0] is None:                               # cannot happen: the seed
         raise AssertionError("the seeding witness was not reachable")
-    product, path = found
-    return (product, {q: e for q, e, _ in path},
-            [q for q, _, _ in path], limit)
+    return out[:4]
+
+
+def smallest_without_seed(f, k, heartbeat=0, trace=None):
+    """The smallest witness of girth k, **with no known witness to start from**.
+
+    The search of `exact_smallest` needs a witness N so that the cutoff lemma
+    can bound the largest prime; without one the bound is infinite and the
+    enumeration does not terminate. That kept the table pinned to the girths
+    for which some element had already been exhibited.
+
+    Doubling removes the need, and the proof was already in hand:
+
+    - ``_search_below(f, k, N)`` is **exhaustive below N**. That is what the
+      cutoff lemma bought: not "the best we saw" but "the smallest there is,
+      if any is below N".
+    - ``universal_floor(k, f)`` gives an N with nothing below it.
+    - Run at that N; if nothing appears, double N. Since each round is
+      exhaustive below its own bound, **the first value that appears is the
+      minimum**: nothing smaller exists below this N, and nothing at all
+      existed below the previous ones, which were already swept.
+
+    No step is heuristic. The only difference from `exact_smallest` is where N
+    comes from, and N does not enter the proof: it enters the running time.
+
+    Returns ``(n, factorisation, cycle, prime_limit, nodes, rounds)``.
+    """
+    bound = universal_floor(k, f) + 1
+    rounds, nodes = 0, 0
+    while True:
+        rounds += 1
+        if trace is not None:
+            trace(rounds, bound, prime_cutoff(bound, k, f))
+        out = _search_below(f, k, bound, heartbeat)
+        nodes += out[-1]
+        if out[0] is not None:
+            return out[0], out[1], out[2], out[3], nodes, rounds
+        bound *= 2
 
 
 KNOWN = {
@@ -380,6 +502,7 @@ KNOWN = {
     ("sigma*", 2): 6, ("sigma*", 3): 6615, ("sigma*", 4): 4380453,
     ("sigma*", 5): 540765225, ("sigma*", 6): 474549075,
     ("sigma*", 7): 4485174218525, ("sigma*", 8): 2386830845734335,
+    ("sigma*", 9): 9928651387877145,
     ("phi*", 2): 12, ("phi*", 3): 66825, ("phi*", 4): 1120454775,
     ("phi*", 5): 1663175056640625,
 }
@@ -394,7 +517,64 @@ def main(argv=None):
                              "cutoff (default: the published one)")
     parser.add_argument("--heartbeat", type=int, default=0,
                         help="print progress every N starting primes")
+    parser.add_argument("--no-seed", action="store_true",
+                        help="start from the universal floor and double, "
+                             "using no known witness at all")
+    parser.add_argument("--measure-lemma", action="store_true",
+                        help="run each girth twice, with and without the "
+                             "per-arc lemma, and compare the search trees")
     args = parser.parse_args(argv)
+
+    if args.measure_lemma:
+        global PER_ARC_LEMMA
+        print("%-8s %2s | %14s %7s | %14s %7s | %6s | same"
+              % ("f", "k", "nodes with (*)", "sec", "nodes with (+)", "sec",
+                 "saved"))
+        for k in args.girths:
+            seed = args.bound or KNOWN.get((args.function, k))
+            if not seed:
+                print("girth %d: not in the control table" % k)
+                continue
+            row = []
+            for flag in (False, True):
+                PER_ARC_LEMMA = flag
+                started = time.time()
+                out = _search_below(args.function, k, seed + 1)
+                row.append((out[0], out[-1], time.time() - started))
+            PER_ARC_LEMMA = True
+            print("%-8s %2d | %14d %7.2f | %14d %7.2f | %5.1fx | %s"
+                  % (args.function, k, row[0][1], row[0][2],
+                     row[1][1], row[1][2], row[0][1] / max(1, row[1][1]),
+                     "yes" if row[0][0] == row[1][0] == seed else "NO"))
+        return 0
+
+    if args.no_seed:
+        for k in args.girths:
+            print(chr(10) + "=== %s, girth %d (no seed) ===" % (args.function, k))
+
+            def trace(rounds, bound, cutoff, k=k):
+                print("  round %d: N = %d (primes <= %d)"
+                      % (rounds, bound, cutoff), flush=True)
+
+            started = time.time()
+            n, factors, cycle, limit, nodes, rounds = smallest_without_seed(
+                args.function, k, args.heartbeat, trace)
+            shown = " * ".join("%d^%d" % (q, e) if e > 1 else str(q)
+                               for q, e in sorted(factors.items()))
+            print("  MINIMUM n = %d   (%d rounds, %d nodes, %.0fs)"
+                  % (n, rounds, nodes, time.time() - started))
+            print("  factorisation  %s" % shown)
+            print("  cycle          %s"
+                  % " -> ".join(str(q) for q in cycle + [cycle[0]]))
+            print("  searched every prime up to %d" % limit)
+            published = KNOWN.get((args.function, k))
+            if published is None:
+                print("  *** NEW: no witness of this girth was published ***")
+            elif published == n:
+                print("  == equals the published value, found without using it")
+            else:
+                print("  != DISAGREES with the published %d" % published)
+        return 0
 
     for k in args.girths:
         seed = args.bound or KNOWN.get((args.function, k))

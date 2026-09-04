@@ -10,15 +10,18 @@ abstract: >-
   rad(n) dividing f(n), and let the covering digraph of n have the primes
   dividing n as vertices with an edge q -> p whenever p divides f(q^e), where
   q^e is the exact power of q in n. This work computes the smallest member of
-  S(f) of each girth, for f = sigma, sigma* and phi*. Two theorems: any minimal
-  witness of girth k has exactly k distinct prime factors and a covering
-  digraph that is a pure directed cycle; and its largest prime is bounded by
-  roughly the square root of any known witness divided by the primorial of
-  k-2. The second bound makes the enumeration finite, so all eighteen published
-  values are proved minimal rather than minimal among the primes examined. Four
-  of them had not been computed before, the largest near 3.2e16. All results
-  are verified by independent implementations and cross-checked against the
-  count of prime-abundant numbers published by Pollack and Pomerance (2012).
+  S(f) of each girth, for f = sigma, sigma* and phi*. Any minimal witness of
+  girth k has exactly k distinct prime factors and a covering digraph that is a
+  pure directed cycle; its largest prime is bounded in terms of any known
+  witness, which makes the enumeration finite; a per-arc strengthening of that
+  bound makes the search several times cheaper; and a floor that mentions no
+  witness at all, combined with doubling over an exhaustive search, removes the
+  need for a known witness entirely. All nineteen published values are proved
+  minimal rather than minimal among the primes examined. Five of them had not
+  been computed before, and one of those, sigma* at girth 9, had no known
+  witness of its girth and so could not be reached by the earlier method. All
+  results are verified by independent implementations and cross-checked against
+  the count of prime-abundant numbers published by Pollack and Pomerance (2012).
 keywords:
   - number theory
   - arithmetic functions
@@ -28,8 +31,8 @@ keywords:
   - girth
   - integer sequences
 license: CC-BY-4.0
-version: 2.0.0
-date-released: "2026-09-03"
+version: 3.0.0
+date-released: "2026-09-04"
 references:
   - type: article
     title: "Prime-Perfect Numbers"
@@ -43,3 +46,15 @@ references:
     year: 2012
     notes: "Paper A14"
     doi: "10.1515/integers-2012-0044"
+  - type: article
+    title: "An almost optimal algorithm for unbounded searching"
+    authors:
+      - family-names: "Bentley"
+        given-names: "Jon Louis"
+      - family-names: "Yao"
+        given-names: "Andrew Chi-Chih"
+    journal: "Information Processing Letters"
+    volume: "5"
+    issue: "3"
+    year: 1976
+    notes: "The doubling (exponential) search used in Theorem 5; standard, and not claimed here"

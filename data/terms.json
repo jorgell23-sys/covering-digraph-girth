@@ -1,6 +1,7 @@
 {
-  "description": "Smallest n in S(f) = {n : rad(n) | f(n)} whose covering digraph has girth k. Every term is proved minimal: the cutoff lemma bounds the largest prime a smaller witness could use, so the enumeration is exhaustive.",
-  "generated_by": "python src/exact.py <function> <girth>",
+  "description": "Smallest n in S(f) = {n : rad(n) divides f(n)} whose covering digraph has girth k. Every term is proved minimal: the cutoff lemma bounds the largest prime a smaller witness could use, so the enumeration is exhaustive.",
+  "generated_by": "python src/make_terms.py",
+  "reproduce_one": "python src/exact.py <function> <girth> --no-seed",
   "reference": "https://doi.org/10.1515/integers-2012-0044",
   "functions": {
     "sigma": [
@@ -22,7 +23,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 3,
         "largest_prime": 3,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 3,
@@ -44,7 +47,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 14,
         "largest_prime": 13,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 4,
@@ -68,7 +73,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 213,
         "largest_prime": 11,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 5,
@@ -94,7 +101,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 4288,
         "largest_prime": 13,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 6,
@@ -122,7 +131,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 41420,
         "largest_prime": 31,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 7,
@@ -152,7 +163,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 2589844,
         "largest_prime": 2801,
-        "first_computed_here": true
+        "first_computed_here": true,
+        "first_computed_in_release": "2.0.0",
+        "no_seed_existed": false
       },
       {
         "girth": 8,
@@ -184,7 +197,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 1452412,
         "largest_prime": 331,
-        "first_computed_here": true
+        "first_computed_here": true,
+        "first_computed_in_release": "2.0.0",
+        "no_seed_existed": false
       }
     ],
     "sigma*": [
@@ -206,7 +221,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 3,
         "largest_prime": 3,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 3,
@@ -228,7 +245,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 58,
         "largest_prime": 7,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 4,
@@ -252,7 +271,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 854,
         "largest_prime": 43,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 5,
@@ -278,7 +299,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 4246,
         "largest_prime": 13,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 6,
@@ -306,7 +329,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 1503,
         "largest_prime": 43,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 7,
@@ -336,7 +361,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 44064,
         "largest_prime": 43,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 8,
@@ -368,7 +395,45 @@
         "proved_minimal": true,
         "primes_searched_up_to": 281925,
         "largest_prime": 61,
-        "first_computed_here": true
+        "first_computed_here": true,
+        "first_computed_in_release": "2.0.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 9,
+        "n": 9928651387877145,
+        "factorization": "3^3 * 5 * 7^3 * 11^2 * 19 * 31^2 * 37 * 43 * 61",
+        "omega": 9,
+        "cycle": [
+          3,
+          7,
+          43,
+          11,
+          61,
+          31,
+          37,
+          19,
+          5
+        ],
+        "edges": {
+          "3": 7,
+          "5": 3,
+          "7": 43,
+          "11": 61,
+          "19": 5,
+          "31": 37,
+          "37": 19,
+          "43": 11,
+          "61": 31
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 139458,
+        "largest_prime": 61,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.0.0",
+        "no_seed_existed": true
       }
     ],
     "phi*": [
@@ -390,7 +455,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 3,
         "largest_prime": 3,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 3,
@@ -412,7 +479,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 182,
         "largest_prime": 11,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 4,
@@ -436,7 +505,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 13664,
         "largest_prime": 23,
-        "first_computed_here": false
+        "first_computed_here": false,
+        "first_computed_in_release": null,
+        "no_seed_existed": false
       },
       {
         "girth": 5,
@@ -462,7 +533,9 @@
         "proved_minimal": true,
         "primes_searched_up_to": 7445747,
         "largest_prime": 23,
-        "first_computed_here": true
+        "first_computed_here": true,
+        "first_computed_in_release": "2.0.0",
+        "no_seed_existed": false
       }
     ]
   }
