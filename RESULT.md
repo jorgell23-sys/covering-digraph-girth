@@ -264,7 +264,7 @@ terms for `sigma` it can be addressed, and the answer is negative:
 
 Four consecutive terms — `k = 4` to `7` — have `ln n / k^2` between 0.72 and
 0.78, which invites reading `n ~ exp(0.75 k^2)`. That reading predicts
-`n_8 ~ 2.7 * 10^20`. **The true value is `3.2 * 10^16`, four orders of magnitude
+`n_8 ~ 7 * 10^20`. **The true value is `3.2 * 10^16`, more than four orders of magnitude
 below.**
 
 The factorizations show why. The girth-7 minimum is **forced to use 2801^2** —

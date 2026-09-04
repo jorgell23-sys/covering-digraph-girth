@@ -101,7 +101,7 @@ buys its way out of the expensive prime.**
 
 That matters beyond the curiosity: `ln n / k²` sits between 0.72 and 0.78 for
 `k = 4, 5, 6, 7`, which invites reading `n ≈ exp(0.75 k²)` and predicts
-`n₈ ≈ 2.7 × 10²⁰`. The true value is `3.2 × 10¹⁶`. **Four terms supported a law
+`n₈ ≈ 7 × 10²⁰`. The true value is `3.2 × 10¹⁶`. **Four terms supported a law
 and the fifth broke it.**
 
 ## What is in here

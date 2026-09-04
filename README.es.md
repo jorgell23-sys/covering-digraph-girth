@@ -109,7 +109,7 @@ compra la salida del primo caro.**
 
 Y eso importa más allá de la curiosidad: `ln n / k²` se queda entre 0,72 y 0,78
 para `k = 4, 5, 6, 7`, lo que invita a leer `n ≈ exp(0,75 k²)` y predice
-`n₈ ≈ 2,7 × 10²⁰`. El valor real es `3,2 × 10¹⁶`. **Cuatro términos sostenían una
+`n₈ ≈ 7 × 10²⁰`. El valor real es `3,2 × 10¹⁶`. **Cuatro términos sostenían una
 ley y el quinto la rompió.**
 
 ## La sucesión que baja
