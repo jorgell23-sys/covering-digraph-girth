@@ -28,6 +28,6 @@
       "scheme": "url"
     }
   ],
-  "version": "3.0.0",
+  "version": "3.1.2",
   "description": "Smallest members of S(f) = {n : rad(n) | f(n)} by the girth of their covering digraph, for f = sigma, sigma* and phi*. Nineteen values, all proved minimal. A cutoff lemma bounds the largest prime a smaller witness could use; a per-arc strengthening of it makes the search several times cheaper; and a floor that mentions no witness at all, combined with doubling over an exhaustive search, removes the need for a known witness entirely, so a girth can now be computed with no example of it in hand. Five values had not been computed before, and one of them, sigma* at girth 9, had no known witness of its girth and was unreachable by the earlier method. The next two terms are bracketed between a proved lower bound and a verified witness, and the number of primes that closing each bracket would require is stated. Verified by independent implementations and cross-checked against Pollack and Pomerance (2012)."
 }
