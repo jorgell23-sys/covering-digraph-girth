@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" width="100%" role="img" aria-labelledby="t d">
+<title id="t">Girth is the shortest cycle</title><desc id="d">6 closes a two-arrow cycle and 234 a three-arrow one: their girths are 2 and 3.</desc>
+<style>
+  text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;fill:#1f2933}
+  .m{fill:#6b7785}.s{font-size:13px}.xs{font-size:11px}
+  .lbl{font-size:15px;font-weight:600}
+  .big{font-size:20px;font-weight:700}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  @media (prefers-color-scheme:dark){
+    text{fill:#e4e7eb}.m{fill:#9aa5b1}.stroke{stroke:#7b8794}
+  }
+</style>
+
+<text class="s" x="170" y="44" text-anchor="middle" font-weight="600">6 = 2 × 3</text>
+<circle cx="108.0" cy="150.0" r="25" fill="none" stroke="#2e7d52" stroke-width="2.5" class="stroke"/>
+<text class="lbl" x="108.0" y="155.0" text-anchor="middle">2</text>
+<circle cx="232.0" cy="150.0" r="25" fill="none" stroke="#2e7d52" stroke-width="2.5" class="stroke"/>
+<text class="lbl" x="232.0" y="155.0" text-anchor="middle">3</text>
+<path d="M 135.0 150.0 Q 169.0 160.9 203.0 150.0" stroke="#2e7d52" stroke-width="2" fill="none" marker-end="url(#a)" class="stroke"/>
+<path d="M 205.0 150.0 Q 171.0 139.1 137.0 150.0" stroke="#2e7d52" stroke-width="2" fill="none" marker-end="url(#a)" class="stroke"/>
+<text class="s" x="170" y="248" text-anchor="middle" fill="#2e7d52">girth 2</text>
+<text class="s" x="500" y="44" text-anchor="middle" font-weight="600">234 = 2 × 3² × 13</text>
+<circle cx="500.0" cy="84.0" r="25" fill="none" stroke="#c8871a" stroke-width="2.5" class="stroke"/>
+<text class="lbl" x="500.0" y="89.0" text-anchor="middle">2</text>
+<circle cx="557.2" cy="183.0" r="25" fill="none" stroke="#c8871a" stroke-width="2.5" class="stroke"/>
+<text class="lbl" x="557.2" y="188.0" text-anchor="middle">3</text>
+<circle cx="442.8" cy="183.0" r="25" fill="none" stroke="#c8871a" stroke-width="2.5" class="stroke"/>
+<text class="lbl" x="442.8" y="188.0" text-anchor="middle">13</text>
+<path d="M 513.5 107.4 Q 520.0 137.3 542.7 157.9" stroke="#c8871a" stroke-width="2" fill="none" marker-end="url(#a)" class="stroke"/>
+<path d="M 530.2 183.0 Q 501.0 173.7 471.8 183.0" stroke="#c8871a" stroke-width="2" fill="none" marker-end="url(#a)" class="stroke"/>
+<path d="M 456.3 159.6 Q 479.0 139.0 485.5 109.1" stroke="#c8871a" stroke-width="2" fill="none" marker-end="url(#a)" class="stroke"/>
+<text class="s" x="500" y="248" text-anchor="middle" fill="#c8871a">girth 3</text>
+<text class="xs m" x="350" y="284" text-anchor="middle">The question of this work: for each k, what is the SMALLEST number of girth k?</text>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa5b1"/></marker></defs>
+</svg>

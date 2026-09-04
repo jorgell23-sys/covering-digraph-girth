@@ -8,13 +8,16 @@ posible demostrarlo **sin conocer ninguna respuesta de antemano**.
 
 **Todo esto se comprueba en dos segundos:**
 
+> **¿Es tu primera vez con esto? Empezá acá:** [**Explicación desde cero**](https://jorgell23-sys.github.io/covering-digraph-girth/es/) —
+> todo contado con peras y manzanas, con dibujos y sin conocimientos previos.
+
 ```bash
 git clone https://github.com/jorgell23-sys/covering-digraph-girth
 cd covering-digraph-girth
 python verify.py
 ```
 
-Sin instalar nada. Corre 220 comprobaciones e imprime PASS o FAIL para cada una.
+Sin instalar nada. Corre 227 comprobaciones e imprime PASS o FAIL para cada una.
 
 ---
 

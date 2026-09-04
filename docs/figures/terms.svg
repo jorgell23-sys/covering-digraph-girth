@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="100%" role="img" aria-labelledby="t d">
+<title id="t">How the smallest number of each girth grows</title><desc id="d">On a logarithmic scale: each step up multiplies by ten.</desc>
+<style>
+  text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;fill:#1f2933}
+  .m{fill:#6b7785}.s{font-size:13px}.xs{font-size:11px}
+  .lbl{font-size:15px;font-weight:600}
+  .big{font-size:20px;font-weight:700}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  @media (prefers-color-scheme:dark){
+    text{fill:#e4e7eb}.m{fill:#9aa5b1}.stroke{stroke:#7b8794}
+  }
+</style>
+
+<text class="xs m" x="14" y="174" text-anchor="middle" transform="rotate(-90 14 174)">number of digits</text>
+<text class="xs m" x="400" y="348" text-anchor="middle">girth k</text>
+<line x1="62" y1="308" x2="738" y2="308" stroke="#9aa5b1" stroke-width="1.5" class="stroke"/>
+<line x1="62" y1="308.0" x2="738" y2="308.0" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="312.0" text-anchor="end">0</text>
+<line x1="62" y1="262.1" x2="738" y2="262.1" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="266.1" text-anchor="end">3</text>
+<line x1="62" y1="216.1" x2="738" y2="216.1" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="220.1" text-anchor="end">6</text>
+<line x1="62" y1="170.2" x2="738" y2="170.2" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="174.2" text-anchor="end">9</text>
+<line x1="62" y1="124.2" x2="738" y2="124.2" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="128.2" text-anchor="end">12</text>
+<line x1="62" y1="78.3" x2="738" y2="78.3" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="82.3" text-anchor="end">15</text>
+<line x1="62" y1="32.4" x2="738" y2="32.4" stroke="#9aa5b1" stroke-width="1" stroke-dasharray="3 4" opacity="0.45" class="stroke"/>
+<text class="xs m" x="54" y="36.4" text-anchor="end">18</text>
+<text class="xs m" x="62.0" y="326" text-anchor="middle">2</text>
+<text class="xs m" x="158.6" y="326" text-anchor="middle">3</text>
+<text class="xs m" x="255.1" y="326" text-anchor="middle">4</text>
+<text class="xs m" x="351.7" y="326" text-anchor="middle">5</text>
+<text class="xs m" x="448.3" y="326" text-anchor="middle">6</text>
+<text class="xs m" x="544.9" y="326" text-anchor="middle">7</text>
+<text class="xs m" x="641.4" y="326" text-anchor="middle">8</text>
+<text class="xs m" x="738.0" y="326" text-anchor="middle">9</text>
+<polyline points="62.0,296.1 158.6,271.7 255.1,229.3 351.7,178.7 448.3,135.6 544.9,64.7 641.4,55.3" fill="none" stroke="#2f6fb5" stroke-width="2" opacity="0.75"/>
+<circle cx="62.0" cy="296.1" r="5.5" fill="none" stroke="#2f6fb5" stroke-width="2"/>
+<circle cx="158.6" cy="271.7" r="5.5" fill="none" stroke="#2f6fb5" stroke-width="2"/>
+<circle cx="255.1" cy="229.3" r="5.5" fill="none" stroke="#2f6fb5" stroke-width="2"/>
+<circle cx="351.7" cy="178.7" r="5.5" fill="none" stroke="#2f6fb5" stroke-width="2"/>
+<circle cx="448.3" cy="135.6" r="5.5" fill="none" stroke="#2f6fb5" stroke-width="2"/>
+<circle cx="544.9" cy="64.7" r="5.5" fill="#2f6fb5" stroke="#2f6fb5" stroke-width="2"/>
+<circle cx="641.4" cy="55.3" r="5.5" fill="#2f6fb5" stroke="#2f6fb5" stroke-width="2"/>
+<text class="s" x="653.4" y="60.3" fill="#2f6fb5" font-weight="700">σ</text>
+<polyline points="62.0,296.1 158.6,249.5 255.1,206.3 351.7,174.3 448.3,175.1 544.9,114.3 641.4,72.5 738.0,63.0" fill="none" stroke="#c8871a" stroke-width="2" opacity="0.75"/>
+<circle cx="62.0" cy="296.1" r="5.5" fill="none" stroke="#c8871a" stroke-width="2"/>
+<circle cx="158.6" cy="249.5" r="5.5" fill="none" stroke="#c8871a" stroke-width="2"/>
+<circle cx="255.1" cy="206.3" r="5.5" fill="none" stroke="#c8871a" stroke-width="2"/>
+<circle cx="351.7" cy="174.3" r="5.5" fill="none" stroke="#c8871a" stroke-width="2"/>
+<circle cx="448.3" cy="175.1" r="5.5" fill="none" stroke="#c8871a" stroke-width="2"/>
+<circle cx="544.9" cy="114.3" r="5.5" fill="none" stroke="#c8871a" stroke-width="2"/>
+<circle cx="641.4" cy="72.5" r="5.5" fill="#c8871a" stroke="#c8871a" stroke-width="2"/>
+<circle cx="738.0" cy="63.0" r="5.5" fill="#c8871a" stroke="#c8871a" stroke-width="2"/>
+<text class="s" x="750.0" y="68.0" fill="#c8871a" font-weight="700">σ*</text>
+<polyline points="62.0,291.5 158.6,234.1 255.1,169.4 351.7,74.9" fill="none" stroke="#7a4fa3" stroke-width="2" opacity="0.75"/>
+<circle cx="62.0" cy="291.5" r="5.5" fill="none" stroke="#7a4fa3" stroke-width="2"/>
+<circle cx="158.6" cy="234.1" r="5.5" fill="none" stroke="#7a4fa3" stroke-width="2"/>
+<circle cx="255.1" cy="169.4" r="5.5" fill="none" stroke="#7a4fa3" stroke-width="2"/>
+<circle cx="351.7" cy="74.9" r="5.5" fill="#7a4fa3" stroke="#7a4fa3" stroke-width="2"/>
+<text class="s" x="363.7" y="79.9" fill="#7a4fa3" font-weight="700">φ*</text>
+<text class="xs m" x="62" y="378">Filled dots are the ones this work computed first.</text>
+</svg>

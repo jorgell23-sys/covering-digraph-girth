@@ -27,6 +27,8 @@ Optional, slower:
 """
 
 import argparse
+import json
+import re
 import os
 import sys
 import time
@@ -119,12 +121,15 @@ SIEVE_COUNT_SIGMA = 5327
 PUBLISHED_COUNT_SIGMA = 5328
 
 failures = []
+passed = [0]
 
 
 def check(condition, description):
     print("  %s  %s" % ("PASS" if condition else "FAIL", description))
     if not condition:
         failures.append(description)
+    else:
+        passed[0] += 1
     return condition
 
 
@@ -345,6 +350,82 @@ def main(argv=None):
                           "%-7s girth %d re-derived by sieving" % (f, k))
     else:
         print("\n13. Full re-derivation by sieving: skipped (use --full)")
+
+    # ----------------------------------------------------------------------
+    # 14. The explainer page cannot go stale in silence.
+    #
+    # Every live number in docs/*.html is tagged data-fact="...", and here each
+    # one is compared against the data. The figures are compared against what
+    # their generator produces right now. So if a value improves and the
+    # explanation is not updated, THIS FAILS -- which is the point: a rule
+    # written in prose gets broken again.
+    print("\n14. The explainer page is in sync with the data")
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, "data", "terms.json"), encoding="utf-8") as fh:
+        terms = json.load(fh)["functions"]
+    expected = {
+        "terms_total": sum(len(v) for v in terms.values()),
+        "new_terms": sum(1 for v in terms.values()
+                         for e in v if e.get("first_computed_here")),
+        "sieve_count": SIEVE_COUNT_SIGMA,
+        "published_count": PUBLISHED_COUNT_SIGMA,
+    }
+    pages = [os.path.join("docs", "index.html"),
+             os.path.join("docs", "es", "index.html")]
+    for page in pages:
+        path = os.path.join(here, page)
+        if not os.path.exists(path):
+            check(False, "%s exists" % page)
+            continue
+        with open(path, encoding="utf-8") as fh:
+            html = fh.read()
+        facts = dict(re.findall(r'data-fact="([a-z_0-9]+)">([^<]+)<', html))
+        wrong = {k: (facts.get(k), str(v)) for k, v in expected.items()
+                 if facts.get(k) != str(v)}
+        check(not wrong, "%s: every tagged number matches the data%s"
+              % (page, "" if not wrong else " -- %s" % wrong))
+        missing = [src for src in re.findall(r'<img src="([^"]+)"', html)
+                   if not os.path.exists(os.path.normpath(
+                       os.path.join(os.path.dirname(path), src)))]
+        check(not missing, "%s: every figure it references exists%s"
+              % (page, "" if not missing else " -- missing %s" % missing))
+
+    sys.path.insert(0, os.path.join(here, "src"))
+    import make_figures as MF
+    stale = []
+    for name, fn in (("graph", MF.fig_graph), ("girth", MF.fig_girth),
+                     ("cutoff", MF.fig_cutoff)):
+        for es, suf in ((False, ""), (True, ".es")):
+            f = os.path.join(here, "docs", "figures", "%s%s.svg" % (name, suf))
+            if not os.path.exists(f):
+                stale.append(os.path.basename(f))
+                continue
+            with open(f, encoding="utf-8") as fh:
+                if fh.read() != fn(es=es):
+                    stale.append(os.path.basename(f))
+    for es, suf in ((False, ""), (True, ".es")):
+        f = os.path.join(here, "docs", "figures", "terms%s.svg" % suf)
+        if not os.path.exists(f):
+            stale.append(os.path.basename(f))
+            continue
+        with open(f, encoding="utf-8") as fh:
+            if fh.read() != MF.fig_terms(terms, es=es):
+                stale.append(os.path.basename(f))
+    check(not stale, "the 8 figures are what their generator produces today%s"
+          % ("" if not stale else " -- stale: %s" % stale))
+
+    # The page announces how many checks this file runs; self-referential on
+    # purpose, so that adding one and forgetting the text breaks the count.
+    total = passed[0] + len(failures) + 2
+    for page in pages:
+        path = os.path.join(here, page)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            m = re.search(r'data-fact="checks">([^<]+)<', fh.read())
+        check(m is not None and int(m.group(1)) == total,
+              "%s: the number of checks it announces is right (%s, expected %d)"
+              % (page, m.group(1) if m else "absent", total))
 
     # ----------------------------------------------------------------------
     elapsed = time.time() - started

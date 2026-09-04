@@ -4,6 +4,10 @@ Nineteen integers, each **proved** to be the smallest of its kind — five of
 them never computed before — and the small theorems that make proving it
 possible **without knowing any answer in advance**.
 
+> **New to this? Start here:** [**Explained from scratch**](https://jorgell23-sys.github.io/covering-digraph-girth/) - the whole
+> thing in plain words, with pictures and no background needed
+> ([en espanol](https://jorgell23-sys.github.io/covering-digraph-girth/es/)).
+
 **Everything here is verifiable in two seconds:**
 
 ```bash
@@ -12,7 +16,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-No dependencies, no setup. It runs 220 checks and prints PASS or FAIL for each.
+No dependencies, no setup. It runs 227 checks and prints PASS or FAIL for each.
 
 ---
 

@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The numbers that draw a cycle - explained from scratch</title>
+<meta name="description" content="What the girth of a number is, where the nineteen values came from, how they were checked and what they are good for.">
+<style>
+:root{
+  --ink:#1f2933; --soft:#52606d; --mute:#7b8794; --line:#d9e0e6;
+  --bg:#fbfbf9; --card:#ffffff; --blue:#2f6fb5; --green:#2e7d52;
+  --amber:#a8700f; --red:#c0442e; --sel:#e8f0fa;
+  --serif:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#e4e7eb;--soft:#cbd2d9;--mute:#9aa5b1;--line:#3e4c59;
+        --bg:#12171c;--card:#1a2027;--blue:#7aaee0;--green:#6ec295;
+        --amber:#e0a63f;--red:#e08272;--sel:#1e2a38;}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font-family:var(--serif);font-size:19px;line-height:1.72}
+.wrap{max-width:50rem;margin:0 auto;padding:0 1.25rem 6rem}
+header.top{padding:3.5rem 0 2rem;border-bottom:3px double var(--line);margin-bottom:2rem}
+.kicker{font-family:var(--sans);font-size:.75rem;letter-spacing:.16em;
+        text-transform:uppercase;color:var(--mute);margin:0 0 .9rem}
+h1{font-size:2.35rem;line-height:1.18;margin:0 0 .8rem;letter-spacing:-.015em}
+.sub{font-size:1.12rem;color:var(--soft);margin:0}
+.byline{font-family:var(--sans);font-size:.82rem;color:var(--mute);margin-top:1.6rem}
+h2{font-family:var(--sans);font-size:1.42rem;line-height:1.3;margin:3.2rem 0 .4rem;
+   letter-spacing:-.01em;scroll-margin-top:1rem}
+h2 .num{color:var(--mute);font-weight:600;margin-right:.5rem}
+h3{font-family:var(--sans);font-size:1.08rem;margin:2rem 0 .3rem}
+p{margin:0 0 1.15rem}
+a{color:var(--blue)}
+strong{font-weight:700}
+.lead{font-size:1.08rem;color:var(--soft)}
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:1.2rem 1.5rem;margin:0 0 2rem;font-family:var(--sans);font-size:.95rem}
+nav.toc p{font-weight:700;margin:0 0 .6rem;font-size:.8rem;letter-spacing:.1em;
+          text-transform:uppercase;color:var(--mute)}
+nav.toc ol{margin:0;padding-left:1.3rem;line-height:1.85}
+figure{margin:2rem 0;padding:0}
+figure img{width:100%;height:auto;display:block;background:var(--card);
+           border:1px solid var(--line);border-radius:12px;padding:.75rem}
+figcaption{font-family:var(--sans);font-size:.86rem;color:var(--mute);
+           margin-top:.7rem;line-height:1.55}
+figcaption b{color:var(--soft)}
+.box{border-radius:12px;padding:1.15rem 1.4rem;margin:1.8rem 0;
+     font-family:var(--sans);font-size:.97rem;line-height:1.65}
+.def{background:var(--sel);border:1px solid var(--line)}
+.def dt{font-weight:700;margin-top:.7rem}
+.def dt:first-child{margin-top:0}
+.def dd{margin:.15rem 0 0;color:var(--soft)}
+.try{background:var(--card);border:1px solid var(--green);border-left:5px solid var(--green)}
+.try p:first-child{margin-top:0}
+.try p:last-child{margin-bottom:0}
+.warn{background:var(--card);border:1px solid var(--amber);border-left:5px solid var(--amber)}
+.warn p:last-child{margin-bottom:0}
+.tag{display:inline-block;font-family:var(--sans);font-size:.7rem;font-weight:700;
+     letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem}
+.tag.g{color:var(--green)} .tag.a{color:var(--amber)} .tag.b{color:var(--blue)}
+.calc{font-family:var(--mono);font-size:.94rem;background:var(--card);
+      border:1px solid var(--line);border-radius:10px;padding:.9rem 1.1rem;
+      margin:1.2rem 0;overflow-x:auto;line-height:1.9}
+code{font-family:var(--mono);font-size:.9em;background:var(--sel);
+     padding:.1em .35em;border-radius:4px}
+.calc code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;font-family:var(--sans);
+      font-size:.92rem;margin:1.5rem 0}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--line);
+      vertical-align:top}
+th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+td.n{font-family:var(--mono);white-space:nowrap}
+.scroll{overflow-x:auto}
+ul.plain{list-style:none;padding-left:0}
+ul.plain li{padding-left:1.4rem;position:relative;margin-bottom:.6rem}
+ul.plain li::before{content:"\2192";position:absolute;left:0;color:var(--mute)}
+.refs{font-family:var(--sans);font-size:.93rem}
+.refs h3{margin-top:1.6rem}
+.refs ol{padding-left:1.3rem}
+.refs li{margin-bottom:.8rem;line-height:1.6}
+.refs .why{color:var(--mute);display:block;font-size:.87rem}
+footer{margin-top:4rem;padding-top:1.6rem;border-top:1px solid var(--line);
+       font-family:var(--sans);font-size:.85rem;color:var(--mute)}
+.lang{font-family:var(--sans);font-size:.85rem;margin-bottom:1.5rem}
+@media (max-width:640px){
+  body{font-size:17px}
+  h1{font-size:1.8rem}
+  .wrap{padding:0 1rem 4rem}
+}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  nav.toc,.lang{display:none}
+  h2{page-break-after:avoid}
+  figure{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <p class="kicker">Explained from scratch · no background needed</p>
+  <h1>The numbers that draw a cycle</h1>
+  <p class="sub">What the <b>girth</b> of a number is, where the nineteen values
+  in this work came from, how they were checked and what they are good for. If
+  you can divide and you remember what a prime number is, that is enough.</p>
+  <p class="byline">Jorge Ellena Godoy · 2026 ·
+  <a href="es/index.html">Versión en español</a> ·
+  <a href="https://github.com/jorgell23-sys/covering-digraph-girth">repository</a></p>
+</header>
+
+<nav class="toc">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#question">The question, in plain words</a></li>
+    <li><a href="#words">The words you need</a></li>
+    <li><a href="#recipe">How the drawing is made</a></li>
+    <li><a href="#try">Try it yourself before reading on</a></li>
+    <li><a href="#origin">Where the data comes from</a></li>
+    <li><a href="#findings">What we found</a></li>
+    <li><a href="#checking">How do we know we did not get it wrong?</a></li>
+    <li><a href="#useful">What is it good for?</a></li>
+    <li><a href="#notclaim">What this does NOT say</a></li>
+    <li><a href="#glossary">Glossary</a> · <a href="#biblio">Further reading</a></li>
+  </ol>
+</nav>
+
+<h2 id="question"><span class="num">1</span>The question, in plain words</h2>
+
+<p class="lead">We are going to draw a picture out of a number. It sounds odd,
+but it is simple: the dots of the picture are its primes, and the arrows come
+out of one calculation.</p>
+
+<p>Take <b>234</b>. First break it into primes:
+<code>234 = 2 × 3² × 13</code>. The dots will be 2, 3 and 13.</p>
+
+<p>Now, for each prime, compute <b>the sum of the divisors of its power</b>. It
+is schoolbook arithmetic:</p>
+
+<div class="calc">σ(2)  = 1 + 2 = <b>3</b>
+σ(3²) = 1 + 3 + 9 = <b>13</b>
+σ(13) = 1 + 13 = <b>14</b> = 2 × 7</div>
+
+<p>And the rule for the arrows is: <b>from each prime, draw an arrow to every
+prime appearing in its result</b>. From 2 an arrow goes to 3, because 3 showed
+up. From 3, one to 13. And from 13, one back to 2, because
+<code>14 = 2 × 7</code> has a 2 in it.</p>
+
+<p>The three arrows close a triangle: <code>2 → 3 → 13 → 2</code>. A path that
+returns to where it started is called a <b>cycle</b>, and here its length is 3.
+The length of the shortest cycle in a picture is called its <b>girth</b>.</p>
+
+<div class="box def">
+  <p style="margin:0"><b>The question of this work:</b> for each length
+  <code>k</code>, what is the <b>smallest number of all</b> whose picture has a
+  cycle of length <code>k</code>?</p>
+</div>
+
+<p>For <code>k = 3</code> the answer is <b>234</b>: no smaller number has a
+triangle. This work answers that question in
+<span data-fact="terms_total">19</span> cases, using three different
+calculations in place of the sum of divisors.</p>
+
+<h2 id="words"><span class="num">2</span>The words you need</h2>
+
+<div class="box def">
+<dl>
+  <dt>Divides</dt>
+  <dd>"3 divides 12" means <code>12 ÷ 3</code> comes out exact, no remainder.
+  Written <code>3 | 12</code>.</dd>
+
+  <dt>Prime number</dt>
+  <dd>Divisible only by 1 and by itself: 2, 3, 5, 7, 11, 13…</dd>
+
+  <dt>Factoring</dt>
+  <dd>Breaking a number into a product of primes:
+  <code>234 = 2 × 3² × 13</code>. Every number breaks up in exactly one way.</dd>
+
+  <dt>σ(n), the sum of divisors</dt>
+  <dd>Add up every number that divides <code>n</code>, itself included.
+  <code>σ(6) = 1+2+3+6 = 12</code>. It is one of the oldest calculations in
+  mathematics: perfect numbers are defined with it.</dd>
+
+  <dt>rad(n), the radical</dt>
+  <dd>The product of the distinct primes of <code>n</code>, without repeats.
+  <code>rad(234) = 2 × 3 × 13 = 78</code>.</dd>
+
+  <dt>Cycle and girth</dt>
+  <dd>A <b>cycle</b> is a path of arrows returning to where it began. The
+  <b>girth</b> is the length of the shortest cycle in the picture. The word is
+  borrowed from graph theory, the branch that studies dots joined by lines.</dd>
+</dl>
+</div>
+
+<h2 id="recipe"><span class="num">3</span>How the drawing is made</h2>
+
+<figure>
+  <img src="figures/graph.svg" alt="The number 234 factors into 2, 3 squared and 13; the divisor sums give 3, 13 and 14, and the resulting arrows form a triangle between 2, 3 and 13.">
+  <figcaption><b>Figure 1.</b> The drawing of 234. Each calculation on the right
+  produces one arrow, and the three arrows close a triangle. The girth is
+  3.</figcaption>
+</figure>
+
+<p>One detail matters: the picture only makes sense when <b>every</b> prime has
+at least one arrow arriving at it. The numbers where that happens are called,
+for the sum of divisors, <b>prime-abundant</b>, and they are not an invention of
+this work: Pollack and Pomerance studied them in 2012 and they are catalogued in
+the OEIS encyclopedia. What is computed here is a property <b>of the drawing</b>
+of those numbers, which is a different thing.</p>
+
+<figure>
+  <img src="figures/girth.svg" alt="On the left, 6 with two arrows between 2 and 3, girth 2. On the right, 234 with a triangle, girth 3.">
+  <figcaption><b>Figure 2.</b> Two girths. 6 closes with two arrows; 234 needs
+  three. The question is which is the smallest for each length.</figcaption>
+</figure>
+
+<h2 id="try"><span class="num">4</span>Try it yourself before reading on</h2>
+
+<div class="box try">
+  <span class="tag g">Exercise · two minutes and a sheet of paper</span>
+  <p>Draw <b>6</b>. Hint: <code>6 = 2 × 3</code>, so there are two dots. Compute
+  <code>σ(2)</code> and <code>σ(3)</code> and see which primes appear.</p>
+  <p><b>Answer:</b> <code>σ(2) = 3</code>, so an arrow <code>2 → 3</code>. And
+  <code>σ(3) = 1+3 = 4 = 2²</code>, so an arrow <code>3 → 2</code>. The two
+  arrows close a cycle of length 2: the girth of 6 is <b>2</b>. And no smaller
+  number closes at all, so 6 is the answer for <code>k = 2</code>.</p>
+</div>
+
+<h2 id="origin"><span class="num">5</span>Where the data comes from</h2>
+
+<p>Nobody gave an opinion here. Each of the nineteen numbers came out of a
+program, and there are <b>two different programs</b> that share no method:</p>
+
+<ul class="plain">
+  <li><b>Sieving.</b> Walk the numbers one by one from the start, draw each
+  one's graph, and keep the first with the girth you want. Slow, but nothing
+  escapes it, and it works as far as the machine holds out.</li>
+  <li><b>Constructing.</b> Build candidates directly out of cycles of primes,
+  without walking through the numbers in between. Very fast and reaches much
+  further, but <b>a constructed candidate is not an answer</b> until it is
+  measured separately.</li>
+  <li><b>And crossing them.</b> Where both reach, both must agree. That is where
+  you find out if one of them is wrong.</li>
+</ul>
+
+<div class="box warn">
+  <span class="tag a">A trap already paid for</span>
+  <p>In an earlier version the constructor proposed <code>n = 120</code> as the
+  smallest of girth 3 — and the real girth of 120 is 2. Constructing is not
+  verifying: <b>every candidate produced by a method has to be checked by an
+  independent measurement</b>.</p>
+</div>
+
+<h2 id="findings"><span class="num">6</span>What we found</h2>
+
+<h3>a) The nineteen values</h3>
+
+<p>For three different calculations — the sum of divisors and two relatives of
+it — and for each girth, the smallest number.
+<span data-fact="new_terms">5</span> of them <b>had never been computed
+before</b>.</p>
+
+<figure>
+  <img src="figures/terms.svg" alt="Logarithmic plot of the size of the smallest number of each girth, for the three functions; filled dots are the ones computed for the first time.">
+  <figcaption><b>Figure 3.</b> How fast they grow. The scale is logarithmic:
+  each mark multiplies by a thousand. From girth 2 to girth 9 you go from a
+  one-digit number to a sixteen-digit one.</figcaption>
+</figure>
+
+<h3>b) From "the smallest we found" to "the smallest"</h3>
+
+<p>This is what turns a list into a result. The previous version of this work
+said, honestly, that its values were <i>"minimal among the primes
+examined"</i> — meaning that if somebody looked further, a better one might
+appear. That is a conjecture, not a theorem.</p>
+
+<p>What closes that door is a short argument. If a number is the smallest of its
+girth, its largest prime cannot be arbitrary: the prime pointing at it on the
+cycle must contribute a value containing it, and that forces the whole number to
+be at least as large as a certain product. Given any already known example, that
+<b>bounds the largest possible prime</b>. And checking every prime below a bound
+is checking <b>all</b> of them.</p>
+
+<figure>
+  <img src="figures/cutoff.svg" alt="Two lines: above, the old search covered a stretch and the rest stayed in doubt; below, the proved cutoff marks a limit and everything beyond is ruled out.">
+  <figcaption><b>Figure 4.</b> Before, the search went as far as somebody had
+  looked. Now it is proved that beyond the cutoff there is nothing, so checking
+  up to the cutoff is checking everything.</figcaption>
+</figure>
+
+<h3>c) And starting without knowing any answer</h3>
+
+<p>The cutoff above has a catch: it is stated <b>in terms of an example already
+known</b>. If nobody ever exhibited a number of some girth, there is nothing to
+start from, and the previous version said exactly that — that there the search
+was <i>"still a heuristic search"</i>.</p>
+
+<p>That turned out to be false, and the interesting part is that the previous
+version already had the material to notice. By doubling a bound and searching
+exhaustively below it, the search needs no seed at all. That produced the first
+value that <b>could not have been computed before</b>: girth 9 for one of the
+three functions, which had no known example of its kind.</p>
+
+<h2 id="checking"><span class="num">7</span>How do we know we did not get it wrong?</h2>
+
+<p>Because anyone can run one command and watch. The repository ships a program
+running <span data-fact="checks">227</span> checks in a few seconds, with
+nothing to install.</p>
+
+<ul class="plain">
+  <li><b>Every number, from its definition.</b> We do not check that the program
+  agrees with itself: the radical, the divisor sum and the girth of each of the
+  nineteen values are recomputed from scratch.</li>
+  <li><b>An external control.</b> The program counts, with its own sieve, how
+  many numbers of this family there are up to a billion, and compares it against
+  the count <b>published by Pollack and Pomerance in 2012</b>. It gives
+  <span data-fact="sieve_count">5327</span> against
+  <span data-fact="published_count">5328</span>, and the difference is
+  explained: they also count the number 1. Matching somebody else's number
+  digit for digit is what turns "trust me" into "check it yourself".</li>
+  <li><b>The numbers on this very page</b> are tagged in the file and compared
+  against the data. If a value improves tomorrow and this explanation is not
+  updated, <b>the check fails</b>.</li>
+</ul>
+
+<h2 id="useful"><span class="num">8</span>What is it good for?</h2>
+
+<ul class="plain">
+  <li><b>It turns an infinite search into a finite one.</b> That is the heart of
+  it: going from "I looked this far and found nothing better" to "I proved there
+  is nothing beyond". It is the difference between a datum and a theorem, and it
+  shows up in any discipline that looks for the minimum of something.</li>
+  <li><b>It joins two worlds usually studied apart:</b> divisor arithmetic, two
+  thousand years old, and graphs, three hundred. The drawing in section 1 is a
+  bridge between them.</li>
+  <li><b>It leaves open questions</b>, written down in the repository. A result
+  that opens none is usually a box ticked rather than a thread pulled.</li>
+</ul>
+
+<h2 id="notclaim"><span class="num">9</span>What this does NOT say</h2>
+
+<table>
+<tr><th>It does not say</th><th>Why</th></tr>
+<tr><td>That the family of numbers is new</td>
+    <td>It is not: for the sum of divisors they are the <i>prime-abundant</i> numbers of Pollack and Pomerance (2012), catalogued as A175200. What is new is the invariant of the drawing.</td></tr>
+<tr><td>That there are values for every girth</td>
+    <td>The table goes as far as the computation went. Empty cells are empty cells, not zeros.</td></tr>
+<tr><td>Anything about numbers outside this family</td>
+    <td>If some prime has no arrow arriving, the number is out and nothing is claimed about it.</td></tr>
+<tr><td>That the method is the fastest possible</td>
+    <td>It was measured to be several times faster than the previous one, and that is all that is claimed.</td></tr>
+</table>
+
+<h2 id="glossary">Glossary</h2>
+
+<div class="scroll">
+<table>
+<tr><th>Word</th><th>What it means</th><th>Example</th></tr>
+<tr><td>Prime</td><td>Only 1 and itself divide it</td><td class="n">2, 3, 5, 7</td></tr>
+<tr><td>Factoring</td><td>Breaking into a product of primes</td><td class="n">234 = 2·3²·13</td></tr>
+<tr><td>σ(n)</td><td>The sum of all divisors</td><td class="n">σ(6) = 12</td></tr>
+<tr><td>rad(n)</td><td>The product of the distinct primes</td><td class="n">rad(234) = 78</td></tr>
+<tr><td>Directed graph</td><td>Dots joined by arrows</td><td class="n">2 → 3</td></tr>
+<tr><td>Cycle</td><td>A path of arrows returning to the start</td><td class="n">2→3→13→2</td></tr>
+<tr><td>Girth</td><td>The length of the shortest cycle</td><td class="n">girth(234) = 3</td></tr>
+<tr><td>Witness</td><td>A number exhibiting a given girth</td><td class="n">234 for k=3</td></tr>
+</table>
+</div>
+
+<h2 id="biblio">Further reading</h2>
+
+<div class="refs">
+
+<h3>Level 1 — if you liked this and want more, without formulas</h3>
+<ol>
+  <li>Wikipedia, <a href="https://en.wikipedia.org/wiki/Prime_number">Prime number</a>.
+      <span class="why">The bricks of everything else.</span></li>
+  <li>Wikipedia, <a href="https://en.wikipedia.org/wiki/Divisor_function">Divisor function</a> and <a href="https://en.wikipedia.org/wiki/Perfect_number">Perfect number</a>.
+      <span class="why">Where σ(n) comes from and why it has been studied since antiquity.</span></li>
+  <li>Wikipedia, <a href="https://en.wikipedia.org/wiki/Graph_theory">Graph theory</a> and <a href="https://en.wikipedia.org/wiki/Girth_(graph_theory)">Girth</a>.
+      <span class="why">The other half: dots, arrows, cycles and girth.</span></li>
+  <li>OEIS Foundation, <a href="https://oeis.org/">The On-Line Encyclopedia of Integer Sequences</a>.
+      <span class="why">More than 380,000 catalogued sequences. Where you find out whether a list of numbers was already known.</span></li>
+</ol>
+
+<h3>Level 2 — a textbook, to study it properly</h3>
+<ol start="5">
+  <li>D. M. Burton, <i>Elementary Number Theory</i>, McGraw-Hill, 7th ed., 2010.
+      <span class="why">The friendliest start; the divisibility and arithmetic-function chapters cover σ(n) and rad(n).</span></li>
+  <li>G. H. Hardy and E. M. Wright, <i>An Introduction to the Theory of Numbers</i>, Oxford, 6th ed., 2008.
+      <span class="why">The classic, and the standard reference for multiplicative functions.</span></li>
+  <li>J. A. Bondy and U. S. R. Murty, <i>Graph Theory</i>, Springer, 2008.
+      <span class="why">For the graph half: cycles, girth and directed graphs, with all the vocabulary.</span></li>
+</ol>
+
+<h3>Level 3 — the work this one is measured against</h3>
+<ol start="8">
+  <li>P. Pollack and C. Pomerance, "Prime-perfect numbers", <i>INTEGERS</i> 12A (2012), paper A14.
+      <span class="why">The family of numbers the drawing sits on, and the count of how many there are up to a given size. It is the verifier's external control.</span></li>
+  <li>OEIS, <a href="https://oeis.org/A175200">A175200</a>, the numbers with rad(n) | σ(n).
+      <span class="why">The family, catalogued. It confirms this work did not invent it.</span></li>
+  <li>OEIS, <a href="https://oeis.org/A000203">A000203</a> (σ) and <a href="https://oeis.org/A007947">A007947</a> (rad).
+      <span class="why">The two functions in the definition.</span></li>
+</ol>
+
+<h3>And the work itself</h3>
+<ol start="11">
+  <li>J. Ellena Godoy, "Smallest witnesses by girth for rad(n) | f(n)", 2026. DOI <a href="https://doi.org/10.5281/zenodo.22288593">10.5281/zenodo.22288593</a>.
+      <span class="why">The statements, the proofs, the data and the verifier.</span></li>
+</ol>
+</div>
+
+<footer>
+  <p><b>How to check it yourself.</b> Download the repository and run
+  <code>python verify.py</code>. Nothing to install. To rebuild the figures on
+  this page, <code>python src/make_figures.py</code>.</p>
+  <p>System design and research direction are the author's. The mathematical
+  results were produced by an automated system (Claude, Anthropic) under that
+  direction. All computations were verified by independent implementations and
+  cross-checked against published work. The author is responsible for the
+  correctness of everything published here.</p>
+  <p>Text and figures under CC BY 4.0 · code under MIT ·
+  Jorge Ellena Godoy, 2026</p>
+</footer>
+
+
+</div>
+</body>
+</html>
