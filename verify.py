@@ -210,7 +210,7 @@ def main(argv=None):
         return 1
     print("All checks passed in %.1fs." % elapsed)
     print("Every number in RESULT.md was verified from its definition,")
-    print("by two independent methods, and cross-checked against a published")
+    print("by three independent methods, and cross-checked against a published")
     print("count. Nothing here has to be taken on trust.")
     return 0
 
