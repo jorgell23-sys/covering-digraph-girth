@@ -218,6 +218,21 @@ That is the same factor of about 4 that version 3 measured as the price of not
 knowing the answer. **It buys speed, not possibility**: the seedless search gets
 there too.
 
+## Splitting it across cores
+
+Starting primes are independent -- each opens a tree that touches no other -- so
+the search splits exactly. The only thing lost is shared pruning, and the
+minimum cannot change: a process's bound is always at least the true minimum, so
+the cutoff never drops anything below it.
+
+    python src/parallel.py sigma 7 7746928876851256 --cores 8 --control
+
+**4.54x** on eight cores there, with **identical** node counts and the same
+answer; **4.13x** on `sigma*` girth 10, where the nodes grow 9.3% because the
+bound is no longer shared. It does not reach eight -- the work is skewed and
+each process sieves once -- and it does **not** move the wall of the previous
+section, which is a memory wall that splitting makes worse.
+
 Proof, discussion and limits: **[RESULT.md](RESULT.md)**.
 
 ## One thing worth seeing

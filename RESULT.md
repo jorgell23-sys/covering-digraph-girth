@@ -855,6 +855,48 @@ how much is kept.
 
 ---
 
+## 12b. Splitting the search across cores
+
+The enumeration walks **starting primes** -- the largest prime of the cycle --
+and each opens a tree that touches no other, because the walk always begins at
+the largest prime and no candidate appears under two starts. Splitting them is
+exact, not approximate. The one thing lost is shared pruning: the whole search
+lowers its bound on every improvement and that prunes the remaining starts,
+while separate processes each carry their own.
+
+**The minimum cannot change.** A process's bound is always at least the true
+minimum `m`: it starts at `N > m` and only drops to values of witnesses that
+exist, which are `>= m`. The cutoff drops a start `P` only when every witness
+beginning at `P` measures at least `cycle_floor(P) >= bound >= m`. Nothing below
+`m` is ever dropped.
+
+| `sigma*`, girth 10, same bound | nodes | time |
+|---|---:|---:|
+| whole, one core | 48321070 | 287.7 s |
+| split, twelve cores | 52828732 (+9.3%) | **69.7 s** |
+
+**4.13x**, and the minimum is identical digit for digit. On `sigma` at girth 7
+the speedup is 4.54x on eight cores and the node counts are **identical** --
+with a tight bound there was nothing left to share.
+
+It does not reach twelve for two measured reasons: the work is skewed, so the
+busiest process sets the time; and each process sieves its primes once, which
+does not parallelise. **And it does not move the wall of section 10.** That wall
+is 2197597268 primes, and splitting makes it worse, because each process would
+sieve its own table. A factor of four does not turn an infeasible search into a
+feasible one.
+
+    python src/parallel.py sigma 7 7746928876851256 --cores 8 --control
+
+The `--control` flag runs both and compares. This is deliberately not part of
+`verify.py`: that file's promise is to run in seconds with nothing installed,
+and starting a process pool is a dependency on the machine rather than on a
+package. A parallel search that returns a different number is not an
+optimisation but a bug, and "it is faster" means nothing without that comparison
+beside it.
+
+---
+
 ## 13. Reproducing everything
 
     python verify.py            # all checks, ~2 seconds, no dependencies
@@ -867,6 +909,8 @@ how much is kept.
     python src/construct.py sigma 6
     python src/sieve.py 1000000000
     python src/make_terms.py                     # regenerates data/terms.json
+
+    python src/parallel.py sigma 7 7746928876851256 --cores 8 --control
 
     python src/surgery.py "sigma*" 540765225 5   # the certificate, and it fires
     python src/surgery.py "sigma**" 10762773021 5

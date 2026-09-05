@@ -233,6 +233,22 @@ Es el mismo factor de alrededor de 4 que la versión 3 midió como precio de no
 saber la respuesta. **Compra velocidad, no posibilidad**: la búsqueda sin semilla
 también llega.
 
+## Repartirlo entre los núcleos
+
+Los primos de arranque son independientes —cada uno abre un árbol que no toca a
+los demás—, así que la búsqueda se reparte de forma exacta. Lo único que se
+pierde es la poda compartida, y el mínimo no puede cambiar: la cota de cada
+proceso vale siempre al menos el mínimo verdadero, así que el corte nunca
+descarta nada por debajo de él.
+
+    python src/parallel.py sigma 7 7746928876851256 --cores 8 --control
+
+**4,54×** con ocho núcleos ahí, con nodos **idénticos** y la misma respuesta;
+**4,13×** en `sigma*` cintura 10, donde los nodos suben un 9,3 % porque la cota
+deja de compartirse. No llega a ocho —el trabajo está desbalanceado y cada
+proceso criba una vez— y **no** mueve la pared de la sección anterior, que es de
+memoria y que repartir empeora.
+
 La demostración, con sus límites, está en [RESULT.md](RESULT.md) (en inglés).
 
 ## Algo que vale la pena mirar
