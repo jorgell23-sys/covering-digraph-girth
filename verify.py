@@ -46,7 +46,8 @@ from construct import smallest_witness  # noqa: E402
 from exact import (cycle_floor, exact_smallest, per_arc_floor,  # noqa: E402
                    prime_cutoff, primorial, predecessor_floor,
                    smallest_without_seed, universal_floor)
-from surgery import insertions, inversion_certificate  # noqa: E402
+from surgery import (insertions, inversion_certificate,  # noqa: E402
+                     prime_divisors_up_to)
 
 # --------------------------------------------------------------------------
 # The published claims. Everything below is checked, nothing is assumed.
@@ -427,6 +428,30 @@ def main(argv=None):
     check(not any(d["p"] == 2 and d["q"] == 13
                   for d in insertions(TERMS["sigma"][5], "sigma", 10 ** 6)),
           "the enumerator does not propose it")
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12d2. Asking only for the small prime divisors is the "
+          "same answer as factoring the whole value")
+    # The optimisation that makes the enumeration terminate on high-degree
+    # functions cannot change a single insertion, and here it is checked
+    # against the definition: the primes of the full factorisation that are
+    # below the bound.
+    same = 0
+    for f, by_girth in sorted(TERMS.items()):
+        for k, n in sorted(by_girth.items()):
+            for q, e in sorted(factorize(n).items()):
+                for exponent in range(1, e + 3):
+                    value = f_of_prime_power(q, exponent, f)
+                    if len(str(value)) > 24:
+                        continue        # the full factorisation is the slow one
+                    for bound in (2, 100, 10 ** 5, 10 ** 7):
+                        same += 1
+                        expected = {p for p in factorize(value) if p <= bound}
+                        if prime_divisors_up_to(value, bound) != expected:
+                            check(False, "%s q=%d e=%d bound=%d: they differ"
+                                         % (f, q, exponent, bound))
+                            break
+    check(same > 500, "they agree in %d cases" % same)
 
     # ----------------------------------------------------------------------
     print(chr(10) + "12e. The inversion certificate fires exactly where the "

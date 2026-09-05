@@ -17,7 +17,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-No dependencies, no setup. It runs 374 checks and prints PASS or FAIL for each.
+No dependencies, no setup. It runs 375 checks and prints PASS or FAIL for each.
 
 ---
 

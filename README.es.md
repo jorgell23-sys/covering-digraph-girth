@@ -18,7 +18,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-Sin instalar nada. Corre 374 comprobaciones e imprime PASS o FAIL para cada una.
+Sin instalar nada. Corre 375 comprobaciones e imprime PASS o FAIL para cada una.
 
 ---
 

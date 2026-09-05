@@ -603,6 +603,18 @@ divides `sigma(13)` and `7` divides `sigma(2^2)` -- and yields `1103602500`,
 whose girth is **2**, not 6. `verify.py` pins that number, and also checks that
 the enumerator does not propose it.
 
+**One implementation note, because it is what makes the enumeration terminate.**
+The condition `p | f(q_i^e')` names the primes, so they are read off a
+factorisation rather than enumerated -- but factoring `f(q_i^e')` *whole* is
+almost always wasted work. A prime is usable only if `q_i^e' p^a` fits the
+budget, so `p < budget / q_i^e'`, and every factor above that bound will never
+be used. On `sigma_5` with the witness 234 the value `sigma_5(13^7)` has 39
+digits and Pollard rho takes 15 seconds to split it, while the bound for that
+case is **2**: a 39-digit number factored to find out whether 2 divides it.
+Asking only for the prime divisors below the bound takes 0.07 seconds and
+returns the same four insertions. `verify.py` checks the two answers against
+each other on several hundred cases rather than assuming they agree.
+
 ### Corollary — a certificate that the next minimum is smaller
 
 > **Corollary.** If in addition `q_i^e' * p^a < q_i^e_i`, then

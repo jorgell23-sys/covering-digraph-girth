@@ -67,9 +67,57 @@ from fractions import Fraction
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from arithmetic import covering_digraph, f_of_prime_power, factorize  # noqa: E402
-from exact import _factor as factor_large  # noqa: E402
+from exact import _factor as factor_large, _is_prime, primes_up_to  # noqa: E402
 
-__all__ = ["pure_cycle", "admissible", "insertions", "inversion_certificate"]
+__all__ = ["pure_cycle", "admissible", "insertions", "inversion_certificate",
+           "prime_divisors_up_to"]
+
+#: How far trial division goes before falling back to full factorisation.
+_TRIAL_LIMIT = 100000
+_SIEVE = []
+
+
+def prime_divisors_up_to(n, bound):
+    """The **complete** set of primes p <= bound dividing n.
+
+    Factoring the whole of ``f(q^e)`` is almost always wasted work: a prime is
+    only usable if its power fits the budget, so every factor above the bound
+    is one that will never be used.  The cost of not seeing that: in ``sigma_5``
+    with the witness 234, ``sigma_5(13^7)`` has 39 digits and Pollard takes 15
+    seconds to split it, while the bound for that case is **2** -- a 39-digit
+    number factored to find out whether 2 divides it.
+
+    Still complete: trial division by the primes up to ``min(bound, 100000)``;
+    if the bound does not exceed that, nothing is left to look for, and if it
+    does, the surviving cofactor has all its prime factors above the limit and
+    is factored whole -- but by then it is much smaller.
+    """
+    global _SIEVE
+    if bound < 2 or n < 2:
+        return set()
+    found = set()
+    limit = min(bound, _TRIAL_LIMIT)
+    if not _SIEVE:
+        _SIEVE = primes_up_to(_TRIAL_LIMIT)
+    for p in _SIEVE:
+        if p > limit:
+            break
+        if n % p == 0:
+            found.add(p)
+            while n % p == 0:
+                n //= p
+            if n == 1:
+                return found
+    if bound <= limit or n == 1:
+        return found
+    if _is_prime(n):
+        if n <= bound:
+            found.add(n)
+        return found
+    for p in factor_large(n):
+        if p <= bound:
+            found.add(p)
+    return found
 
 
 def pure_cycle(n, f):
@@ -129,7 +177,11 @@ def insertions(n, f, max_ratio, max_exponent=64):
         new_exp = 1
         while new_exp <= max_exponent and q ** new_exp * 2 < budget:
             value = f_of_prime_power(q, new_exp, f)
-            for p in sorted(factor_large(value)):
+            # p is only usable if q^e' p^a < budget with a >= 1, so
+            # p < budget / q^e'. Asking for the full factorisation of f(q^e')
+            # is wasted work: the factors above that bound are never used.
+            bound = budget / (q ** new_exp)
+            for p in sorted(prime_divisors_up_to(value, int(bound))):
                 if p in inside:
                     continue
                 a, power = 1, p
