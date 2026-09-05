@@ -96,7 +96,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-375 checks, no dependencies, `PASS` or `FAIL` on each and exit code 1 if any
+396 checks, no dependencies, `PASS` or `FAIL` on each and exit code 1 if any
 fails. They re-derive every published value from the definitions, re-prove the
 reachable ones exhaustively, and cross-check the count of `S(sigma)` below `10^9`
 against Pollack and Pomerance (2012), who never saw this repository.

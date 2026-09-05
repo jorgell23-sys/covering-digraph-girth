@@ -171,6 +171,68 @@ def check(condition, description):
     return condition
 
 
+#: Las seis partes de la portada, por su ancla. Este control vive **dentro del
+#: repositorio** a proposito: un estandar que solo comprueba la herramienta que
+#: publica se rompe en cuanto alguien edita el README despues de publicar, o
+#: clona el repo y lo modifica. Aca falla donde sea que este.
+FRONT_PAGE_PARTS = (
+    ("hallazgo:que", "what was found, in one sentence"),
+    ("hallazgo:enunciado", "the exact statement"),
+    ("hallazgo:ejemplo", "the smallest case, with numbers"),
+    ("hallazgo:prueba", "why it is proved"),
+    ("hallazgo:comprobar", "the command that checks it"),
+    ("hallazgo:nodice", "what it does not say"),
+)
+
+_HISTORIA = re.compile(
+    r"(what changed in version|qu\u00e9 cambi\u00f3 en la versi\u00f3n|"
+    r"version \d|versi\u00f3n \d|release \d)", re.I)
+_ASIDE = re.compile(
+    r"(la regla que sale|the rule that comes out|the rule this leaves|"
+    r"lo que esto ense\u00f1a|what this teaches|the lesson)", re.I)
+
+
+def front_page():
+    """The front page states the finding, in six parts, before anything else.
+
+    A reader who opens this repository must be able to say what was found and
+    why it is true without scrolling past the first screen. That is a rule
+    about the artifact, so it is checked by the artifact rather than by the
+    tool that publishes it -- a standard enforced only at publish time breaks
+    the first time the page is edited afterwards.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    for name in ("README.md", "README.es.md", "RESULT.md"):
+        path = os.path.join(here, name)
+        if not os.path.exists(path):
+            check(False, "%s exists" % name)
+            continue
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        at = [text.find("<!-- %s -->" % a) for a, _ in FRONT_PAGE_PARTS]
+        missing = [q for (a, q), i in zip(FRONT_PAGE_PARTS, at) if i < 0]
+        if not check(not missing, "%-13s has all six parts%s"
+                     % (name, "" if not missing else " -- missing %s" % missing)):
+            continue
+        check(at == sorted(at), "%-13s the six parts are in order" % name)
+        head = text[: at[0]]
+        check(len(head.splitlines()) <= 12,
+              "%-13s the finding is at the top (line %d)"
+              % (name, len(head.splitlines()) + 1))
+        m = _HISTORIA.search(head)
+        check(m is None, "%-13s no version history before the finding%s"
+              % (name, "" if m is None else " -- found %r" % m.group(0)))
+        numerals = len(re.findall(r"\d[\d.,]{2,}", text[at[2]:at[3]]))
+        check(numerals >= 3,
+              "%-13s the example carries numbers (%d found)" % (name, numerals))
+        part = text[at[4]:at[5]]
+        check("```" in part or "\n    " in part,
+              "%-13s the check part carries an executable command" % name)
+        m = _ASIDE.search(text)
+        check(m is None, "%-13s no methodological aside%s"
+              % (name, "" if m is None else " -- found %r" % m.group(0)))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--full", action="store_true",
@@ -181,6 +243,11 @@ def main(argv=None):
                              "(slow: about 40 minutes together with --full)")
     args = parser.parse_args(argv)
     started = time.time()
+
+    # ----------------------------------------------------------------------
+    print("\n0. The front page states the finding, in six parts")
+    # ----------------------------------------------------------------------
+    front_page()
 
     # ----------------------------------------------------------------------
     print("\n1. Every term belongs to S(f): rad(n) divides f(n)")

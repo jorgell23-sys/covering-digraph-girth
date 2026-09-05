@@ -99,7 +99,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-375 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
+396 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
 salida 1 si alguna falla. Recalculan cada valor publicado desde las
 definiciones, redemuestran de forma exhaustiva los que se pueden, y cruzan el
 conteo de `S(sigma)` por debajo de `10^9` contra Pollack y Pomerance (2012), que
