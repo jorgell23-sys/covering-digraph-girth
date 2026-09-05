@@ -35,12 +35,14 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
-from arithmetic import (covering_digraph, factorize, girth, in_S,  # noqa: E402
+from arithmetic import (biunitary_divisors, covering_digraph,  # noqa: E402
+                        factorize, f_of_prime_power, girth, in_S,
                         is_pure_cycle, rad)
 from construct import smallest_witness  # noqa: E402
 from exact import (cycle_floor, exact_smallest, per_arc_floor,  # noqa: E402
                    prime_cutoff, primorial, predecessor_floor,
                    smallest_without_seed, universal_floor)
+from surgery import insertions, inversion_certificate  # noqa: E402
 
 # --------------------------------------------------------------------------
 # The published claims. Everything below is checked, nothing is assumed.
@@ -52,15 +54,18 @@ TERMS = {
                7: 7746928876851255, 8: 31674203849435875},
     "sigma*": {2: 6, 3: 6615, 4: 4380453, 5: 540765225, 6: 474549075,
                7: 4485174218525, 8: 2386830845734335,
-               9: 9928651387877145},
+               9: 9928651387877145, 10: 10858178043907173985005},
     "phi*":   {2: 12, 3: 66825, 4: 1120454775, 5: 1663175056640625},
+    "sigma**": {2: 6, 3: 15925, 4: 2321865, 5: 10762773021,
+                6: 3321843525, 7: 345358414826425},
 }
 
 #: Terms cheap enough to re-prove exhaustively in the default run. The rest are
 #: behind --exact: sigma girth 7 examines every prime below 2.6 million.
 EXACT_FAST = {"sigma": [2, 3, 4, 5], "sigma*": [2, 3, 4, 5, 6],
-              "phi*": [2, 3, 4]}
-EXACT_SLOW = {"sigma": [6, 7, 8], "sigma*": [7, 8, 9], "phi*": [5]}
+              "phi*": [2, 3, 4], "sigma**": [2, 3, 4, 5, 6]}
+EXACT_SLOW = {"sigma": [6, 7, 8], "sigma*": [7, 8, 9, 10], "phi*": [5],
+              "sigma**": [7]}
 
 def cycle_of(n, f):
     """The cycle of a pure-cycle term, as [(prime, exponent), ...] in order.
@@ -97,7 +102,12 @@ BRACKETS = {
     ("sigma", 9): {
         "no_witness_below": 1239376200655897100288,
         "primes_swept": 69681011,
-        "witness": 8324995955560453359590400,
+        "witness": 1232737113370661112862375,
+        # Release 3.1 exhibited this one, from a constructor that fixes the
+        # least exponent realising each edge. The surgery of release 3.2 beats
+        # it by a factor of 6.75 using 127^3 and 19^2 -- not least exponents --
+        # which is why looking at more primes could never have found it.
+        "previous_witness": 8324995955560453359590400,
     },
     ("phi*", 6): {
         "no_witness_below": 1344781885607247872,
@@ -106,12 +116,35 @@ BRACKETS = {
     },
 }
 
+#: Upper bounds produced by surgery where no bound existed before. These are
+#: exhibited witnesses, verified below; no lower bound has been swept for them,
+#: so they are bounds and not brackets.
+SURGERY_BOUNDS = {
+    ("sigma**", 8): 247135929796462577545675,
+}
+
 #: Which terms were found by exhaustive sieving up to 10^9, and so can be
 #: reproduced by construction as a cross-check between two independent methods.
 SIEVED = {
     "sigma":  [2, 3, 4, 5],
     "sigma*": [2, 3, 4, 5, 6],
     "phi*":   [2, 3],
+    "sigma**": [2, 3, 4],
+}
+
+#: The ones the CONSTRUCTOR also reaches, so that the two methods can be
+#: compared. It is a strict subset of SIEVED, and the missing entry is the
+#: interesting one: the constructor fixes, for each edge, the LEAST exponent
+#: that realises it, and the smallest witness of girth 4 for sigma** uses 3^6
+#: where the least exponent is smaller. The constructor therefore returns
+#: 49160475 instead of 2321865 -- not a bug, a limit, and the same limit is why
+#: it could not find the girth-9 bound for sigma that surgery finds. The gap is
+#: checked below rather than hidden.
+CONSTRUCTED = {
+    "sigma":  [2, 3, 4, 5],
+    "sigma*": [2, 3, 4, 5, 6],
+    "phi*":   [2, 3],
+    "sigma**": [2, 3],
 }
 
 #: Number of elements of S(sigma) up to 10^9 found by the sieve, excluding n=1.
@@ -174,13 +207,21 @@ def main(argv=None):
     # ----------------------------------------------------------------------
     print("\n4. The two methods agree: construction reproduces the sieved terms")
     # ----------------------------------------------------------------------
-    for f, girths in SIEVED.items():
+    for f, girths in CONSTRUCTED.items():
         for k in girths:
             expected = TERMS[f][k]
             built, _cycle, _ = smallest_witness(f, k, n_primes=20)
             check(built == expected,
                   "%-7s girth %d: construction gives %s, sieve gave %d"
                   % (f, k, built, expected))
+    # And the one place where they DISAGREE, checked rather than omitted: the
+    # constructor takes the least exponent realising each edge, so it cannot
+    # reach a minimum that needs a larger one.
+    built, _cycle, _ = smallest_witness("sigma**", 4, n_primes=20)
+    check(built is not None and built > TERMS["sigma**"][4],
+          "sigma** girth 4: the constructor returns %s, larger than the true "
+          "minimum %d, because the minimum needs 3^6 and the constructor takes "
+          "least exponents" % (built, TERMS["sigma**"][4]))
 
     # ----------------------------------------------------------------------
     print("\n5. Cross-check against a published result")
@@ -334,6 +375,108 @@ def main(argv=None):
           "%.0f) is one where the previous term DIVIDES the next -- so sharing "
           "does not explain jump size"
           % (len(pairs), biggest[1], biggest[2], biggest[3], biggest[0]))
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12b. sigma** is the function it claims to be")
+    # ----------------------------------------------------------------------
+    # The closed form is compared against the definition of a biunitary
+    # divisor, not taken on trust. If these disagreed, every sigma** term in
+    # this repository would be about a different function.
+    for q in (2, 3, 5, 7, 11, 13):
+        ok_all = all(f_of_prime_power(q, e, "sigma**")
+                     == sum(biunitary_divisors(q, e)) for e in range(1, 9))
+        check(ok_all, "sigma** at %d^e equals the sum of the biunitary "
+                      "divisors, e = 1..8" % q)
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12c. The surgery theorem: every insertion it proposes "
+          "really has girth k+1")
+    # ----------------------------------------------------------------------
+    proposed = 0
+    for f, by_girth in sorted(TERMS.items()):
+        for k, n in sorted(by_girth.items()):
+            for d in insertions(n, f, 10 ** 6)[:4]:
+                proposed += 1
+                digraph = covering_digraph(d["n"], f)
+                if not check(in_S(d["n"], f) and girth(digraph) == k + 1
+                             and is_pure_cycle(digraph),
+                             "%-7s girth %d -> %d: %d is in S(f) and is a pure "
+                             "%d-cycle" % (f, k, k + 1, d["n"], k + 1)):
+                    break
+    check(proposed >= 20,
+          "%d insertions were checked, not two" % proposed)
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12d. Without the chord conditions the construction FAILS")
+    # ----------------------------------------------------------------------
+    # The negative control. Conditions 3-5 of the theorem look like bookkeeping;
+    # they are not. On the smallest witness of girth 5 for sigma, the pair
+    # 13 -> 2^2 -> 7 satisfies (1) and (2) and produces a number of girth 2.
+    bad = TERMS["sigma"][5] * 4
+    check(bad == 1103602500, "the counterexample is 1103602500")
+    check(f_of_prime_power(13, 1, "sigma") % 2 == 0,
+          "condition (1) holds: 2 divides sigma(13)")
+    check(f_of_prime_power(2, 2, "sigma") % 7 == 0,
+          "condition (2) holds: 7 divides sigma(2^2)")
+    check(girth(covering_digraph(bad, "sigma")) == 2,
+          "and yet the girth of 1103602500 is 2, not 6")
+    check(not any(d["p"] == 2 and d["q"] == 13
+                  for d in insertions(TERMS["sigma"][5], "sigma", 10 ** 6)),
+          "the enumerator does not propose it")
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12e. The inversion certificate fires exactly where the "
+          "sequence goes down")
+    # ----------------------------------------------------------------------
+    consecutive = down = certified = 0
+    for f, by_girth in sorted(TERMS.items()):
+        ks = sorted(by_girth)
+        for a, b in zip(ks, ks[1:]):
+            consecutive += 1
+            drops = by_girth[b] < by_girth[a]
+            cert = inversion_certificate(by_girth[a], f)
+            down += drops
+            certified += bool(cert)
+            check(bool(cert) == drops,
+                  "%-7s girth %d -> %d: certificate %s, the minimum %s"
+                  % (f, a, b, "yes" if cert else "no",
+                     "goes down" if drops else "does not"))
+            if cert and drops:
+                check(cert["n"] == by_girth[b],
+                      "%-7s girth %d: the certificate gives the next minimum "
+                      "exactly: %d" % (f, a, cert["n"]))
+    check(consecutive >= 20 and down == certified == 2,
+          "over %d consecutive pairs the sequence goes down %d times and the "
+          "certificate fires %d times" % (consecutive, down, certified))
+    # A squarefree minimum can never certify, because the inequality forces a
+    # exponent to come down and there is none to bring down.
+    for f, k in (("sigma*", 4), ("phi*", 2)):
+        n = TERMS[f][k]
+        if all(e == 1 for e in factorize(n).values()):
+            check(inversion_certificate(n, f) is None,
+                  "%-7s girth %d: %d is squarefree, so no certificate is "
+                  "possible" % (f, k, n))
+
+    # ----------------------------------------------------------------------
+    print(chr(10) + "12f. The upper bounds surgery produces")
+    # ----------------------------------------------------------------------
+    old = BRACKETS[("sigma", 9)]["previous_witness"]
+    new = BRACKETS[("sigma", 9)]["witness"]
+    check(new < old,
+          "sigma   girth 9: the new witness %d beats the one of release 3.1 "
+          "(%d) by a factor of %.2f" % (new, old, old / new))
+    check(prime_cutoff(new + 1, 9, "sigma") < prime_cutoff(old + 1, 9, "sigma"),
+          "sigma   girth 9: and with it the prime cutoff drops from %d to %d"
+          % (prime_cutoff(old + 1, 9, "sigma"), prime_cutoff(new + 1, 9, "sigma")))
+    found = insertions(TERMS["phi*"][5], "phi*", 10 ** 8)
+    check(len(found) == 1 and found[0]["n"] == BRACKETS[("phi*", 6)]["witness"],
+          "phi*    girth 6: the bound of release 3.0 is the ONLY admissible "
+          "insertion with ratio below 10^8, so surgery cannot improve it")
+    for (f, k), n in sorted(SURGERY_BOUNDS.items()):
+        digraph = covering_digraph(n, f)
+        check(in_S(n, f) and girth(digraph) == k and is_pure_cycle(digraph),
+              "%-7s girth %d: the exhibited bound %d is in S(f), has girth %d "
+              "and is a pure cycle" % (f, k, n, k))
 
     # ----------------------------------------------------------------------
     if args.full:

@@ -49,17 +49,23 @@ def _primes_up_to(limit):
 
 
 def _segment(low, high, primes):
-    """rad, sigma, sigma* and phi* for every integer in [low, high).
+    """rad, sigma, sigma*, phi* and sigma** for every integer in [low, high).
 
     One pass per prime, writing into arrays. `remainder` tracks what is left of
     each integer after dividing out the primes found; whatever survives above 1
     is a prime factor with exponent 1.
+
+    ``sigma**`` needs the exponent's parity, which the array of exact powers
+    carries implicitly: ``q^e`` is a perfect square exactly when ``e`` is even,
+    and then the divisor to subtract is its square root. The root is taken in
+    integers and corrected, never trusted from floating point.
     """
     length = high - low
     radical = np.ones(length, dtype=np.int64)
     sig = np.ones(length, dtype=np.int64)
     usig = np.ones(length, dtype=np.int64)
     uphi = np.ones(length, dtype=np.int64)
+    bsig = np.ones(length, dtype=np.int64)
     remainder = np.arange(low, high, dtype=np.int64)
 
     for p in primes.tolist():
@@ -81,7 +87,13 @@ def _segment(low, high, primes):
         radical[index] *= p
         usig[index] *= exact_power + 1
         uphi[index] *= exact_power - 1
-        sig[index] *= (exact_power * p - 1) // (p - 1)
+        sigma_pp = (exact_power * p - 1) // (p - 1)
+        sig[index] *= sigma_pp
+        root = np.sqrt(exact_power.astype(np.float64)).astype(np.int64)
+        root = np.where(root * root > exact_power, root - 1, root)
+        root = np.where((root + 1) * (root + 1) <= exact_power, root + 1, root)
+        square = root * root == exact_power
+        bsig[index] *= np.where(square, sigma_pp - root, sigma_pp)
         remainder[index] //= exact_power
 
     left = remainder > 1
@@ -90,8 +102,9 @@ def _segment(low, high, primes):
     usig[left] *= tail + 1
     uphi[left] *= tail - 1
     sig[left] *= tail + 1
+    bsig[left] *= tail + 1          # exponent 1 is odd: sigma** = sigma = q+1
     return {"rad": radical, "sigma": sig, "sigma*": usig, "phi*": uphi,
-            "low": low}
+            "sigma**": bsig, "low": low}
 
 
 def members(segment, f):

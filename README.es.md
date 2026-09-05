@@ -2,9 +2,10 @@
 
 *(English version: [README.md](README.md))*
 
-Diecinueve números enteros, cada uno **demostradamente** el más chico de su
-clase — cinco de ellos nunca calculados antes — y los teoremas chicos que hacen
-posible demostrarlo **sin conocer ninguna respuesta de antemano**.
+Veintiséis números enteros, cada uno **demostradamente** el más chico de su
+clase — doce de ellos nunca calculados antes — y los teoremas chicos que hacen
+posible demostrarlo **sin conocer ninguna respuesta de antemano**, y que avisan
+de antemano cuándo el siguiente va a ser **más chico**.
 
 **Todo esto se comprueba en dos segundos:**
 
@@ -17,7 +18,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-Sin instalar nada. Corre 227 comprobaciones e imprime PASS o FAIL para cada una.
+Sin instalar nada. Corre 374 comprobaciones e imprime PASS o FAIL para cada una.
 
 ---
 
@@ -51,21 +52,24 @@ de grafos sobre esa familia.
 
 ## Los resultados
 
-| cintura | `sigma` | `sigma*` | `phi*` |
-|---:|---:|---:|---:|
-| 2 | 6 | 6 | 12 |
-| 3 | 234 | 6615 | 66825 |
-| 4 | 137214 | 4380453 | 1120454775 |
-| 5 | 275900625 | 540765225 | **1663175056640625** |
-| 6 | 180141399900 | 474549075 | |
-| 7 | **7746928876851255** | 4485174218525 | |
-| 8 | **31674203849435875** | **2386830845734335** | |
-| 9 | | **9928651387877145** | |
+| cintura | `sigma` | `sigma*` | `phi*` | `sigma**` |
+|---:|---:|---:|---:|---:|
+| 2 | 6 | 6 | 12 | **6** |
+| 3 | 234 | 6615 | 66825 | **15925** |
+| 4 | 137214 | 4380453 | 1120454775 | **2321865** |
+| 5 | 275900625 | 540765225 | **1663175056640625** | **10762773021** |
+| 6 | 180141399900 | 474549075 | | **3321843525** |
+| 7 | **7746928876851255** | 4485174218525 | | **345358414826425** |
+| 8 | **31674203849435875** | **2386830845734335** | | |
+| 9 | | **9928651387877145** | | |
+| 10 | | **10858178043907173985005** | | |
 
-Los cinco en negrita no habían sido calculados, y **los diecinueve son mínimos
-demostrados**. El último es el caso interesante: no se conocía ningún testigo de
-cintura 9 para `sigma*`, así que la versión 2 no podía calcularlo en absoluto.
-La versión 3 saca la necesidad de conocer uno.
+Los doce en negrita no habían sido calculados, y **los veintiséis son mínimos
+demostrados**. Dos de ellos no se podían calcular en absoluto antes de la versión
+3.2 — `sigma*` con cintura 10 y `sigma**` con cintura 7—, y los destrabó la
+cirugía de más abajo. Y mirá `sigma*` de la cintura 5 a la 6, y `sigma**` de la 5
+a la 6: la sucesión **baja**. La sección *«Cuándo el siguiente es más chico»*
+cuenta por qué, y cómo saberlo de antemano.
 
 ## La diferencia entre «el más chico que encontramos» y «el más chico»
 
@@ -132,10 +136,15 @@ vez por cintura.
 Los dos términos siguientes no salieron, y la versión 3 puede decir exactamente
 por qué. La búsqueda barrió todo lo que hay por debajo de `1,24·10²¹` para `sigma`
 con cintura 9 y por debajo de `1,3·10¹⁸` para `phi*` con cintura 6, y no encontró
-nada: eso son teoremas. El constructor exhibe testigos en `8,3·10²⁴` y
-`4,2·10²²`: eso está verificado, pero no es mínimo. Así que los dos términos
-quedan **acorralados**, y cerrar el cerco exigiría cribar **5700 millones** y
-**14 000 millones** de primos. Eso no entra en memoria.
+nada: eso son teoremas. La cirugía exhibe testigos en `1,23·10²⁴` y `4,2·10²²`:
+eso está verificado, pero no es mínimo. Así que los dos términos quedan
+**acorralados**, y cerrar el cerco exigiría examinar todos los primos por debajo
+de **2200 millones** y de **14 000 millones**. Eso no entra en memoria.
+
+El primero de esos dos números era **5700 millones**: el testigo de cintura 9
+para `sigma` que exhibía la versión 3.1 valía `8,3·10²⁴`, y la cirugía lo baja a
+`1,23·10²⁴`, un factor de **6,75**. La pared se corrió un factor 2,6, y sigue
+siendo una pared.
 
 Antes el límite era «hace falta un testigo conocido», que es una condición sobre
 lo que otros hayan publicado. Ahora es un número de primos: una condición sobre
@@ -157,9 +166,64 @@ cadena. **Predicción:** el mínimo verdadero de cintura 6 también será múlti
 `1663175056640625`. Lo refuta cualquier testigo más chico que no lo sea.
 
 Y la lectura que parecía obvia —*el salto es chico cuando los dos testigos
-comparten mucho*— es **falsa**: el salto más grande de los dieciséis pares
+comparten mucho*— es **falsa**: el salto más grande de los veintidós pares
 consecutivos es uno donde el término anterior divide al siguiente. `verify.py`
 recalcula esa tabla.
+
+## Cuándo el siguiente es más chico
+
+Pedir un ciclo más largo suele costar más. Dos veces en la tabla cuesta
+**menos**. El mecanismo es un solo movimiento local sobre el ciclo, y es un
+teorema.
+
+Tomá un testigo de cintura `k` cuyo digrafo es el ciclo puro
+`q_1 -> ... -> q_k -> q_1`. Elegí una flecha `q_i -> q_{i+1}`, un primo `p` fuera
+del ciclo y exponentes `e'`, `a` tales que `p | f(q_i^e')`, `q_{i+1} | f(p^a)` y
+**no aparezca ninguna cuerda**: ningún `q_j` distinto de `p` recibe flecha de
+`q_i^e'`, ningún `q_j` distinto de `q_{i+1}` la recibe de `p^a`, y ningún otro
+vértice apunta a `p`. Entonces
+
+```
+n' = n * q_i^(e'-e_i) * p^a
+```
+
+es un testigo de **cintura k+1**, así que `m_f(k+1) <= m_f(k) * q_i^(e'-e_i) * p^a`.
+
+Las tres condiciones de cuerda no son trámite. Sacalas y el mismo movimiento
+sobre el mínimo de cintura 5 de `sigma` da `1103602500`, cuya cintura es **2**.
+`verify.py` fija ese número.
+
+**El certificado.** Si el tramo nuevo cuesta menos que el exponente que ahorra
+—`q_i^e' * p^a < q_i^e_i`— entonces `m_f(k+1) < m_f(k)`, **demostrado sin
+calcular `m_f(k+1)`**. Y se decide con una búsqueda finita y chica: la desigualdad
+obliga `e' < e_i`, así que `e'` recorre `1 .. e_i-1`, `p` recorre los divisores
+primos de `f(q_i^e')` —que la primera condición ya nombra, así que los primos no
+se recorren nunca— y `a` recorre `p^a < q_i^(e_i-e')`.
+
+Sobre los **22** pares consecutivos de la tabla el certificado dispara
+**exactamente dos veces**, que son exactamente las dos veces que la sucesión
+baja, y las dos veces devuelve el mínimo siguiente clavado:
+
+| | `m_f(k)` | corta | inserta | razón | mínimo siguiente |
+|---|---:|---|---|---:|---:|
+| `sigma*`, 5→6 | 540765225 | `7^5 → 7^3` | `43` | `43/49` | 474549075 |
+| `sigma**`, 5→6 | 10762773021 | `3^6 → 3^2` | `5^2` | `25/81` | 3321843525 |
+
+```bash
+python src/surgery.py "sigma*" 540765225 5
+```
+
+**Vale en una sola dirección, y eso importa.** Que no haya ninguna inserción con
+razón menor que 1 *no* demuestra que el mínimo siguiente sea mayor: podría venir
+de un ciclo sin relación con éste. Que eso no pase en ninguno de los 22 pares es
+una medición, no una demostración.
+
+**Y el premio que produjo dos de los términos nuevos.** Aunque la inserción no
+salga más barata, igual exhibe un testigo de verdad de cintura `k+1`, y un
+testigo exhibido es justo el `N` que la búsqueda exhaustiva necesita. Para
+`sigma*` con cintura 10 la búsqueda sin semilla llevaba 40 duplicaciones sin
+llegar a nada; con la cota de la cirugía, una sola vuelta de cuatro minutos lo
+resolvió.
 
 La demostración, con sus límites, está en [RESULT.md](RESULT.md) (en inglés).
 

@@ -211,6 +211,11 @@ def predecessor_floor(P, f):
         return P - 1
     if f == "phi*":
         return P + 1
+    if f == "sigma**":
+        # sigma**(q^e) <= sigma(q^e) < 2 q^e, exactly as for sigma, because the
+        # biunitary divisors of q^e are a subset of its divisors. So the same
+        # bound holds, and it is valid without any further hypothesis.
+        return (P + 1) // 2
     raise ValueError("unknown function: %r" % (f,))
 
 

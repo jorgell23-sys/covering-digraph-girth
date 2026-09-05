@@ -1,8 +1,9 @@
 # Smallest witnesses by girth for rad(n) | f(n)
 
-Nineteen integers, each **proved** to be the smallest of its kind — five of
+Twenty-six integers, each **proved** to be the smallest of its kind — twelve of
 them never computed before — and the small theorems that make proving it
-possible **without knowing any answer in advance**.
+possible **without knowing any answer in advance**, and that tell you in advance
+when the next one will be **smaller**.
 
 > **New to this? Start here:** [**Explained from scratch**](https://jorgell23-sys.github.io/covering-digraph-girth/) - the whole
 > thing in plain words, with pictures and no background needed
@@ -16,7 +17,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-No dependencies, no setup. It runs 227 checks and prints PASS or FAIL for each.
+No dependencies, no setup. It runs 374 checks and prints PASS or FAIL for each.
 
 ---
 
@@ -47,21 +48,24 @@ graph invariant over that family.
 
 ## The results
 
-| girth | `sigma` | `sigma*` | `phi*` |
-|---:|---:|---:|---:|
-| 2 | 6 | 6 | 12 |
-| 3 | 234 | 6615 | 66825 |
-| 4 | 137214 | 4380453 | 1120454775 |
-| 5 | 275900625 | 540765225 | **1663175056640625** |
-| 6 | 180141399900 | 474549075 | |
-| 7 | **7746928876851255** | 4485174218525 | |
-| 8 | **31674203849435875** | **2386830845734335** | |
-| 9 | | **9928651387877145** | |
+| girth | `sigma` | `sigma*` | `phi*` | `sigma**` |
+|---:|---:|---:|---:|---:|
+| 2 | 6 | 6 | 12 | **6** |
+| 3 | 234 | 6615 | 66825 | **15925** |
+| 4 | 137214 | 4380453 | 1120454775 | **2321865** |
+| 5 | 275900625 | 540765225 | **1663175056640625** | **10762773021** |
+| 6 | 180141399900 | 474549075 | | **3321843525** |
+| 7 | **7746928876851255** | 4485174218525 | | **345358414826425** |
+| 8 | **31674203849435875** | **2386830845734335** | | |
+| 9 | | **9928651387877145** | | |
+| 10 | | **10858178043907173985005** | | |
 
-The five in bold had not been computed before, and **all nineteen are proved
-minimal**. The last one is the interesting case: no witness of girth 9 was known
-for `sigma*`, so version 2 could not have computed it at all. Version 3 removes
-the need to know one.
+The twelve in bold had not been computed before, and **all twenty-six are proved
+minimal**. Two of them could not have been computed at all before version 3.2:
+`sigma*` at girth 10 and `sigma**` at girth 7, both unlocked by the surgery
+below. And notice `sigma*` from girth 5 to 6, and `sigma**` from 5 to 6: the
+sequence goes **down**. Section *"When the next one is smaller"* is about why,
+and about how to know it in advance.
 
 ## The difference between "smallest we found" and "smallest"
 
@@ -122,11 +126,16 @@ measured on the terms where both methods can run. It is paid once per girth.
 
 The next two terms did not finish, and version 3 can say exactly why. The search
 swept everything below `1.24e21` for `sigma` at girth 9 and below `1.3e18` for
-`phi*` at girth 6 and found nothing — those are theorems. The constructor
-exhibits witnesses at `8.3e24` and `4.2e22` — those are verified, but not
-minimal. So both terms are **bracketed**, and closing the bracket would mean
-sieving **5.7 billion** and **14 billion** primes respectively. That does not fit
-in memory.
+`phi*` at girth 6 and found nothing — those are theorems. Surgery exhibits
+witnesses at `1.23e24` and `4.2e22` — those are verified, but not minimal. So
+both terms are **bracketed**, and closing the bracket would mean examining every
+prime below **2.2 billion** and **14 billion** respectively. That does not fit in
+memory.
+
+The first of those two numbers used to be **5.7 billion**: the girth-9 witness
+for `sigma` that version 3.1 exhibited was `8.3e24`, and surgery brings it down
+to `1.23e24`, a factor of **6.75**. The wall moved by a factor of 2.6, and it is
+still a wall.
 
 Before, the limit was *"a known witness is needed"* — a condition on what other
 people have published. Now it is a number of primes: a condition on the machine.
@@ -147,8 +156,59 @@ continues the chain. **Prediction:** the true girth-6 minimum is also a multiple
 of `1663175056640625`. Any smaller witness that is not refutes it.
 
 And the reading that looked obvious — *the jump is small when the two witnesses
-share a lot* — is **false**: the largest jump of all sixteen consecutive pairs is
+share a lot* — is **false**: the largest jump of all twenty-two consecutive pairs is
 one where the previous term divides the next. `verify.py` recomputes that table.
+
+## When the next one is smaller
+
+Asking for a longer cycle usually costs more. Twice in the table it costs
+**less**. The mechanism is a single local move on the cycle, and it is a theorem.
+
+Take a witness of girth `k` whose digraph is the pure cycle
+`q_1 -> ... -> q_k -> q_1`. Pick an edge `q_i -> q_{i+1}`, a prime `p` outside
+the cycle and exponents `e'`, `a` such that `p | f(q_i^e')`, `q_{i+1} | f(p^a)`,
+and **no chord appears** — no `q_j` other than `p` is hit by `q_i^e'`, no `q_j`
+other than `q_{i+1}` is hit by `p^a`, and no other vertex hits `p`. Then
+
+```
+n' = n * q_i^(e'-e_i) * p^a
+```
+
+is a witness of **girth k+1**, so `m_f(k+1) <= m_f(k) * q_i^(e'-e_i) * p^a`.
+
+The three chord conditions are not bookkeeping. Drop them and the same move on
+the girth-5 minimum for `sigma` gives `1103602500`, whose girth is **2**.
+`verify.py` pins that number.
+
+**The certificate.** If the new stretch costs less than the exponent it saves —
+`q_i^e' * p^a < q_i^e_i` — then `m_f(k+1) < m_f(k)`, **proved without computing
+`m_f(k+1)`**. And it is decidable by a small finite search: the inequality forces
+`e' < e_i`, so `e'` runs over `1 .. e_i-1`, `p` runs over the prime divisors of
+`f(q_i^e')` — which the first condition already names, so the primes are never
+enumerated — and `a` over `p^a < q_i^(e_i-e')`.
+
+Over the **22** consecutive pairs in the table the certificate fires **exactly
+twice**, which is exactly how often the sequence goes down, and both times it
+hands back the next minimum on the nose:
+
+| | `m_f(k)` | cut | insert | ratio | next minimum |
+|---|---:|---|---|---:|---:|
+| `sigma*`, 5→6 | 540765225 | `7^5 → 7^3` | `43` | `43/49` | 474549075 |
+| `sigma**`, 5→6 | 10762773021 | `3^6 → 3^2` | `5^2` | `25/81` | 3321843525 |
+
+```bash
+python src/surgery.py "sigma*" 540765225 5
+```
+
+**One-directional, and that matters.** Finding no insertion below ratio 1 does
+*not* prove the next minimum is bigger — it could come from an unrelated cycle.
+That this never happens across the 22 pairs is measured, not proved.
+
+**And the bonus that produced two of the new terms.** Even when the insertion is
+not cheaper, it still exhibits a real witness of girth `k+1` — and an exhibited
+witness is exactly the `N` the exhaustive search needs. For `sigma*` at girth 10
+the seedless search had run 40 doublings without reaching anything; with the
+surgery bound, one round of four minutes settled it.
 
 Proof, discussion and limits: **[RESULT.md](RESULT.md)**.
 

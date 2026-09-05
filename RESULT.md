@@ -1,9 +1,23 @@
 # Smallest witnesses by girth for rad(n) | f(n)
 
-**Version 3.0 — 2026-09-04**
+**Version 3.2 — 2026-09-04**
 
 Every number in this document can be checked by running `python verify.py`,
 which takes about two seconds and needs nothing installed.
+
+**What changed in version 3.2.** Version 3 could prove a term minimal and could
+start with no seed, but it could not say **in advance** whether the next term
+would be larger or smaller, and twice in the table it is smaller. Version 3.2
+adds a **surgery theorem**: inserting one vertex into the cycle of a witness of
+girth `k` yields a witness of girth `k+1`, under three chord conditions that a
+negative control shows are indispensable. Two things follow. A **certificate**:
+if the inserted stretch costs less than the exponent it saves, then
+`m_f(k+1) < m_f(k)`, proved without computing `m_f(k+1)`, by a finite search that
+never enumerates primes. And an **exhibited upper bound**, which is exactly what
+the exhaustive search needs to start: with it, two terms that could not be
+reached before were computed -- `sigma*` at girth 10 and `sigma**` at girth 7 --
+the girth-9 bound for `sigma` improved by a factor of 6.75, and a fourth
+function, `sigma**`, entered the tables.
 
 **What changed in version 3.** Version 2 could only reach a girth for which
 somebody had already exhibited *some* witness, because the cutoff lemma needs a
@@ -350,20 +364,47 @@ accepted.
 
 ## 7. The terms
 
-**All nineteen are proved minimal.** The five in bold had not been computed
+**All twenty-six are proved minimal.** The twelve in bold had not been computed
 before; the one marked with a dagger is the first that **had no seed at all**,
-so it could not have been computed by the method of version 2.
+so it could not have been computed by the method of version 2; the two marked
+with a double dagger are the ones that version 3 could not reach in practice and
+that the surgery of section 9 unlocked.
 
-| girth | `sigma` | `sigma*` | `phi*` |
-|---:|---:|---:|---:|
-| 2 | 6 | 6 | 12 |
-| 3 | 234 | 6615 | 66825 |
-| 4 | 137214 | 4380453 | 1120454775 |
-| 5 | 275900625 | 540765225 | **1663175056640625** |
-| 6 | 180141399900 | 474549075 | |
-| 7 | **7746928876851255** | 4485174218525 | |
-| 8 | **31674203849435875** | **2386830845734335** | |
-| 9 | | **9928651387877145** (dagger) | |
+| girth | `sigma` | `sigma*` | `phi*` | `sigma**` |
+|---:|---:|---:|---:|---:|
+| 2 | 6 | 6 | 12 | **6** |
+| 3 | 234 | 6615 | 66825 | **15925** |
+| 4 | 137214 | 4380453 | 1120454775 | **2321865** |
+| 5 | 275900625 | 540765225 | **1663175056640625** | **10762773021** |
+| 6 | 180141399900 | 474549075 | | **3321843525** |
+| 7 | **7746928876851255** | 4485174218525 | | **345358414826425** (dd) |
+| 8 | **31674203849435875** | **2386830845734335** | | |
+| 9 | | **9928651387877145** (dagger) | | |
+| 10 | | **10858178043907173985005** (dd) | | |
+
+The fourth function is `sigma**`, the sum of the **biunitary** divisors: a
+divisor `d` of `n` is biunitary when the greatest common unitary divisor of `d`
+and `n/d` is 1, which on a prime power leaves every `q^i` except the middle one
+when `e` is even, so `sigma**(q^e) = sigma(q^e) - q^(e/2)` for `e` even and
+`sigma(q^e)` for `e` odd. `verify.py` compares that closed form against the
+definition rather than assuming it.
+
+The two terms marked with a double dagger:
+
+    sigma*,  girth 10:  10858178043907173985005
+                        = 3^8 * 5 * 7^3 * 11^2 * 13^2 * 31^2 * 43 * 61 * 97 * 193
+                        cycle 193 -> 97 -> 7 -> 43 -> 11 -> 61 -> 31 -> 13 -> 5 -> 3 -> 193
+                        every prime up to 36871065 examined; the lemma required
+                        33457967. 48321070 nodes, 252 seconds.
+
+    sigma**, girth 7:   345358414826425 = 5^2 * 7^4 * 11^4 * 13 * 19 * 37 * 43
+                        cycle 43 -> 11 -> 37 -> 19 -> 5 -> 13 -> 7 -> 43
+                        every prime up to 1048575 examined; the lemma required
+                        523775. 930082 nodes, 5 seconds.
+
+Neither was reachable before. For `sigma*` at girth 10 the seedless search had
+run **40 doublings** without finding anything; what made one round enough was an
+exhibited upper bound, and that is what section 9 produces.
 
     sigma*, girth 9:  9928651387877145   = 3^3 * 5 * 7^3 * 11^2 * 19 * 31^2 * 37 * 43 * 61
                       cycle 61 -> 31 -> 37 -> 19 -> 5 -> 3 -> 7 -> 43 -> 11 -> 61
@@ -473,7 +514,9 @@ differing in a single factor:
 Closing the 5-cycle forces the exponent of 7 up to `7^5`. Extending to a 6-cycle
 admits a new prime, 43, and **that allows the exponent to drop to `7^3`**.
 
-**It is not a property of `sigma*`.** Across the nineteen terms:
+**It is not a property of `sigma*`.** `sigma**` does it too, at the same step,
+and there the whole difference is one factor: `3^6` against `3^2 * 5^2`, a ratio
+of `25/81`. Across the consecutive pairs of the first three functions:
 
 | f | previous | next | decrease? |
 |---|---:|---:|---|
@@ -487,9 +530,9 @@ admits a new prime, 43, and **that allows the exponent to drop to `7^3`**.
 | `phi*` (3 → 4) | 66825 | 1120454775 | no |
 | `phi*` (4 → 5) | 1120454775 | 1663175056640625 | no |
 
-One decrease in nine consecutive pairs. What section 8 adds is that the same
-mechanism operates without producing a decrease: at `sigma` from 7 to 8 it
-merely flattens the growth.
+One decrease in nine consecutive pairs there, two in the twenty-two of the full
+table. What section 8 adds is that the same mechanism operates without producing
+a decrease: at `sigma` from 7 to 8 it merely flattens the growth.
 
 **The new pair shows the mechanism exactly**, because unlike `sigma` 7 → 8 the
 two witnesses share almost everything:
@@ -509,9 +552,97 @@ one stretch of the cycle:
 two cheap steps of exponent 1.** The detour exists because `31^2 + 1 = 2 * 13 *
 37` offers both exits, and because `37 + 1 = 2 * 19` and `19 + 1 = 2^2 * 5`
 complete it. The ratio of the two terms is exactly `703/169 = 4.1598...`, exact
-as a fraction: `m(9) * 169 = m(8) * 703`. It is the description of one case, not
-a law -- but it is the first time the mechanism can be written down with both
-witnesses in view.
+as a fraction: `m(9) * 169 = m(8) * 703`.
+
+### Theorem 6 — surgery on the cycle
+
+The description above is of one case. Here is the theorem it is a case of.
+
+> **Theorem 6.** Let `f` be multiplicative and **local** -- `q` never divides
+> `f(q^e)` -- and let `n = prod q_j^e_j` be a witness of girth `k` whose covering
+> digraph is the pure cycle `q_1 -> ... -> q_k -> q_1`. Let `p` be a prime
+> outside the cycle and `e', a >= 1` be such that, for some index `i`:
+>
+> 1. `p | f(q_i^e')`;
+> 2. `q_{i+1} | f(p^a)`;
+> 3. no `q_j` with `j != i` divides `f(q_i^e')`;
+> 4. no `q_j` with `j != i+1` divides `f(p^a)`;
+> 5. `p` divides no `f(q_j^e_j)` with `j != i`.
+>
+> Then `n' = n * q_i^(e'-e_i) * p^a` has as its covering digraph the pure cycle
+> of length `k+1` obtained by inserting `p` between `q_i` and `q_{i+1}`. Hence
+>
+>     m_f(k+1)  <=  m_f(k) * q_i^(e'-e_i) * p^a                          (C)
+
+*Proof.* The vertices of `D_f(n')` are the `k+1` primes. The edges out of `q_j`
+with `j != i` did not change, because that exponent did not change: in `n` they
+went only to `q_{j+1}`, and (5) says they do not go to `p` either. The edges out
+of `q_i` go to `p` by (1) and to no `q_j` by (3) -- and not to `q_i`, by
+locality. The edges out of `p` go to `q_{i+1}` by (2), to no other `q_j` by (4),
+and not to `p` by locality. So the digraph is exactly the `(k+1)`-cycle: every
+vertex has an incoming edge, hence `n'` is in `S(f)`, and its only cycle has
+length `k+1`. The arithmetic of (C) is that `n'` replaces `q_i^e_i` by `q_i^e'`
+and multiplies by `p^a`. QED
+
+**Conditions 3, 4 and 5 are not bookkeeping.** On the girth-5 minimum for
+`sigma`, `275900625`, the pair `13 -> 2^2 -> 7` satisfies (1) and (2) -- `2`
+divides `sigma(13)` and `7` divides `sigma(2^2)` -- and yields `1103602500`,
+whose girth is **2**, not 6. `verify.py` pins that number, and also checks that
+the enumerator does not propose it.
+
+### Corollary — a certificate that the next minimum is smaller
+
+> **Corollary.** If in addition `q_i^e' * p^a < q_i^e_i`, then
+> `m_f(k+1) < m_f(k)`.
+
+And this is **decidable by a small finite search**, which is what makes it
+useful. With `p^a >= 2` the inequality forces `e' < e_i`, so:
+
+- `e'` runs over `1 .. e_i - 1`;
+- `p` runs over the **prime divisors of `f(q_i^e')`**, which condition (1)
+  already names -- the primes are never enumerated, they are read off a
+  factorisation;
+- `a` runs over the exponents with `p^a < q_i^(e_i-e')`.
+
+Nothing in that mentions girth `k+1` or any witness of girth `k+1`. An immediate
+consequence: **if every exponent of `m_f(k)` is 1, no certificate can exist**. A
+squarefree minimum cannot certify that the next one drops.
+
+**Measured over all 22 consecutive pairs of the table, the certificate fires
+exactly twice -- exactly where the sequence goes down -- and both times it
+returns the next minimum itself:**
+
+| | `m_f(k)` | cut | insert | ratio | certificate gives | true `m_f(k+1)` |
+|---|---:|---|---|---:|---:|---:|
+| `sigma*`, 5→6 | 540765225 | `7^5 -> 7^3` | `43` | `43/49` | 474549075 | 474549075 |
+| `sigma**`, 5→6 | 10762773021 | `3^6 -> 3^2` | `5^2` | `25/81` | 3321843525 | 3321843525 |
+
+**It is one-directional.** Finding no insertion of ratio below 1 does **not**
+prove `m_f(k+1) >= m_f(k)`: the next minimum could come from a cycle unrelated to
+this one. That this never happens across the 22 pairs is measured, not proved.
+
+**And surgery gives the next minimum exactly in 12 of the 22 pairs, so it is not
+a law either.** In the other 10 the next minimum changes more than one vertex.
+That is precisely why (C) is useful as a **bound** and not as a prediction.
+
+### What the bound unlocks
+
+An upper bound that is *exhibited* is what the exhaustive search of section 5
+needs to start, and it replaces every doubling round with one. That is how the
+two terms marked with a double dagger in section 7 were computed. It also
+improves the girth-9 bound for `sigma` -- see section 10 -- and produces bounds
+where there were none:
+
+| | upper bound from surgery | ratio |
+|---|---:|---:|
+| `m_sigma**(8)` | 247135929796462577545675 | 715592611 |
+
+**And it has a limit, which is visible.** From `sigma*` at girth 10 there is **no
+admissible insertion at all** with ratio below `10^9`: as `k` grows, conditions
+3, 4 and 5 -- which must hold against *every* vertex of the cycle -- get harder
+to satisfy. For `phi*` at girth 6 there is exactly **one** admissible insertion
+below ratio `10^8`, and it is the bound version 3 already had, so surgery cannot
+improve that one.
 
 ---
 
@@ -554,25 +685,47 @@ more primes -- `phi*` girth 6 gives the same value with primes up to 101, 173 an
 minima -- the constructor proves no minimality, and stability is not a proof --
 but it is the same check section 6 already applies to the published terms.
 
+**And stability is not the same as being the best available.** Surgery on the
+girth-8 minimum for `sigma` gives a strictly better witness:
+
+    sigma, girth 9 <= 1232737113370661112862375
+                    = 5^3 * 7^2 * 13^2 * 19^2 * 31^2 * 61 * 83 * 127^3 * 331
+                    cut 19^1 -> 19^2, insert 127^3, ratio 38919277
+
+That is **6.75 times smaller** than the constructor's, and the reason the
+constructor could not find it is not the range of primes -- it uses 127, and the
+constructor was given primes up to 131. It is that the constructor fixes, for
+each edge, the **least** exponent that realises it, and this witness needs `127^3`
+and `19^2`. The same limit is visible on a term that *is* known: for `sigma**` at
+girth 4 the constructor returns 49160475 where the true minimum is 2321865,
+because the minimum needs `3^6`. `verify.py` checks both facts.
+
+For `phi*` at girth 6, surgery reproduces the constructor's bound exactly -- it
+is `m_phi*(5) * 3^12 * 47` -- and proves something the constructor could not: it
+is the **only** admissible insertion with ratio below `10^8`. Improving that one
+means leaving the mechanism.
+
 So both terms are **bracketed between two verified bounds**:
 
-    1.24e21 <  m_sigma(9)  <=  8.3e24
+    1.24e21 <  m_sigma(9)  <=  1.233e24
     1.3e18  <  m_phi*(6)   <=  4.2e22
 
 **And here is the wall, with its number.** To make the enumeration a proof one
-has to sieve up to the cutoff the upper bound imposes:
+has to examine every prime up to the cutoff the upper bound imposes:
 
 | | cutoff the upper bound demands |
 |---|---:|
-| `sigma`, girth 9 | 5710904352 primes |
-| `phi*`, girth 6 | 14064872236 primes |
+| `sigma`, girth 9, with the bound of version 3.1 | 5710904352 |
+| `sigma`, girth 9, with the bound above | **2197597268** |
+| `phi*`, girth 6 | 14064872236 |
 
-Five point seven and fourteen billion. That does not fit in the machine this was
-run on, and not for lack of patience: the sieve alone exceeds memory. The wall is
-not in the method any more — the method needs nothing it does not have — but in
-the size of the terms, and it moves only two ways: by lowering the upper bound (a
+Two point two and fourteen billion. That does not fit in the machine this was run
+on, and not for lack of patience: the sieve alone exceeds memory. The wall is not
+in the method any more — the method needs nothing it does not have — but in the
+size of the terms, and it moves only two ways: by lowering the upper bound (a
 smaller witness narrows the cutoff by a square root) or by sieving in blocks
-instead of all at once.
+instead of all at once. Surgery moved it the first way, by a factor of 2.6, and
+it is still a wall.
 
 **This is the first time this work can say where it ends.** Before, the limit was
 "a known witness is needed", which is a condition on what other people have
@@ -610,7 +763,7 @@ of girth 6 below `4.2e22` that is not a multiple of `1663175056640625` refutes i
 
 **What does not hold, and it looked obvious.** The first reading of the mechanism
 was that the jump is small when the two witnesses share a lot. That is false.
-Over the sixteen consecutive pairs available, comparing the fraction of bits that
+Over the consecutive pairs available, comparing the fraction of bits that
 survive from one term to the next against the ratio between them:
 
 | pair | ratio | fraction shared |
@@ -621,8 +774,8 @@ survive from one term to the next against the ratio between them:
 | `sigma*` 8->9 | **4.16** | 0.855 |
 | `sigma*` 5->6 | **0.88** | 0.806 |
 
-The largest jump of the sixteen -- `phi*` from 4 to 5, a factor of a million and
-a half -- is one of those that shares *everything*: the previous term divides the
+The largest jump of them all -- `phi*` from 4 to 5, a factor of a million and a
+half -- is one of those that shares *everything*: the previous term divides the
 next. And the two smallest jumps have opposite sharing, 0.30 and 0.86. Sharing
 and jump size are **unrelated**. `verify.py` recomputes the whole table.
 
@@ -642,8 +795,16 @@ how much is kept.
   but section 10 gives the number of primes that would have to be sieved for the
   next two terms, and it is in the billions.
   **The upper bounds in section 10 are not minima**: they come from the
-  constructor, which proves no minimality. What is proved there is that a witness
-  of that size exists, and that is verified.
+  constructor or from surgery, neither of which proves minimality. What is proved
+  there is that a witness of that size exists, and that is verified.
+- **The inversion certificate of section 9 is one-directional.** Finding no
+  insertion of ratio below 1 does not prove that the next minimum is larger; the
+  next minimum could come from a cycle unrelated to this one. That this never
+  happens over the 22 consecutive pairs of the table is a measurement, not a
+  proof.
+- **The enumeration of insertions is complete within a ratio and an exponent
+  bound**, not absolutely. The runs behind this document use ratio below `10^9`
+  and exponent at most 64, and both numbers are printed by the tool.
 - **The divisibility chain in `phi*` is two links, not a law.** Three terms give
   two pairs, and the third link is predicted, not verified.
 - **It does not claim the doubling search is the best way to start.** It is the
@@ -659,10 +820,11 @@ how much is kept.
 - **It does not claim novelty.** See [PRIOR_ART.md](PRIOR_ART.md): searches of
   OEIS and four bibliographic sources found nothing, with a positive control
   that does find the relevant literature. **Not found is not the same as new**,
-  and Theorems 2, 3 and 4 and Step 2 of Theorem 1 are short arguments over
+  and Theorems 2, 3, 4 and 6 and Step 2 of Theorem 1 are short arguments over
   elementary closed forms, so they may well exist under other words. Theorem 5
   in particular combines a standard technique (doubling) with Theorem 2; only
-  the combination is claimed, not the technique.
+  the combination is claimed, not the technique. Theorem 6 is three lines once
+  the right quantity is looked at, and the same caution applies to it.
 - **It does not claim mathematical interest.** That is for a human reader to
   judge.
 
@@ -680,6 +842,11 @@ how much is kept.
     python src/construct.py sigma 6
     python src/sieve.py 1000000000
     python src/make_terms.py                     # regenerates data/terms.json
+
+    python src/surgery.py "sigma*" 540765225 5   # the certificate, and it fires
+    python src/surgery.py "sigma**" 10762773021 5
+    python src/surgery.py sigma 31674203849435875 8 1000000000
+    python src/surgery.py "phi*" 1663175056640625 5 100000000
 
 The sieve counts 5327 members of `S(sigma)` below 10^9, excluding `n = 1`.
 Pollack and Pomerance count 5328 prime-abundant numbers below 10^9 including

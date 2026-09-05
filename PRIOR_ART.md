@@ -5,7 +5,7 @@ exactly what was searched so that a reader can judge how much the absence is
 worth — and repeat it.
 
 Searches performed **2026-09-03** (versions 1 and 2), and repeated and extended
-**2026-09-04** for **version 3**.
+**2026-09-04** for **version 3** and again for **version 3.2**.
 
 ---
 
@@ -29,6 +29,8 @@ All three complete sequences, with the version-2 terms included:
 | `sigma`: 6, 234, 137214, 275900625, 180141399900, 7746928876851255, 31674203849435875 | **not in OEIS** |
 | `sigma*`: 6, 6615, 4380453, 540765225, 474549075, 4485174218525, 2386830845734335, 9928651387877145 | **not in OEIS** |
 | `phi*`: 12, 66825, 1120454775, 1663175056640625 | **not in OEIS** |
+| `sigma*` with the version-3.2 term appended, up to 10858178043907173985005 | **not in OEIS** |
+| `sigma**`: 6, 15925, 2321865, 10762773021, 3321843525, 345358414826425 | **not in OEIS** |
 
 OEIS asks that simple transformations be checked too, since a sequence may be
 catalogued doubled or shifted. All five variants were searched for each — as is,
@@ -50,6 +52,17 @@ Each new value was searched on its own digits, across all ~380,000 sequences:
 | `2386830845734335` *(v2)* | **0** |
 | `1663175056640625` *(v2)* | **0** |
 | `9928651387877145` *(v3)* | **0** |
+| `10858178043907173985005` *(v3.2)* | **0** |
+| `345358414826425` *(v3.2)* | **0** |
+| `10762773021` *(v3.2)* | **0** |
+| `3321843525` *(v3.2)* | **0** |
+
+**And the positive control, run with the same code on the same day**: the perfect
+numbers `6, 28, 496, 8128, 33550336` return `ALREADY CATALOGUED`
+([A000396](https://oeis.org/A000396)), and the abundant numbers
+`12, 18, 20, 24, 30, 36, 40, 42, 48, 54` return
+[A005101](https://oeis.org/A005101). The silence above is therefore the
+instrument saying nothing, not the instrument being broken.
 
 ## 4. Bibliographic databases
 
@@ -137,6 +150,38 @@ witness was *"still a heuristic search"* — a claim about what its own method
 could not do, made without checking, and false. The exhaustiveness that refutes
 it was proved in that same document. A limit stated about one's own work is a
 claim like any other and needs the same checking.
+
+## 6b. The surgery theorem specifically (version 3.2)
+
+Theorem 6 of [RESULT.md](RESULT.md) inserts one vertex into the cycle and gives
+a bound on the next minimum, with a certificate for when the next minimum is
+smaller.
+
+Two searches, with the terms required to appear together:
+
+| query | terms required together | result |
+|---|---|---|
+| covering digraph girth multiplicative function radical divides | girth, digraph, divisor | **not found in what was searched** (arXiv did not answer) |
+| smallest integer whose covering digraph has girth k unitary sigma | girth, unitary | **not found in what was searched** (arXiv did not answer) |
+
+**The positive control for the same run**: `unitary perfect numbers sum of
+unitary divisors`, terms `unitary` and `perfect` required together, returns
+Subbarao and Warren, *Unitary perfect numbers*, Canad. Math. Bull. 9 (1966);
+Wall, *The fifth unitary perfect number* (1975); and Wall, *Bi-unitary perfect
+numbers*, Proc. AMS (1972). The sources answer and do find the relevant
+literature when there is some.
+
+**What is and is not claimed.** Inserting a vertex into a cycle is an elementary
+move, and the proof of Theorem 6 is a paragraph of bookkeeping once the right
+five conditions are written down. What did not appear anywhere searched is the
+conjunction: this move on the **covering digraph of a multiplicative function**,
+and the use of the cost inequality as a **certificate of non-monotonicity** for
+the sequence of smallest witnesses. As with Theorems 2, 3 and 4, an argument of
+this shape can live inside a paper without reaching its title or abstract.
+
+**A note on sigma\*\***. The biunitary divisor function is not new -- Wall
+studied bi-unitary perfect numbers in 1972 -- and nothing about the function
+itself is claimed here. What is computed is the same graph invariant over it.
 
 ## 7. Analogous sequences that do exist
 

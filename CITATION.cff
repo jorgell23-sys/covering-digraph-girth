@@ -16,12 +16,19 @@ abstract: >-
   witness, which makes the enumeration finite; a per-arc strengthening of that
   bound makes the search several times cheaper; and a floor that mentions no
   witness at all, combined with doubling over an exhaustive search, removes the
-  need for a known witness entirely. All nineteen published values are proved
-  minimal rather than minimal among the primes examined. Five of them had not
-  been computed before, and one of those, sigma* at girth 9, had no known
-  witness of its girth and so could not be reached by the earlier method. All
-  results are verified by independent implementations and cross-checked against
-  the count of prime-abundant numbers published by Pollack and Pomerance (2012).
+  need for a known witness entirely. A surgery theorem inserts one vertex into
+  the cycle of a witness of girth k to obtain a witness of girth k+1, which
+  bounds the next smallest witness from above and, when the inserted stretch
+  costs less than the exponent it saves, certifies that the next smallest witness
+  is strictly smaller without computing it. All twenty-six published values are
+  proved minimal rather than minimal among the primes examined, now including a
+  fourth function, sigma**, the sum of the biunitary divisors. Twelve of them had
+  not been computed before; sigma* at girth 9 had no known witness of its girth
+  and so could not be reached by the earlier method, and sigma* at girth 10 and
+  sigma** at girth 7 were reached only because surgery supplied an upper bound to
+  start from. All results are verified by independent implementations and
+  cross-checked against the count of prime-abundant numbers published by Pollack
+  and Pomerance (2012).
 keywords:
   - number theory
   - arithmetic functions
@@ -30,8 +37,10 @@ keywords:
   - covering digraph
   - girth
   - integer sequences
+  - biunitary divisors
+  - non-monotonicity
 license: CC-BY-4.0
-version: 3.1.2
+version: 3.2.0
 date-released: "2026-09-04"
 references:
   - type: article
