@@ -402,9 +402,22 @@ The two terms marked with a double dagger:
                         every prime up to 1048575 examined; the lemma required
                         523775. 930082 nodes, 5 seconds.
 
-Neither was reachable before. For `sigma*` at girth 10 the seedless search had
-run **40 doublings** without finding anything; what made one round enough was an
-exhibited upper bound, and that is what section 9 produces.
+**What surgery bought here is a measured factor, not a possibility.** The
+seedless search reaches both on its own -- it had simply been stopped at round 40
+on `sigma*` girth 10, not exhausted -- and running it to the end gives the
+comparison:
+
+| | seedless, from the universal floor | from the surgery bound | saved |
+|---|---:|---:|---:|
+| `sigma*`, girth 10 | 206680700 nodes, 1125 s | 48321070 nodes, 252 s | **4.28x** |
+| `sigma**`, girth 7 | 4266506 nodes, 23 s | 930082 nodes, 5 s | **4.59x** |
+
+That factor is exactly the price of not knowing the answer that section 5
+measured at about 4, now confirmed on two cases where the two methods can be run
+side by side. An exhibited upper bound replaces every doubling round with one.
+
+    python src/exact.py "sigma*" 10 --no-seed     # the 1125 s run
+    python src/exact.py "sigma*" 10               # the 252 s one
 
     sigma*, girth 9:  9928651387877145   = 3^3 * 5 * 7^3 * 11^2 * 19 * 31^2 * 37 * 43 * 61
                       cycle 61 -> 31 -> 37 -> 19 -> 5 -> 3 -> 7 -> 43 -> 11 -> 61

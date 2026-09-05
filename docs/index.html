@@ -331,12 +331,13 @@ without searching for it.</p>
 "smaller" exactly twice, which is exactly the two times it happens — and in both
 it hands you the next number itself, on the nose.</p>
 
-<p>There is a bonus, and it is the reason two of the new values exist at all.
-Even when the insertion is <i>not</i> cheaper, it still hands you a real number
-of the next girth. And an exhibited number is exactly what the search of section
-6b needs to start. For one of the functions the seedless search had gone forty
-rounds at girth 10 without reaching anything; with a number to start from, one
-round of four minutes did it.</p>
+<p>There is a bonus, and it is how two of the new values were computed. Even when
+the insertion is <i>not</i> cheaper, it still hands you a real number of the next
+girth — and a number in hand is exactly what the search of section 6b needs to
+start, which saves it all the guessing. It was run both ways to see how much that
+is worth: starting from nothing took 1125 seconds, starting from the number the
+insertion hands you took 252. <b>It buys speed, not possibility</b>: the search
+gets there either way.</p>
 
 <h2 id="checking"><span class="num">7</span>How do we know we did not get it wrong?</h2>
 

@@ -57,12 +57,21 @@ Each new value was searched on its own digits, across all ~380,000 sequences:
 | `10762773021` *(v3.2)* | **0** |
 | `3321843525` *(v3.2)* | **0** |
 
-**And the positive control, run with the same code on the same day**: the perfect
-numbers `6, 28, 496, 8128, 33550336` return `ALREADY CATALOGUED`
-([A000396](https://oeis.org/A000396)), and the abundant numbers
+**Two positive controls, run with the same code on the same day.** For the
+sequences: the perfect numbers `6, 28, 496, 8128, 33550336` return `ALREADY
+CATALOGUED` ([A000396](https://oeis.org/A000396)), and the abundant numbers
 `12, 18, 20, 24, 30, 36, 40, 42, 48, 54` return
-[A005101](https://oeis.org/A005101). The silence above is therefore the
-instrument saying nothing, not the instrument being broken.
+[A005101](https://oeis.org/A005101). For the **single values** -- which are a
+different query and so need their own control -- searching `33550336` on its own
+digits returns **10 entries**, A000396 among them. The zeros in the table above
+are therefore the instrument saying nothing, not the instrument being broken.
+
+**And the first attempt at this control failed, which is why it is here.** The
+single-value queries were first run through the same helper used for sequences,
+which refuses anything shorter than a few terms: it returned "too short" for the
+new values *and for the perfect number*, so it could not tell an absence from a
+refusal. The numbers above come from the query that does answer, checked against
+the control first.
 
 ## 4. Bibliographic databases
 

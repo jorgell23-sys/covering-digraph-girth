@@ -65,9 +65,10 @@ de grafos sobre esa familia.
 | 10 | | **10858178043907173985005** | | |
 
 Los doce en negrita no habían sido calculados, y **los veintiséis son mínimos
-demostrados**. Dos de ellos no se podían calcular en absoluto antes de la versión
-3.2 — `sigma*` con cintura 10 y `sigma**` con cintura 7—, y los destrabó la
-cirugía de más abajo. Y mirá `sigma*` de la cintura 5 a la 6, y `sigma**` de la 5
+demostrados**. Dos de ellos —`sigma*` con cintura 10 y `sigma**` con cintura 7—
+se calcularon a partir de una cota superior que exhibe la cirugía de más abajo, y
+eso cuesta unas **4,3 veces menos** que buscar sin ninguna cota (medido de las
+dos formas). Y mirá `sigma*` de la cintura 5 a la 6, y `sigma**` de la 5
 a la 6: la sucesión **baja**. La sección *«Cuándo el siguiente es más chico»*
 cuenta por qué, y cómo saberlo de antemano.
 
@@ -218,12 +219,19 @@ razón menor que 1 *no* demuestra que el mínimo siguiente sea mayor: podría ve
 de un ciclo sin relación con éste. Que eso no pase en ninguno de los 22 pares es
 una medición, no una demostración.
 
-**Y el premio que produjo dos de los términos nuevos.** Aunque la inserción no
-salga más barata, igual exhibe un testigo de verdad de cintura `k+1`, y un
-testigo exhibido es justo el `N` que la búsqueda exhaustiva necesita. Para
-`sigma*` con cintura 10 la búsqueda sin semilla llevaba 40 duplicaciones sin
-llegar a nada; con la cota de la cirugía, una sola vuelta de cuatro minutos lo
-resolvió.
+**Y el premio, medido.** Aunque la inserción no salga más barata, igual exhibe un
+testigo de verdad de cintura `k+1`, y un testigo exhibido es justo el `N` que la
+búsqueda exhaustiva necesita: convierte todas las duplicaciones en una sola
+vuelta. Corrido de las dos formas sobre los dos términos nuevos:
+
+| | sin semilla | desde la cota de la cirugía | ahorra |
+|---|---:|---:|---:|
+| `sigma*`, cintura 10 | 206.680.700 nodos, 1125 s | 48.321.070 nodos, 252 s | **4,28×** |
+| `sigma**`, cintura 7 | 4.266.506 nodos, 23 s | 930.082 nodos, 5 s | **4,59×** |
+
+Es el mismo factor de alrededor de 4 que la versión 3 midió como precio de no
+saber la respuesta. **Compra velocidad, no posibilidad**: la búsqueda sin semilla
+también llega.
 
 La demostración, con sus límites, está en [RESULT.md](RESULT.md) (en inglés).
 

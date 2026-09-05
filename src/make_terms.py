@@ -48,11 +48,10 @@ FIRST_HERE = {
 #: reached by the seedless search of release 3.0.0. Every term is reproducible
 #: that way; these are the ones with no alternative.
 #:
-#: For ``sigma*`` at girth 10 and ``sigma**`` at girth 7 the seedless search had
-#: no *practical* alternative either: doubling from the universal floor had run
-#: 40 rounds on the first without reaching it. What made them computable was a
-#: seed that the surgery of release 3.2.0 exhibits, and with it one round is
-#: enough.
+#: ``sigma*`` at girth 10 and ``sigma**`` at girth 7 are NOT of that kind: the
+#: seedless search reaches both, in 1125 s and 23 s. They were computed from the
+#: upper bound the surgery of release 3.2.0 exhibits, which costs about 4.3
+#: times less -- speed, not possibility, and both numbers are in RESULT.md.
 NO_SEED_EXISTED = {("sigma*", 9)}
 
 

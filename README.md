@@ -61,9 +61,9 @@ graph invariant over that family.
 | 10 | | **10858178043907173985005** | | |
 
 The twelve in bold had not been computed before, and **all twenty-six are proved
-minimal**. Two of them could not have been computed at all before version 3.2:
-`sigma*` at girth 10 and `sigma**` at girth 7, both unlocked by the surgery
-below. And notice `sigma*` from girth 5 to 6, and `sigma**` from 5 to 6: the
+minimal**. Two of them -- `sigma*` at girth 10 and `sigma**` at girth 7 -- were
+computed from an upper bound the surgery below exhibits, which costs about
+**4.3x less** than searching with no bound at all (measured both ways). And notice `sigma*` from girth 5 to 6, and `sigma**` from 5 to 6: the
 sequence goes **down**. Section *"When the next one is smaller"* is about why,
 and about how to know it in advance.
 
@@ -204,11 +204,19 @@ python src/surgery.py "sigma*" 540765225 5
 *not* prove the next minimum is bigger — it could come from an unrelated cycle.
 That this never happens across the 22 pairs is measured, not proved.
 
-**And the bonus that produced two of the new terms.** Even when the insertion is
-not cheaper, it still exhibits a real witness of girth `k+1` — and an exhibited
-witness is exactly the `N` the exhaustive search needs. For `sigma*` at girth 10
-the seedless search had run 40 doublings without reaching anything; with the
-surgery bound, one round of four minutes settled it.
+**And the bonus, measured.** Even when the insertion is not cheaper, it still
+exhibits a real witness of girth `k+1` — and an exhibited witness is exactly the
+`N` the exhaustive search needs, which turns every doubling round into one round.
+Both ways, on the two terms new here:
+
+| | seedless | from the surgery bound | saved |
+|---|---:|---:|---:|
+| `sigma*`, girth 10 | 206680700 nodes, 1125 s | 48321070 nodes, 252 s | **4.28x** |
+| `sigma**`, girth 7 | 4266506 nodes, 23 s | 930082 nodes, 5 s | **4.59x** |
+
+That is the same factor of about 4 that version 3 measured as the price of not
+knowing the answer. **It buys speed, not possibility**: the seedless search gets
+there too.
 
 Proof, discussion and limits: **[RESULT.md](RESULT.md)**.
 

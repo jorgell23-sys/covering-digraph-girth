@@ -23,7 +23,11 @@ peer-reviewed paper, by an author who has never seen this repository.
 Optional, slower:
 
     python verify.py --full     also re-derives the sieved terms from scratch
-    python verify.py --exact    also re-proves the large terms (minutes)
+    python verify.py --exact    also re-proves the large terms
+
+Both slow modes together took 2419 seconds -- about 40 minutes -- on the machine
+this was written on, most of it re-proving sigma* at girth 10 twice: once with
+its own value as the bound, once from nothing.
 """
 
 import argparse
@@ -173,7 +177,7 @@ def main(argv=None):
                              "(slow: needs numpy and several minutes)")
     parser.add_argument("--exact", action="store_true",
                         help="also re-prove the large terms exhaustively "
-                             "(slow: about 25 minutes in total)")
+                             "(slow: about 40 minutes together with --full)")
     args = parser.parse_args(argv)
     started = time.time()
 
@@ -559,16 +563,27 @@ def main(argv=None):
 
     # The page announces how many checks this file runs; self-referential on
     # purpose, so that adding one and forgetting the text breaks the count.
+    #
+    # It counts the DEFAULT run, so it can only be compared in a default run.
+    # Under --exact or --full there are more checks and the comparison would
+    # always fail -- which it did, silently, for every release before this one:
+    # `verify.py --exact --full` could not pass, and nobody noticed because the
+    # slow modes are run rarely. A check that cannot pass in a documented mode
+    # is worse than no check, so here it says what it is doing instead.
     total = passed[0] + len(failures) + 2
-    for page in pages:
-        path = os.path.join(here, page)
-        if not os.path.exists(path):
-            continue
-        with open(path, encoding="utf-8") as fh:
-            m = re.search(r'data-fact="checks">([^<]+)<', fh.read())
-        check(m is not None and int(m.group(1)) == total,
-              "%s: the number of checks it announces is right (%s, expected %d)"
-              % (page, m.group(1) if m else "absent", total))
+    if args.exact or args.full:
+        print("  (the announced count is the default run's; not compared here, "
+              "because this run has %d checks and not the default's)" % total)
+    else:
+        for page in pages:
+            path = os.path.join(here, page)
+            if not os.path.exists(path):
+                continue
+            with open(path, encoding="utf-8") as fh:
+                m = re.search(r'data-fact="checks">([^<]+)<', fh.read())
+            check(m is not None and int(m.group(1)) == total,
+                  "%s: the number of checks it announces is right (%s, "
+                  "expected %d)" % (page, m.group(1) if m else "absent", total))
 
     # ----------------------------------------------------------------------
     elapsed = time.time() - started
