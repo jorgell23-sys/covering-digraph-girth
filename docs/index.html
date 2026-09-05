@@ -163,7 +163,7 @@ The length of the shortest cycle in a picture is called its <b>girth</b>.</p>
 
 <p>For <code>k = 3</code> the answer is <b>234</b>: no smaller number has a
 triangle. This work answers that question in
-<span data-fact="terms_total">19</span> cases, using three different
+<span data-fact="terms_total">26</span> cases, using four different
 calculations in place of the sum of divisors.</p>
 
 <h2 id="words"><span class="num">2</span>The words you need</h2>
@@ -258,18 +258,19 @@ program, and there are <b>two different programs</b> that share no method:</p>
 
 <h2 id="findings"><span class="num">6</span>What we found</h2>
 
-<h3>a) The nineteen values</h3>
+<h3>a) The twenty-six values</h3>
 
-<p>For three different calculations — the sum of divisors and two relatives of
+<p>For four different calculations — the sum of divisors and three relatives of
 it — and for each girth, the smallest number.
-<span data-fact="new_terms">5</span> of them <b>had never been computed
+<span data-fact="new_terms">12</span> of them <b>had never been computed
 before</b>.</p>
 
 <figure>
   <img src="figures/terms.svg" alt="Logarithmic plot of the size of the smallest number of each girth, for the three functions; filled dots are the ones computed for the first time.">
   <figcaption><b>Figure 3.</b> How fast they grow. The scale is logarithmic:
-  each mark multiplies by a thousand. From girth 2 to girth 9 you go from a
-  one-digit number to a sixteen-digit one.</figcaption>
+  each mark multiplies by a thousand. From girth 2 to girth 10 you go from a
+  one-digit number to a twenty-three-digit one — and the line is not always
+  going up, which is what section 6d is about.</figcaption>
 </figure>
 
 <h3>b) From "the smallest we found" to "the smallest"</h3>
@@ -306,10 +307,42 @@ exhaustively below it, the search needs no seed at all. That produced the first
 value that <b>could not have been computed before</b>: girth 9 for one of the
 three functions, which had no known example of its kind.</p>
 
+<h3>d) Sometimes the next number is <i>smaller</i>, and now we can tell in advance</h3>
+
+<p>You would expect that asking for a longer cycle costs more, and it usually
+does. But twice in the table the number of the next girth is <b>smaller</b> than
+the one before. Why?</p>
+
+<p>Look at the picture as a ring of beads. To make the ring one bead longer you
+<b>slip a new bead in between two old ones</b>. The new bead costs something —
+it is a new prime — but the bead it now sits behind may get cheaper, because it
+no longer has to reach all the way to the next one; a shorter reach means a
+smaller power. If the saving beats the cost, the longer ring is the
+<b>cheaper</b> one.</p>
+
+<p>That is the whole idea, and it can be checked without finding the next number
+at all. Everything the check needs is in the ring you already have: for each
+join, the powers below the one already there, and the primes that divide the
+value at that power. Both lists are short and finite. If one insertion comes out
+cheaper than what it replaces, then the next number is smaller — <b>proved</b>,
+without searching for it.</p>
+
+<p>It works: over every pair of consecutive girths in the table, the check says
+"smaller" exactly twice, which is exactly the two times it happens — and in both
+it hands you the next number itself, on the nose.</p>
+
+<p>There is a bonus, and it is how two of the new values were computed. Even when
+the insertion is <i>not</i> cheaper, it still hands you a real number of the next
+girth — and a number in hand is exactly what the search of section 6b needs to
+start, which saves it all the guessing. It was run both ways to see how much that
+is worth: starting from nothing took 1125 seconds, starting from the number the
+insertion hands you took 252. <b>It buys speed, not possibility</b>: the search
+gets there either way.</p>
+
 <h2 id="checking"><span class="num">7</span>How do we know we did not get it wrong?</h2>
 
 <p>Because anyone can run one command and watch. The repository ships a program
-running <span data-fact="checks">227</span> checks in a few seconds, with
+running <span data-fact="checks">396</span> checks in a few seconds, with
 nothing to install.</p>
 
 <ul class="plain">
@@ -354,6 +387,8 @@ nothing to install.</p>
     <td>If some prime has no arrow arriving, the number is out and nothing is claimed about it.</td></tr>
 <tr><td>That the method is the fastest possible</td>
     <td>It was measured to be several times faster than the previous one, and that is all that is claimed.</td></tr>
+<tr><td>That when the check finds no cheaper insertion, the next number is bigger</td>
+    <td>The check only works in one direction. When it finds one, the next number really is smaller. When it finds none, the next number could still be smaller for a reason that has nothing to do with this ring — that never happened in the table, but "never happened" is a measurement, not a proof.</td></tr>
 </table>
 
 <h2 id="glossary">Glossary</h2>

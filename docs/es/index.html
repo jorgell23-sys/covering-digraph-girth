@@ -164,7 +164,7 @@ camino que vuelve al punto de partida se llama <b>ciclo</b>, y su largo acá es
 
 <p>Para <code>k = 3</code> la respuesta es <b>234</b>: ningún número menor tiene
 un triángulo. Este trabajo contesta esa pregunta para
-<span data-fact="terms_total">19</span> casos, con tres cuentas distintas en
+<span data-fact="terms_total">26</span> casos, con cuatro cuentas distintas en
 lugar de la suma de divisores.</p>
 
 <h2 id="palabras"><span class="num">2</span>Las palabras que hacen falta</h2>
@@ -262,17 +262,18 @@ hay <b>dos programas distintos</b> que no comparten el método:</p>
 
 <h2 id="hallazgos"><span class="num">6</span>Lo que encontramos</h2>
 
-<h3>a) Los diecinueve valores</h3>
+<h3>a) Los veintiséis valores</h3>
 
-<p>Para tres cuentas distintas —la suma de divisores y dos parientes suyas— y
-para cada cintura, el número más chico. <span data-fact="new_terms">5</span> de
+<p>Para cuatro cuentas distintas —la suma de divisores y tres parientes suyas— y
+para cada cintura, el número más chico. <span data-fact="new_terms">12</span> de
 ellos <b>no se habían calculado nunca</b>.</p>
 
 <figure>
   <img src="../figures/terms.es.svg" alt="Gráfico en escala logarítmica del tamaño del menor número de cada cintura, para las tres funciones; los puntos rellenos son los calculados por primera vez.">
   <figcaption><b>Figura 3.</b> Cuánto crecen. La escala es logarítmica: cada
-  marca es multiplicar por mil. De cintura 2 a cintura 9 se pasa de un número de
-  una cifra a uno de dieciséis.</figcaption>
+  marca es multiplicar por mil. De cintura 2 a cintura 10 se pasa de un número de
+  una cifra a uno de veintitrés — y la línea no siempre sube, que es de lo que
+  habla la sección 6d.</figcaption>
 </figure>
 
 <h3>b) De «el más chico que encontramos» a «el más chico»</h3>
@@ -309,10 +310,42 @@ exhaustiva por debajo, la búsqueda ya no necesita ninguna semilla. Con eso sali
 el primer valor que <b>no podría haberse calculado antes</b>: la cintura 9 de
 una de las tres funciones, que no tenía ningún ejemplo conocido.</p>
 
+<h3>d) A veces el número siguiente es <i>más chico</i>, y ahora se puede saber de antemano</h3>
+
+<p>Uno esperaría que pedir un ciclo más largo cueste más, y casi siempre cuesta.
+Pero dos veces en la tabla el número de la cintura siguiente es <b>más chico</b>
+que el anterior. ¿Por qué?</p>
+
+<p>Mirá el dibujo como un collar de cuentas. Para alargar el collar en una cuenta
+hay que <b>meter una cuenta nueva entre dos viejas</b>. La cuenta nueva cuesta
+algo —es un primo más—, pero la cuenta que queda justo antes puede salir más
+barata, porque ya no tiene que alcanzar hasta la que seguía; alcanzar menos lejos
+significa una potencia más chica. Si lo que se ahorra es más que lo que se paga,
+el collar más largo es el <b>más barato</b>.</p>
+
+<p>Ésa es toda la idea, y se puede comprobar <b>sin encontrar el número
+siguiente</b>. Todo lo que la comprobación necesita está en el collar que ya se
+tiene: para cada unión, las potencias por debajo de la que ya está, y los primos
+que dividen al valor en esa potencia. Las dos listas son cortas y finitas. Si
+alguna inserción sale más barata que lo que reemplaza, entonces el número
+siguiente es más chico — <b>demostrado</b>, sin buscarlo.</p>
+
+<p>Y funciona: sobre todos los pares de cinturas consecutivas de la tabla, la
+comprobación dice «más chico» exactamente dos veces, que son exactamente las dos
+veces que pasa — y en las dos entrega el número siguiente clavado.</p>
+
+<p>Hay un premio extra, y es cómo se calcularon dos de los valores nuevos. Aunque
+la inserción <i>no</i> salga más barata, igual entrega un número de verdad de la
+cintura siguiente — y tener un número es justo lo que la búsqueda de la sección
+6b necesita para arrancar, porque le ahorra todo el tanteo. Se corrió de las dos
+formas para ver cuánto vale eso: arrancando de cero tardó 1125 segundos;
+arrancando del número que la inserción entrega, 252. <b>Compra velocidad, no
+posibilidad</b>: la búsqueda llega igual.</p>
+
 <h2 id="comprobar"><span class="num">7</span>¿Y cómo sabemos que no nos equivocamos?</h2>
 
 <p>Porque cualquiera puede correr un comando y verlo. El repositorio trae un
-programa que corre <span data-fact="checks">227</span> comprobaciones en unos
+programa que corre <span data-fact="checks">396</span> comprobaciones en unos
 segundos, sin instalar nada.</p>
 
 <ul class="plain">
@@ -358,6 +391,8 @@ segundos, sin instalar nada.</p>
     <td>Si a algún primo no le llega ninguna flecha, el número queda fuera y no se dice nada de él.</td></tr>
 <tr><td>Que el método sea el más rápido posible</td>
     <td>Se midió que es varias veces más rápido que el anterior, y eso es todo lo que se afirma.</td></tr>
+<tr><td>Que si la comprobación no encuentra ninguna inserción más barata, el número siguiente sea mayor</td>
+    <td>La comprobación vale en una sola dirección. Cuando encuentra una, el siguiente es de verdad más chico. Cuando no encuentra ninguna, el siguiente todavía podría ser más chico por un motivo que no tiene nada que ver con este collar — no pasó nunca en la tabla, pero «nunca pasó» es una medición, no una demostración.</td></tr>
 </table>
 
 <h2 id="glosario">Glosario</h2>

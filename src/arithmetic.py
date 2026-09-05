@@ -29,12 +29,13 @@ from collections import deque
 
 __all__ = [
     "factorize", "rad", "sigma", "unitary_sigma", "unitary_phi",
+    "biunitary_sigma", "biunitary_divisors",
     "f_of_prime_power", "in_S", "covering_digraph", "girth", "is_pure_cycle",
     "FUNCTIONS",
 ]
 
-#: The three multiplicative functions studied here, by name.
-FUNCTIONS = ("sigma", "sigma*", "phi*")
+#: The multiplicative functions studied here, by name.
+FUNCTIONS = ("sigma", "sigma*", "phi*", "sigma**")
 
 
 def factorize(n):
@@ -66,14 +67,30 @@ def rad(n):
     return result
 
 
+def biunitary_divisors(q, e):
+    """The biunitary divisors of q^e, straight from the definition.
+
+    A divisor d of n is *biunitary* when the greatest common unitary divisor of
+    d and n/d is 1. On a prime power that leaves every q^i except the middle one
+    when e is even, which is where the closed form below comes from -- and
+    ``verify.py`` compares the two rather than taking the closed form on trust.
+    """
+    def unitary(a):
+        return {1, q ** a} if a else {1}
+
+    return [q ** i for i in range(e + 1)
+            if max(unitary(i) & unitary(e - i)) == 1]
+
+
 def f_of_prime_power(q, e, f):
-    """Evaluate f at the prime power q^e, for the three functions studied.
+    """Evaluate f at the prime power q^e, for the four functions studied.
 
     These are the standard closed forms:
 
-        sigma(q^e)  = (q^(e+1) - 1) / (q - 1) = 1 + q + ... + q^e
-        sigma*(q^e) = q^e + 1        (the unitary divisors of q^e are 1 and q^e)
-        phi*(q^e)   = q^e - 1
+        sigma(q^e)   = (q^(e+1) - 1) / (q - 1) = 1 + q + ... + q^e
+        sigma*(q^e)  = q^e + 1       (the unitary divisors of q^e are 1 and q^e)
+        phi*(q^e)    = q^e - 1
+        sigma**(q^e) = sigma(q^e) - q^(e/2) for e even, sigma(q^e) for e odd
     """
     if f == "sigma":
         return (q ** (e + 1) - 1) // (q - 1)
@@ -81,6 +98,9 @@ def f_of_prime_power(q, e, f):
         return q ** e + 1
     if f == "phi*":
         return q ** e - 1
+    if f == "sigma**":
+        s = (q ** (e + 1) - 1) // (q - 1)
+        return s - q ** (e // 2) if e % 2 == 0 else s
     raise ValueError("unknown function: %r (expected one of %r)" % (f, FUNCTIONS))
 
 
@@ -105,6 +125,11 @@ def unitary_sigma(n):
 def unitary_phi(n):
     """The unitary analogue of Euler's phi: prod (q^e - 1)."""
     return _evaluate(n, "phi*")
+
+
+def biunitary_sigma(n):
+    """Sum of the biunitary divisors of n."""
+    return _evaluate(n, "sigma**")
 
 
 def in_S(n, f):

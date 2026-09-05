@@ -26,8 +26,11 @@ TERMS = {
     "sigma":  {2: 6, 3: 234, 4: 137214, 5: 275900625, 6: 180141399900,
                7: 7746928876851255, 8: 31674203849435875},
     "sigma*": {2: 6, 3: 6615, 4: 4380453, 5: 540765225, 6: 474549075,
-               7: 4485174218525, 8: 2386830845734335, 9: 9928651387877145},
+               7: 4485174218525, 8: 2386830845734335, 9: 9928651387877145,
+               10: 10858178043907173985005},
     "phi*":   {2: 12, 3: 66825, 4: 1120454775, 5: 1663175056640625},
+    "sigma**": {2: 6, 3: 15925, 4: 2321865, 5: 10762773021, 6: 3321843525,
+                7: 345358414826425},
 }
 
 #: The ones this project computed for the first time, and the release that did.
@@ -35,11 +38,20 @@ FIRST_HERE = {
     ("sigma", 7): "2.0.0", ("sigma", 8): "2.0.0",
     ("sigma*", 8): "2.0.0", ("phi*", 5): "2.0.0",
     ("sigma*", 9): "3.0.0",
+    ("sigma**", 2): "3.2.0", ("sigma**", 3): "3.2.0",
+    ("sigma**", 4): "3.2.0", ("sigma**", 5): "3.2.0",
+    ("sigma**", 6): "3.2.0", ("sigma**", 7): "3.2.0",
+    ("sigma*", 10): "3.2.0",
 }
 
 #: The ones for which no seed was available at all, so they could only be
 #: reached by the seedless search of release 3.0.0. Every term is reproducible
 #: that way; these are the ones with no alternative.
+#:
+#: ``sigma*`` at girth 10 and ``sigma**`` at girth 7 are NOT of that kind: the
+#: seedless search reaches both, in 1125 s and 23 s. They were computed from the
+#: upper bound the surgery of release 3.2.0 exhibits, which costs about 4.3
+#: times less -- speed, not possibility, and both numbers are in RESULT.md.
 NO_SEED_EXISTED = {("sigma*", 9)}
 
 

@@ -173,8 +173,8 @@ def fig_terms(terms, es=False):
     pad_l, pad_r, pad_t, pad_b = 62, 22, 40, 92
     gw, gh = w - pad_l - pad_r, h - pad_t - pad_b
     series = [("sigma", BLUE, "σ"), ("sigma*", AMBER, "σ*"),
-              ("phi*", PURPLE, "φ*")]
-    ks = list(range(2, 10))
+              ("phi*", PURPLE, "φ*"), ("sigma**", GREEN, "σ**")]
+    ks = list(range(2, 11))
     mx = 0
     for name, _, _ in series:
         for e in terms[name]:
