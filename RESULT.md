@@ -404,13 +404,13 @@ The two terms marked with a double dagger:
 
 **What surgery bought here is a measured factor, not a possibility.** The
 seedless search reaches both on its own -- it had simply been stopped at round 40
-on `sigma*` girth 10, not exhausted -- and running it to the end gives the
-comparison:
+on `sigma*` girth 10, and gets there on round **42**: two short -- and running it
+to the end gives the comparison:
 
 | | seedless, from the universal floor | from the surgery bound | saved |
 |---|---:|---:|---:|
-| `sigma*`, girth 10 | 206680700 nodes, 1125 s | 48321070 nodes, 252 s | **4.28x** |
-| `sigma**`, girth 7 | 4266506 nodes, 23 s | 930082 nodes, 5 s | **4.59x** |
+| `sigma*`, girth 10 | 206680700 nodes, 1125 s, 42 rounds | 48321070 nodes, 252 s | **4.28x** |
+| `sigma**`, girth 7 | 4266506 nodes, 23 s, 31 rounds | 930082 nodes, 5 s | **4.59x** |
 
 That factor is exactly the price of not knowing the answer that section 5
 measured at about 4, now confirmed on two cases where the two methods can be run

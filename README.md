@@ -211,8 +211,8 @@ Both ways, on the two terms new here:
 
 | | seedless | from the surgery bound | saved |
 |---|---:|---:|---:|
-| `sigma*`, girth 10 | 206680700 nodes, 1125 s | 48321070 nodes, 252 s | **4.28x** |
-| `sigma**`, girth 7 | 4266506 nodes, 23 s | 930082 nodes, 5 s | **4.59x** |
+| `sigma*`, girth 10 | 206680700 nodes, 1125 s, 42 rounds | 48321070 nodes, 252 s | **4.28x** |
+| `sigma**`, girth 7 | 4266506 nodes, 23 s, 31 rounds | 930082 nodes, 5 s | **4.59x** |
 
 That is the same factor of about 4 that version 3 measured as the price of not
 knowing the answer. **It buys speed, not possibility**: the seedless search gets

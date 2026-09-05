@@ -226,8 +226,8 @@ vuelta. Corrido de las dos formas sobre los dos términos nuevos:
 
 | | sin semilla | desde la cota de la cirugía | ahorra |
 |---|---:|---:|---:|
-| `sigma*`, cintura 10 | 206.680.700 nodos, 1125 s | 48.321.070 nodos, 252 s | **4,28×** |
-| `sigma**`, cintura 7 | 4.266.506 nodos, 23 s | 930.082 nodos, 5 s | **4,59×** |
+| `sigma*`, cintura 10 | 206.680.700 nodos, 1125 s, 42 vueltas | 48.321.070 nodos, 252 s | **4,28×** |
+| `sigma**`, cintura 7 | 4.266.506 nodos, 23 s, 31 vueltas | 930.082 nodos, 5 s | **4,59×** |
 
 Es el mismo factor de alrededor de 4 que la versión 3 midió como precio de no
 saber la respuesta. **Compra velocidad, no posibilidad**: la búsqueda sin semilla
