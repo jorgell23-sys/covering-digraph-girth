@@ -2,15 +2,96 @@
 
 *(English version: [README.md](README.md))*
 
-Veintiséis números enteros, cada uno **demostradamente** el más chico de su
-clase — doce de ellos nunca calculados antes — y los teoremas chicos que hacen
-posible demostrarlo **sin conocer ninguna respuesta de antemano**, y que avisan
-de antemano cuándo el siguiente va a ser **más chico**.
+<!-- hallazgo:que -->
+## Qué se encontró
 
-**Todo esto se comprueba en dos segundos:**
+Tomá un número entero y, por cada primo `q` que lo divide, dibujá una flecha
+`q -> p` cada vez que `p` divide a `f(q^e)`, con `q^e` la potencia exacta de `q`
+que hay en él y `f` la suma de divisores o una pariente suya. Quedate con los
+números donde **todo primo recibe una flecha**. Ese dibujo siempre contiene un
+ciclo dirigido, y el largo del más corto es un invariante del número.
 
-> **¿Es tu primera vez con esto? Empezá acá:** [**Explicación desde cero**](https://jorgell23-sys.github.io/covering-digraph-girth/es/) —
-> todo contado con peras y manzanas, con dibujos y sin conocimientos previos.
+Este trabajo calcula, para cuatro de esas funciones, **el menor número cuyo
+ciclo más corto tiene cada largo** — 26 valores, cada uno *demostradamente* el
+menor que existe y no el menor que alguien alcanzó a mirar, doce de ellos
+calculados acá por primera vez. Y da una **operación local sobre ese ciclo** que
+decide, mirando un solo valor, si el siguiente va a ser **más chico** — dos
+veces en esta tabla lo es.
+
+<!-- hallazgo:enunciado -->
+## El enunciado
+
+Escribí `rad(n)` para el producto de los primos distintos de `n`, y
+`S(f) = { n : rad(n) divide a f(n) }`. Para `n` en `S(f)` el dibujo de arriba es
+el **digrafo de cubrimiento**, y el largo de su ciclo dirigido más corto es
+`g_f(n)`, la **cintura**. `m_f(k)` es el menor `n` de `S(f)` con `g_f(n) = k`.
+
+> **Lema de corte.** Si `n = m_f(k)` y `P` es su mayor primo, entonces
+>
+>     n  >=  P * a_f(P) * (producto de los k-2 primos mas chicos)
+>
+> con `a_f(P)` la menor potencia de primo `m` para la que `P` puede dividir a
+> `f(m)`. Leído al revés desde cualquier testigo exhibido, eso **acota `P`**: la
+> enumeración se vuelve finita y cada valor de abajo pasa a ser un mínimo
+> demostrado.
+
+> **Cirugía.** Sea `n` un testigo de cintura `k` cuyo digrafo es el ciclo puro
+> `q_1 -> ... -> q_k -> q_1`, sea `p` un primo fuera de él, y sean `e', a >= 1`
+> con `p | f(q_i^e')` y `q_{i+1} | f(p^a)` sin que aparezca ninguna cuerda.
+> Entonces `n' = n * q_i^(e'-e_i) * p^a` es un testigo de cintura `k+1`, así que
+>
+>     m_f(k+1)  <=  m_f(k) * q_i^(e'-e_i) * p^a
+>
+> **Certificado.** Si ese factor es menor que 1, entonces `m_f(k+1) < m_f(k)` —
+> demostrado *sin calcular* `m_f(k+1)`, con una búsqueda finita que nunca
+> recorre primos.
+
+<!-- hallazgo:ejemplo -->
+## El caso más chico, hecho a mano
+
+Tomá `n = 234 = 2 * 3^2 * 13` y `f = sigma`:
+
+    sigma(2)   = 3             ->  flecha  2  -> 3
+    sigma(3^2) = 13            ->  flecha  3  -> 13
+    sigma(13)  = 14 = 2 * 7    ->  flecha  13 -> 2
+
+Todo primo recibe una flecha, así que `234` está en `S(sigma)`, y las flechas
+forman el triángulo `2 -> 3 -> 13 -> 2`: cintura 3. **Ningún número menor tiene
+uno** — ésa es la entrada `m_sigma(3) = 234` de la tabla, y el lema de corte es
+lo que convierte «no encontramos ninguno» en «no hay ninguno».
+
+Ahora el certificado, con `f = sigma*`, donde `sigma*(q^e) = q^e + 1`:
+
+    m(5) = 540765225 = 3^2 * 5^2 * 7^5 * 11 * 13
+
+Bajá `7^5` a `7^3` e insertá el primo `43`. El tramo nuevo cuesta `43` y el
+exponente que libera valía `7^2 = 49`, así que la razón es `43/49 < 1`. Por lo
+tanto `m(6) < m(5)`, y el número que la operación devuelve,
+
+    474549075 = 3^2 * 5^2 * 7^3 * 11 * 13 * 43
+
+es `m(6)` **exactamente**. La sucesión baja en `k = 5`, y eso se supo antes de
+calcular `m(6)`.
+
+<!-- hallazgo:prueba -->
+## Por qué es cierto
+
+El lema de corte son dos desigualdades sobre el mismo factor: el antecesor de
+`P` en el ciclo aporta una potencia de primo `q^e` con `P | f(q^e)`, luego
+`q^e >= a_f(P)`; y los `k-2` primos restantes son distintos, luego aportan al
+menos el primorial. Con `P` acotado, enumerar ciclos sobre los primos de abajo
+es enumerarlos **todos**, así que una búsqueda que no encuentra nada demostró
+que no hay nada.
+
+La cirugía es una cuenta de flechas. En `n'` los vértices `q_j` con `j != i`
+conservaron su exponente, así que siguen apuntando sólo a `q_{j+1}`; `q_i`
+apunta a `p` y, por las condiciones de no-cuerda, a nada más; y `p` apunta a
+`q_{i+1}` y a nada más. El digrafo es exactamente el `(k+1)`-ciclo. Esas
+condiciones no son trámite: sacalas y el mismo movimiento sobre `m_sigma(5)` da
+`1103602500`, cuya cintura es **2**.
+
+<!-- hallazgo:comprobar -->
+## Comprobalo vos, en cinco segundos
 
 ```bash
 git clone https://github.com/jorgell23-sys/covering-digraph-girth
@@ -18,7 +99,26 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-Sin instalar nada. Corre 375 comprobaciones e imprime PASS o FAIL para cada una.
+375 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
+salida 1 si alguna falla. Recalculan cada valor publicado desde las
+definiciones, redemuestran de forma exhaustiva los que se pueden, y cruzan el
+conteo de `S(sigma)` por debajo de `10^9` contra Pollack y Pomerance (2012), que
+nunca vieron este repositorio.
+
+<!-- hallazgo:nodice -->
+## Qué NO dice
+
+La familia de números **no es nueva**: para `sigma` son los *prime-abundant* de
+Pollack y Pomerance, catalogados como [A175200](https://oeis.org/A175200). Lo
+que se calcula acá es un invariante de grafo sobre esa familia. El certificado
+vale en **una sola dirección**: que no haya inserción con razón menor que 1 no
+demuestra que el mínimo siguiente sea mayor. Y la tabla llega hasta donde llegó
+el cómputo: las casillas vacías son casillas vacías, no ceros.
+
+---
+
+> **¿Es tu primera vez con esto? Empezá acá:** [**Explicación desde cero**](https://jorgell23-sys.github.io/covering-digraph-girth/es/) —
+> todo contado con peras y manzanas, con dibujos y sin conocimientos previos.
 
 ---
 
