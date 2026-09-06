@@ -30,6 +30,6 @@
       "scheme": "url"
     }
   ],
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "Smallest members of S(f) = {n : rad(n) | f(n)} by the girth of their covering digraph, for f = sigma, sigma*, phi* and sigma** (the sum of the biunitary divisors). Twenty-six values, all proved minimal. A cutoff lemma bounds the largest prime a smaller witness could use; a per-arc strengthening of it makes the search several times cheaper; and a floor that mentions no witness at all, combined with doubling over an exhaustive search, removes the need for a known witness entirely. A surgery theorem inserts one vertex into the cycle of a witness of girth k to obtain a witness of girth k+1: it bounds the next smallest witness from above, and when the inserted stretch costs less than the exponent it saves it certifies, without computing anything further, that the next smallest witness is strictly smaller -- which over the twenty-two consecutive pairs of the table happens exactly where the sequence goes down. Twelve values had not been computed before; two of them, sigma* at girth 10 and sigma** at girth 7, were reachable only with the upper bound surgery supplies, and the upper bound for sigma at girth 9 improves by a factor of 6.75. Verified by independent implementations and cross-checked against Pollack and Pomerance (2012)."
 }
