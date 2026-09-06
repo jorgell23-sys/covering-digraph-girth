@@ -9,12 +9,14 @@ the sum of divisors or a relative of it. Keep the integers where **every prime
 receives an arrow**. That drawing always contains a directed cycle, and the
 length of its shortest one is an invariant of the integer.
 
-This work computes, for four such functions, **the smallest integer whose
-shortest cycle has each given length** -- 26 values, every one *proved* to be
+This work computes, for eleven such functions, **the smallest integer whose
+shortest cycle has each given length** -- 52 values, every one *proved* to be
 the smallest that exists and not merely the smallest anyone looked far enough to
-find, twelve of them computed here for the first time. And it gives a **local
+find, 38 of them computed here for the first time. And it gives a **local
 operation on that cycle** which decides, from one value alone, whether the next
-one will be **smaller** -- twice in this table it is.
+one will be **smaller** -- twice in 64 consecutive pairs it is, both times at
+the same step, and the operation is shown to be sufficient but **not**
+necessary.
 
 <!-- hallazgo:enunciado -->
 ## The statement

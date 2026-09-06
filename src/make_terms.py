@@ -31,6 +31,16 @@ TERMS = {
     "phi*":   {2: 12, 3: 66825, 4: 1120454775, 5: 1663175056640625},
     "sigma**": {2: 6, 3: 15925, 4: 2321865, 5: 10762773021, 6: 3321843525,
                 7: 345358414826425},
+    #: The parametric families, added in 3.3.0. Nothing in the cutoff lemma or
+    #: in the pure-cycle theorem mentions which f is used, so the same machinery
+    #: applies; what was missing was that the code only knew four names.
+    "sigma*3": {2: 6, 3: 2565, 4: 9933, 5: 2175327, 6: 1278999267},
+    "sigma*5": {2: 6, 3: 2013, 4: 32175, 5: 3910725},
+    "sigma*6": {2: 10, 3: 207553, 4: 237133},
+    "phi*3":   {2: 12, 3: 16891, 4: 26217125, 5: 76670443861},
+    "phi*4":   {2: 6, 3: 207553, 4: 16099333, 5: 2534414641},
+    "phi*5":   {2: 12, 3: 27951, 4: 161994931},
+    "phi*6":   {2: 6, 3: 17501, 4: 4176227},
 }
 
 #: The ones this project computed for the first time, and the release that did.
@@ -43,6 +53,10 @@ FIRST_HERE = {
     ("sigma**", 6): "3.2.0", ("sigma**", 7): "3.2.0",
     ("sigma*", 10): "3.2.0",
 }
+FIRST_HERE.update({(f, k): "3.3.0"
+                   for f in ("sigma*3", "sigma*5", "sigma*6",
+                             "phi*3", "phi*4", "phi*5", "phi*6")
+                   for k in TERMS[f]})
 
 #: The ones for which no seed was available at all, so they could only be
 #: reached by the seedless search of release 3.0.0. Every term is reproducible

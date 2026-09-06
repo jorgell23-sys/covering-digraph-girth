@@ -598,6 +598,69 @@ def main(argv=None):
     # their generator produces right now. So if a value improves and the
     # explanation is not updated, THIS FAILS -- which is the point: a rule
     # written in prose gets broken again.
+    # ----------------------------------------------------------------------
+    print("\n13b. The surgery certificate is sufficient and NOT necessary")
+    # ----------------------------------------------------------------------
+    # Section 12c of RESULT.md: for every k and every C there is a
+    # multiplicative, local f with m_f(k+1) < m_f(k)/C, m_f(k) squarefree --
+    # so no certificate can fire -- and the two cycles disjoint. The f is
+    # built here and the minima are found by brute force, not asserted.
+    for k, small, big in ((2, [2, 3, 5], [7, 11]),
+                          (2, [2, 3, 5], [101, 103]),
+                          (3, [2, 3, 5, 7], [101, 103, 107])):
+        table = {}
+        for cycle in (small, big):
+            for i, q in enumerate(cycle):
+                table[q] = cycle[(i + 1) % len(cycle)]
+        check(all(table[q] % q for q in table),
+              "counterexample k=%d: f is local" % k)
+        smallest = {}
+        limit = 1
+        for q in big:
+            limit *= q
+        for n in range(2, limit + 1):
+            factors = factorize(n)
+            value = 1
+            for q in factors:
+                value *= table.get(q, 1)
+            if any(value % q for q in factors):
+                continue
+            primes = sorted(factors)
+            out = {q: [pp for pp in primes
+                       if pp != q and table.get(q, 1) % pp == 0]
+                   for q in primes}
+            shortest = None
+            for start in primes:
+                dist, queue = {start: 0}, [start]
+                while queue:
+                    u = queue.pop(0)
+                    for v in out[u]:
+                        if v == start:
+                            c = dist[u] + 1
+                            shortest = c if shortest is None else min(shortest, c)
+                        elif v not in dist:
+                            dist[v] = dist[u] + 1
+                            queue.append(v)
+            if shortest is not None and shortest not in smallest:
+                smallest[shortest] = n
+        here_n, next_n = smallest.get(k), smallest.get(k + 1)
+        expected_here, expected_next = 1, 1
+        for q in big:
+            expected_here *= q
+        for q in small:
+            expected_next *= q
+        check(here_n == expected_here and next_n == expected_next,
+              "counterexample k=%d: the minima are %d and %d, as predicted"
+              % (k, expected_here, expected_next))
+        check(next_n < here_n,
+              "counterexample k=%d: m_f(%d) = %d < m_f(%d) = %d (ratio %.1f)"
+              % (k, k + 1, next_n, k, here_n, here_n / next_n))
+        check(all(e == 1 for e in factorize(here_n).values()),
+              "counterexample k=%d: m_f(%d) is squarefree, no certificate can "
+              "fire" % (k, k))
+        check(not (set(factorize(here_n)) & set(factorize(next_n))),
+              "counterexample k=%d: the two cycles are disjoint" % k)
+
     print("\n14. The explainer page is in sync with the data")
     here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(here, "data", "terms.json"), encoding="utf-8") as fh:

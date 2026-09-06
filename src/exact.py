@@ -77,6 +77,11 @@ Usage
     python src/exact.py "phi*" 5 --bound 1663175056640625
 """
 
+import re as _re
+
+#: same shape as in arithmetic.py
+_NAME = _re.compile(r"(sigma|phi)(\*?)(\d*)")
+
 import argparse
 import time
 import os
@@ -216,7 +221,39 @@ def predecessor_floor(P, f):
         # biunitary divisors of q^e are a subset of its divisors. So the same
         # bound holds, and it is valid without any further hypothesis.
         return (P + 1) // 2
-    raise ValueError("unknown function: %r" % (f,))
+    # The parametric families, added in 3.3.0. With a = q^s,
+    #
+    #     sigma_s(q^e)  = (q^(s(e+1)) - 1)/(q^s - 1) < 2 q^(se)  =>  a > P/2
+    #     sigma*_s(q^e) = q^(se) + 1                             =>  a >= P - 1
+    #     phi*_s(q^e)   = q^(se) - 1                             =>  a >= P + 1
+    #
+    # and q^e is the s-th root of a, rounded up. Integer arithmetic throughout:
+    # a float at the boundary could drop a legitimate witness, which is exactly
+    # what this lemma exists to prevent.
+    m = _NAME.fullmatch(f)
+    if m is None:
+        raise ValueError("unknown function: %r" % (f,))
+    base, star, suffix = m.group(1), bool(m.group(2)), m.group(3)
+    if base == "phi" and not star:
+        raise ValueError("unknown function: %r" % (f,))
+    s = int(suffix) if suffix else 1
+    if star:
+        target = P - 1 if base == "sigma" else P + 1
+    else:
+        target = (P + 1) // 2
+    return _integer_root_up(target, s)
+
+
+def _integer_root_up(x, s):
+    """The least integer r with r^s >= x. Integers only."""
+    if x <= 1:
+        return 1
+    r = int(round(x ** (1.0 / s)))
+    while r ** s < x:
+        r += 1
+    while r > 1 and (r - 1) ** s >= x:
+        r -= 1
+    return r
 
 
 def cycle_floor(P, k, f):
