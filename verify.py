@@ -233,6 +233,11 @@ def front_page():
               % (name, "" if m is None else " -- found %r" % m.group(0)))
 
 
+#: How each README states the number of checks it runs.
+CHECKS_EN = r"(\d+) checks, no dependencies"
+CHECKS_ES = r"(\d+) comprobaciones, sin instalar nada"
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--full", action="store_true",
@@ -739,6 +744,23 @@ def main(argv=None):
             check(m is not None and int(m.group(1)) == total,
                   "%s: the number of checks it announces is right (%s, "
                   "expected %d)" % (page, m.group(1) if m else "absent", total))
+
+        # The two READMEs announce the same count in prose, and until 3.3.1
+        # nothing compared it: the publisher printed a WARNING and let the
+        # release out anyway, so v3.3.0 shipped saying "396 checks" on a front
+        # page that runs 411. A rule enforced only by the tool that publishes
+        # breaks the first time the page is edited afterwards, or the line is
+        # ignored -- which is why it is checked here, by the artifact itself.
+        for readme, pattern in (("README.md", CHECKS_EN), ("README.es.md", CHECKS_ES)):
+            path = os.path.join(here, readme)
+            if not os.path.exists(path):
+                continue
+            with open(path, encoding="utf-8") as fh:
+                m = re.search(pattern, fh.read())
+            check(m is not None and int(m.group(1)) == total,
+                  "%-13s: the number of checks it announces is right (%s, "
+                  "expected %d)"
+                  % (readme, m.group(1) if m else "absent", total))
 
     # ----------------------------------------------------------------------
     elapsed = time.time() - started
