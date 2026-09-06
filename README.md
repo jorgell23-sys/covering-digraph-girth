@@ -291,3 +291,14 @@ were produced by an automated system (Claude, Anthropic) under that direction.
 All computations were verified by independent implementations and cross-checked
 against published work. The author is responsible for the correctness of
 everything published here.
+
+## Citing
+
+This work is archived on Zenodo. Cite the **concept DOI**, which always resolves
+to the latest version:
+
+> Ellena Godoy, Jorge. *Smallest witnesses by girth for rad(n) | f(n)*. Zenodo. https://doi.org/10.5281/zenodo.22288593
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22288593.svg)](https://doi.org/10.5281/zenodo.22288593)
+
+The DOI of this specific version is [`10.5281/zenodo.22459593`](https://doi.org/10.5281/zenodo.22459593).

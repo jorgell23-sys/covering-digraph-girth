@@ -41,6 +41,14 @@ keywords:
   - non-monotonicity
 license: CC-BY-4.0
 version: 3.3.3
+doi: "10.5281/zenodo.22288593"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.22288593"
+    description: "Concept DOI: always the latest version."
+  - type: doi
+    value: "10.5281/zenodo.22459593"
+    description: "DOI of this version."
 date-released: "2026-09-04"
 references:
   - type: article
