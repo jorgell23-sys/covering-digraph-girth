@@ -730,15 +730,23 @@ def main(argv=None):
     # `verify.py --exact --full` could not pass, and nobody noticed because the
     # slow modes are run rarely. A check that cannot pass in a documented mode
     # is worse than no check, so here it says what it is doing instead.
-    total = passed[0] + len(failures) + 2
+    # The "+ len(...)" is the checks of this very block, which run after the
+    # total is computed and so are not in `passed` yet. It used to be a literal
+    # 2, one per docs page; adding the two READMEs in 3.3.1 left it short, and
+    # the pages went out announcing 411 for a run of 413. Counting the pages
+    # instead of hard-coding how many there are makes the next page free.
+    paginas = [pg for pg in pages
+               if os.path.exists(os.path.join(here, pg))]
+    lecturas = [(rd, pat) for rd, pat in (("README.md", CHECKS_EN),
+                                          ("README.es.md", CHECKS_ES))
+                if os.path.exists(os.path.join(here, rd))]
+    total = passed[0] + len(failures) + len(paginas) + len(lecturas)
     if args.exact or args.full:
         print("  (the announced count is the default run's; not compared here, "
               "because this run has %d checks and not the default's)" % total)
     else:
-        for page in pages:
+        for page in paginas:
             path = os.path.join(here, page)
-            if not os.path.exists(path):
-                continue
             with open(path, encoding="utf-8") as fh:
                 m = re.search(r'data-fact="checks">([^<]+)<', fh.read())
             check(m is not None and int(m.group(1)) == total,
@@ -751,10 +759,8 @@ def main(argv=None):
         # page that runs 411. A rule enforced only by the tool that publishes
         # breaks the first time the page is edited afterwards, or the line is
         # ignored -- which is why it is checked here, by the artifact itself.
-        for readme, pattern in (("README.md", CHECKS_EN), ("README.es.md", CHECKS_ES)):
+        for readme, pattern in lecturas:
             path = os.path.join(here, readme)
-            if not os.path.exists(path):
-                continue
             with open(path, encoding="utf-8") as fh:
                 m = re.search(pattern, fh.read())
             check(m is not None and int(m.group(1)) == total,

@@ -137,7 +137,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-411 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
+413 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
 salida 1 si alguna falla. Rederivan cada valor publicado desde las definiciones,
 redemuestran exhaustivamente los alcanzables, construyen la `f` del Teorema 4 y
 localizan sus mínimos por fuerza bruta, y contrastan el conteo de `S(sigma)` por
