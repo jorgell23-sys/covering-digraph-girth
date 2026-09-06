@@ -1,98 +1,135 @@
-# El menor testigo de cada cintura para rad(n) | f(n)
-
-*(English version: [README.md](README.md))*
+# Menores testigos por cintura para `rad(n) | f(n)`
 
 <!-- hallazgo:que -->
 ## Qué se encontró
 
-Tomá un número entero y, por cada primo `q` que lo divide, dibujá una flecha
-`q -> p` cada vez que `p` divide a `f(q^e)`, con `q^e` la potencia exacta de `q`
-que hay en él y `f` la suma de divisores o una pariente suya. Quedate con los
-números donde **todo primo recibe una flecha**. Ese dibujo siempre contiene un
-ciclo dirigido, y el largo del más corto es un invariante del número.
+Dada una función multiplicativa `f` y un entero `n`, se traza una flecha
+`q -> p` entre primos que dividen a `n` cuando `p | f(q^e)`, con `q^e` la
+potencia exacta de `q` en `n`. Restringiendo a los `n` en que **todo primo
+recibe flecha**, ese dibujo siempre contiene un ciclo dirigido, y el largo del
+más corto es un invariante de `n`.
 
-Este trabajo calcula, para once de esas funciones, **el menor número cuyo
-ciclo más corto tiene cada largo** — 52 valores, cada uno *demostradamente* el
-menor que existe y no el menor que alguien alcanzó a mirar, 38 de ellos
-calculados acá por primera vez. Y da una **operación local sobre ese ciclo** que
-decide, mirando un solo valor, si el siguiente va a ser **más chico** — dos
-veces en 64 pasos consecutivos lo es, las dos en el mismo paso, y la operación
-resulta suficiente pero **no** necesaria.
+Este repositorio calcula **el menor `n` cuyo ciclo más corto tiene largo `k`**,
+para once funciones y `k = 2, ..., 10`: **52 valores, cada uno demostradamente
+mínimo**, 38 de ellos calculados acá por primera vez. Demuestra además una
+operación local sobre el ciclo que da una cota superior para el valor siguiente,
+y un **certificado** derivado de ella que decide `m_f(k+1) < m_f(k)` **sin
+calcular** `m_f(k+1)`. El certificado resulta **suficiente y no necesario**.
 
 <!-- hallazgo:enunciado -->
-## El enunciado
+## Definiciones y enunciados
 
-Escribí `rad(n)` para el producto de los primos distintos de `n`, y
-`S(f) = { n : rad(n) divide a f(n) }`. Para `n` en `S(f)` el dibujo de arriba es
-el **digrafo de cubrimiento**, y el largo de su ciclo dirigido más corto es
-`g_f(n)`, la **cintura**. `m_f(k)` es el menor `n` de `S(f)` con `g_f(n) = k`.
+Sea `f` multiplicativa y **local**, es decir que `q` nunca divide a `f(q^e)`.
+Se escribe `rad(n)` para el producto de los primos distintos de `n` y
 
-> **Lema de corte.** Si `n = m_f(k)` y `P` es su mayor primo, entonces
->
->     n  >=  P * a_f(P) * (producto de los k-2 primos mas chicos)
->
-> con `a_f(P)` la menor potencia de primo `m` para la que `P` puede dividir a
-> `f(m)`. Leído al revés desde cualquier testigo exhibido, eso **acota `P`**: la
-> enumeración se vuelve finita y cada valor de abajo pasa a ser un mínimo
-> demostrado.
+    S(f) = { n >= 1 : rad(n) divide a f(n) }.
 
-> **Cirugía.** Sea `n` un testigo de cintura `k` cuyo digrafo es el ciclo puro
-> `q_1 -> ... -> q_k -> q_1`, sea `p` un primo fuera de él, y sean `e', a >= 1`
-> con `p | f(q_i^e')` y `q_{i+1} | f(p^a)` sin que aparezca ninguna cuerda.
-> Entonces `n' = n * q_i^(e'-e_i) * p^a` es un testigo de cintura `k+1`, así que
+Para `n = prod q_j^{e_j}` en `S(f)`, el **digrafo de cubrimiento** `D_f(n)`
+tiene por vértices los primos de `n` y una flecha `q_i -> q_j` (`i != j`) cuando
+`q_j | f(q_i^{e_i})`. Pertenecer a `S(f)` equivale a que todo vértice tenga
+flecha entrante, así que `D_f(n)` siempre contiene un ciclo dirigido. Su
+**cintura** `g_f(n)` es el largo del más corto, y
+
+    m_f(k) = min { n en S(f) : g_f(n) = k }.
+
+Las once funciones son `sigma`, `sigma*` (unitaria), `phi*` (totiente unitaria),
+`sigma**` (biunitaria) y las familias con parámetro
+
+    sigma_s(q^e)  = (q^{s(e+1)} - 1)/(q^s - 1),    sigma*_s(q^e) = q^{se} + 1,
+    phi*_s(q^e)   = q^{se} - 1,                    para s = 3, 4, 5, 6.
+
+> **Teorema 1 (forma de un mínimo).** `m_f(k)` tiene exactamente `k` primos
+> distintos, y `D_f(m_f(k))` es un ciclo puro de largo `k`.
+
+> **Teorema 2 (lema de corte).** Sea `n` un testigo de cintura `k` y `P` su mayor
+> primo, y sea `a_f(P)` la menor potencia de primo `m` con `P | f(m)`. Entonces
 >
->     m_f(k+1)  <=  m_f(k) * q_i^(e'-e_i) * p^a
+>     n  >=  P * a_f(P) * primorial(k-2).
 >
-> **Certificado.** Si ese factor es menor que 1, entonces `m_f(k+1) < m_f(k)` —
-> demostrado *sin calcular* `m_f(k+1)`, con una búsqueda finita que nunca
-> recorre primos.
+> En consecuencia, exhibido un testigo `N` de cintura `k`, el mayor primo de
+> `m_f(k)` queda acotado por el mayor `P` para el que la desigualdad todavía
+> admite `n < N`. La enumeración por debajo de esa cota es exhaustiva, así que
+> una búsqueda que no encuentra nada **demuestra** que no hay nada.
+
+> **Teorema 3 (cirugía).** Sea `n` un testigo de cintura `k` cuyo digrafo es el
+> ciclo puro `q_1 -> ... -> q_k -> q_1`, sea `p` un primo fuera de él y sean
+> `e', a >= 1` tales que, para algún índice `i`:
+>
+> 1. `p | f(q_i^{e'})`;
+> 2. `q_{i+1} | f(p^a)`;
+> 3. `q_j` no divide a `f(q_i^{e'})` para todo `j != i`;
+> 4. `q_j` no divide a `f(p^a)` para todo `j != i+1`;
+> 5. `p` no divide a `f(q_j^{e_j})` para todo `j != i`.
+>
+> Entonces `n' = n * q_i^{e'-e_i} * p^a` es un testigo de cintura `k+1`, y por lo
+> tanto
+>
+>     m_f(k+1)  <=  m_f(k) * q_i^{e'-e_i} * p^a.
+>
+> **Corolario (certificado).** Si además `q_i^{e'} * p^a < q_i^{e_i}`, entonces
+> `m_f(k+1) < m_f(k)`. Decidirlo es una búsqueda finita que nunca enumera primos:
+> la desigualdad obliga `e' < e_i`, así que `e'` recorre `1..e_i-1`, `p` recorre
+> los divisores primos de `f(q_i^{e'})` y `a` los exponentes con
+> `p^a < q_i^{e_i-e'}`.
+
+> **Teorema 4 (el certificado no es necesario).** Para todo `k >= 2` y todo
+> `C > 0` existe `f` multiplicativa y local con `m_f(k+1) < m_f(k)/C`, con
+> `m_f(k)` libre de cuadrados —de modo que ningún certificado puede dispararse—
+> y con los ciclos de `m_f(k)` y `m_f(k+1)` **disjuntos**.
 
 <!-- hallazgo:ejemplo -->
 ## El caso más chico, hecho a mano
 
-Tomá `n = 234 = 2 * 3^2 * 13` y `f = sigma`:
+Sea `n = 234 = 2 * 3^2 * 13` y `f = sigma`:
 
-    sigma(2)   = 3             ->  flecha  2  -> 3
-    sigma(3^2) = 13            ->  flecha  3  -> 13
-    sigma(13)  = 14 = 2 * 7    ->  flecha  13 -> 2
+    sigma(2)   = 3            ->   2 -> 3
+    sigma(3^2) = 13           ->   3 -> 13
+    sigma(13)  = 14 = 2 * 7   ->   13 -> 2
 
-Todo primo recibe una flecha, así que `234` está en `S(sigma)`, y las flechas
-forman el triángulo `2 -> 3 -> 13 -> 2`: cintura 3. **Ningún número menor tiene
-uno** — ésa es la entrada `m_sigma(3) = 234` de la tabla, y el lema de corte es
-lo que convierte «no encontramos ninguno» en «no hay ninguno».
+Todo primo recibe flecha, así que `234` está en `S(sigma)`, y las flechas forman
+el triángulo `2 -> 3 -> 13 -> 2`: cintura 3. El Teorema 2 aplicado con el testigo
+`N = 234` acota por 13 el mayor primo de cualquier testigo menor; enumerados esos
+casos no queda ninguno. Luego `m_sigma(3) = 234` es un mínimo, no un récord.
 
-Ahora el certificado, con `f = sigma*`, donde `sigma*(q^e) = q^e + 1`:
+Para el certificado, con `f = sigma*`, donde `sigma*(q^e) = q^e + 1`, y
 
-    m(5) = 540765225 = 3^2 * 5^2 * 7^5 * 11 * 13
+    m_{sigma*}(5) = 540765225 = 3^2 * 5^2 * 7^5 * 11 * 13,
 
-Bajá `7^5` a `7^3` e insertá el primo `43`. El tramo nuevo cuesta `43` y el
-exponente que libera valía `7^2 = 49`, así que la razón es `43/49 < 1`. Por lo
-tanto `m(6) < m(5)`, y el número que la operación devuelve,
-
-    474549075 = 3^2 * 5^2 * 7^3 * 11 * 13 * 43
-
-es `m(6)` **exactamente**. La sucesión baja en `k = 5`, y eso se supo antes de
-calcular `m(6)`.
+se baja `7^5` a `7^3` y se inserta el primo `43`. Las condiciones 1–5 se cumplen
+y `7^3 * 43 < 7^5` porque `43 < 49`. Por lo tanto
+`m_{sigma*}(6) < m_{sigma*}(5)`, sabido antes de calcularlo. El testigo que
+devuelve la construcción, `474549075 = 3^2 * 5^2 * 7^3 * 11 * 13 * 43`, resulta
+ser `m_{sigma*}(6)`.
 
 <!-- hallazgo:prueba -->
-## Por qué es cierto
+## Por qué valen los enunciados
 
-El lema de corte son dos desigualdades sobre el mismo factor: el antecesor de
-`P` en el ciclo aporta una potencia de primo `q^e` con `P | f(q^e)`, luego
-`q^e >= a_f(P)`; y los `k-2` primos restantes son distintos, luego aportan al
-menos el primorial. Con `P` acotado, enumerar ciclos sobre los primos de abajo
-es enumerarlos **todos**, así que una búsqueda que no encuentra nada demostró
-que no hay nada.
+**Teorema 2:** son dos cotas inferiores sobre el mismo producto. El antecesor de
+`P` en el ciclo aporta una potencia de primo `q^e` con `P | f(q^e)`, así que
+`q^e >= a_f(P)` por definición de `a_f`; los `k-2` primos restantes son distintos
+entre sí y distintos de `P` y de `q`, así que su producto es al menos el
+primorial. La cota se evalúa en enteros: un flotante en el borde podría descartar
+un testigo legítimo.
 
-La cirugía es una cuenta de flechas. En `n'` los vértices `q_j` con `j != i`
-conservaron su exponente, así que siguen apuntando sólo a `q_{j+1}`; `q_i`
-apunta a `p` y, por las condiciones de no-cuerda, a nada más; y `p` apunta a
-`q_{i+1}` y a nada más. El digrafo es exactamente el `(k+1)`-ciclo. Esas
-condiciones no son trámite: sacalas y el mismo movimiento sobre `m_sigma(5)` da
-`1103602500`, cuya cintura es **2**.
+**Teorema 3:** es una cuenta de flechas. En `n'` los vértices `q_j` con `j != i`
+conservan su exponente, así que siguen apuntando sólo a `q_{j+1}`, y la condición
+5 dice que tampoco apuntan a `p`; `q_i` apunta a `p` por la condición 1 y a
+ningún `q_j` por la 3; `p` apunta a `q_{i+1}` por la 2, a ningún otro `q_j` por
+la 4, y no a sí mismo por localidad. El digrafo es entonces exactamente el ciclo
+de largo `k+1`. Las condiciones 3–5 no son burocracia: sin ellas, el mismo
+movimiento sobre `m_sigma(5)` da `1103602500`, cuya cintura es **2**.
+
+**Teorema 4:** es una construcción. Sean `p_1 < ... < p_{k+1}` los `k+1` primos
+más chicos y `P_1 < ... < P_k` cualesquiera `k` primos distintos de ellos. Se
+define `f(p_i^e) = p_{i+1}` y `f(P_j^e) = P_{j+1}` cíclicamente, y `f(q^e) = 1`
+en los demás. Es multiplicativa por construcción y local, y su conjunto de
+flechas es exactamente dos ciclos disjuntos, de largos `k+1` y `k`. Un testigo de
+cintura `k` debe entonces contener todos los `P_j`, de donde
+`m_f(k) = P_1...P_k`, mientras `m_f(k+1) = p_1...p_{k+1}`; tomando los `P_j`
+grandes, la razón no está acotada.
 
 <!-- hallazgo:comprobar -->
-## Comprobalo vos, en cinco segundos
+## Comprobación
 
 ```bash
 git clone https://github.com/jorgell23-sys/covering-digraph-girth
@@ -100,60 +137,36 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-396 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
-salida 1 si alguna falla. Recalculan cada valor publicado desde las
-definiciones, redemuestran de forma exhaustiva los que se pueden, y cruzan el
-conteo de `S(sigma)` por debajo de `10^9` contra Pollack y Pomerance (2012), que
-nunca vieron este repositorio.
+411 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
+salida 1 si alguna falla. Rederivan cada valor publicado desde las definiciones,
+redemuestran exhaustivamente los alcanzables, construyen la `f` del Teorema 4 y
+localizan sus mínimos por fuerza bruta, y contrastan el conteo de `S(sigma)` por
+debajo de `10^9` contra Pollack y Pomerance (2012).
 
 <!-- hallazgo:nodice -->
-## Qué NO dice
+## Qué no se afirma
 
-La familia de números **no es nueva**: para `sigma` son los *prime-abundant* de
-Pollack y Pomerance, catalogados como [A175200](https://oeis.org/A175200). Lo
-que se calcula acá es un invariante de grafo sobre esa familia. El certificado
-vale en **una sola dirección**: que no haya inserción con razón menor que 1 no
-demuestra que el mínimo siguiente sea mayor. Y la tabla llega hasta donde llegó
-el cómputo: las casillas vacías son casillas vacías, no ceros.
-
----
-
-> **¿Es tu primera vez con esto? Empezá acá:** [**Explicación desde cero**](https://jorgell23-sys.github.io/covering-digraph-girth/es/) —
-> todo contado con peras y manzanas, con dibujos y sin conocimientos previos.
+El conjunto de base **no es nuevo**: para `sigma` son los *prime-abundant
+numbers* de Pollack y Pomerance, catalogados como
+[A175200](https://oeis.org/A175200). Lo que se calcula acá es un invariante de
+grafo sobre esa familia. La minimalidad se afirma sólo para las cinturas
+listadas; las celdas vacías son desconocidas, no cero. Si existe un testigo de
+cada cintura queda intacto. El certificado es de una sola dirección, y el Teorema
+4 muestra que no puede volverse una caracterización para `f` general.
 
 ---
 
-## De qué se trata, desde cero
+> ¿Recién llegás? [**Explicado desde cero**](https://jorgell23-sys.github.io/covering-digraph-girth/es/),
+> con dibujos y sin dar nada por sabido
+> ([English](https://jorgell23-sys.github.io/covering-digraph-girth/)).
 
-Tomemos un número, digamos **234 = 2 × 3² × 13**, y dos funciones clásicas:
+---
 
-- **rad(n)** — el producto de sus primos distintos. `rad(234) = 2 × 3 × 13 = 78`.
-- **sigma(n)** — la suma de todos sus divisores. `sigma(234) = 546`.
+## Los términos
 
-Y ahora dibujemos un grafo. Los **vértices** son los primos que dividen a `n`.
-Hay una **flecha q → p** cuando `p` divide a `sigma(q^e)`, donde `q^e` es la
-potencia exacta de `q` en `n`:
+En **negrita**, los calculados en este trabajo; todos demostradamente mínimos.
 
-```
-sigma(2)   = 3            →   flecha 2 → 3
-sigma(3²)  = 13           →   flecha 3 → 13
-sigma(13)  = 14 = 2 × 7   →   flecha 13 → 2
-```
-
-El grafo es un triángulo: `2 → 3 → 13 → 2`. Su ciclo más corto mide 3 — decimos
-que su **cintura** es 3. Y 234 es el número más chico de su clase con cintura 3.
-
-La pregunta que este trabajo responde: **¿cuál es el número más chico de
-cintura k?**
-
-El conjunto donde todo primo queda cubierto así no es nuevo: para `sigma` son
-los *prime-abundant numbers* de Pollack y Pomerance (2012), catalogados en OEIS
-como [A175200](https://oeis.org/A175200). Lo que se calcula acá es un invariante
-de grafos sobre esa familia.
-
-## Los resultados
-
-| cintura | `sigma` | `sigma*` | `phi*` | `sigma**` |
+| `k` | `sigma` | `sigma*` | `phi*` | `sigma**` |
 |---:|---:|---:|---:|---:|
 | 2 | 6 | 6 | 12 | **6** |
 | 3 | 234 | 6615 | 66825 | **15925** |
@@ -165,283 +178,118 @@ de grafos sobre esa familia.
 | 9 | | **9928651387877145** | | |
 | 10 | | **10858178043907173985005** | | |
 
-Los doce en negrita no habían sido calculados, y **los veintiséis son mínimos
-demostrados**. Dos de ellos —`sigma*` con cintura 10 y `sigma**` con cintura 7—
-se calcularon a partir de una cota superior que exhibe la cirugía de más abajo, y
-eso cuesta unas **4,3 veces menos** que buscar sin ninguna cota (medido de las
-dos formas). Y mirá `sigma*` de la cintura 5 a la 6, y `sigma**` de la 5
-a la 6: la sucesión **baja**. La sección *«Cuándo el siguiente es más chico»*
-cuenta por qué, y cómo saberlo de antemano.
+| `k` | `sigma*_3` | `sigma*_5` | `sigma*_6` |
+|---:|---:|---:|---:|
+| 2 | **6** | **6** | **10** |
+| 3 | **2565** | **2013** | **207553** |
+| 4 | **9933** | **32175** | **237133** |
+| 5 | **2175327** | **3910725** | |
+| 6 | **1278999267** | | |
 
-## La diferencia entre «el más chico que encontramos» y «el más chico»
+| `k` | `phi*_3` | `phi*_4` | `phi*_5` | `phi*_6` |
+|---:|---:|---:|---:|---:|
+| 2 | **12** | **6** | **12** | **6** |
+| 3 | **16891** | **207553** | **27951** | **17501** |
+| 4 | **26217125** | **16099333** | **161994931** | **4176227** |
+| 5 | **76670443861** | **2534414641** | | |
 
-La versión 1 decía, con honestidad, lo que no podía garantizar:
+`data/terms.json` trae cada valor con su factorización, su ciclo y el primo hasta
+el que llegó la enumeración. Se regenera por cálculo, no se transcribe.
 
-> *La respuesta es mínima sólo entre los primos examinados. Un primo más grande
-> podría, en principio, dar un ciclo más barato.*
+## Las bajadas
 
-O sea que cada valor era una conjetura verificada hasta donde alguien miró.
-Cerrar ese hueco cuesta un lema.
+`m_f(k+1) < m_f(k)` ocurre **dos veces** entre los 64 pasos consecutivos con los
+dos mínimos conocidos, y las dos en el paso `5 -> 6`:
 
-Sea `n` un menor testigo de cintura `k` y sea `P` su mayor primo. Su antecesor
-en el ciclo aporta una potencia `q^e` con `P | f(q^e)`, así que `P ≤ f(q^e)`, y
-las formas cerradas dan `q^e ≥ P/2` para `sigma`, `≥ P−1` para `sigma*` y
-`≥ P+1` para `phi*`. Los `k−2` primos restantes son distintos, así que:
+| f | paso | `m_f(k)` | `m_f(k+1)` | razón |
+|---|---|---:|---:|---:|
+| `sigma**` | 5 -> 6 | 10762773021 | 3321843525 | **0,309** |
+| `sigma*` | 5 -> 6 | 540765225 | 474549075 | **0,878** |
 
-```
-n  ≥  P · a_f(P) · (producto de los k−2 primos más chicos)
-```
+La mediana de las 64 razones es **587**, así que las dos bajadas son excepciones
+aisladas y no la cola de una distribución que llega hasta 1. La razón más chica
+que no es bajada es la de `sigma*_6` de cintura 3 a 4, 1,143, y queda **fuera**
+del paso `5 -> 6`.
 
-Leído al revés, eso es un **corte**: si se conoce cualquier testigo `N`, el menor
-es a lo sumo `N`, así que su mayor primo no puede pasar de aproximadamente
-`sqrt(N / primorial(k−2))`. Enumerar ciclos sobre los primos por debajo de eso
-es exhaustivo, y la respuesta deja de depender de hasta dónde miró alguien.
+El certificado del Teorema 3 dispara exactamente en esos dos pares y devuelve el
+mínimo siguiente exacto. Comparando factorizaciones sobre los 49 pares donde la
+cirugía puede probarse, acierta precisamente cuando `m_f(k+1)` se obtiene de
+`m_f(k)` agregando un primo y cambiando un exponente: 49 coincidencias de 49.
+Como `m_f(k+1)` tiene siempre exactamente un primo más que `m_f(k)` por el
+Teorema 1, insertar dos vértices no puede dar el mínimo siguiente.
 
-Para `phi*` con cintura 5 el corte es **7 445 747**. Hubo que descartar todos los
-primos por debajo de eso para poder decir que el mayor primo de la respuesta es
-**23**.
+Las condiciones 3–5 hay que cumplirlas contra todos los vértices del ciclo, lo
+que sugiere que se vuelven más difíciles al crecer `k`. Medido sobre 6661
+inserciones candidatas que cumplen las condiciones 1 y 2, la tasa de
+supervivencia cae una sola vez —de 7,59 % en cintura a lo sumo 3 a 1,72 % en
+cintura 4 o más, `chi^2 = 138,5` con un grado de libertad— y de ahí en adelante
+es **constante**: el `chi^2` de homogeneidad vale 10,2 con seis grados de
+libertad. Lo que se agota al crecer `k` no es la admisibilidad sino la
+admisibilidad barata.
 
-## Arrancar sin conocer la respuesta
+## Los límites, con número
 
-Ese corte está enunciado **en función de un testigo ya conocido**, así que la
-versión 2 no podía tocar una cintura de la que nadie hubiera exhibido un
-ejemplo. Lo decía de sí misma, y llamaba a hallar el primer testigo *«una
-búsqueda heurística»*.
+Dos términos quedan acorralados y no determinados:
 
-Era falso, y la versión 2 tenía el material para verlo. La búsqueda por debajo
-de `N` es **exhaustiva**: no devuelve «el mejor que vi» sino «el menor que hay,
-si hay alguno por debajo de `N`». Así que lo único que faltaba era un `N` de
-arranque que no le debiera nada a una respuesta conocida. Un testigo de cintura
-`k` tiene exactamente `k` primos distintos, así que su mayor primo es al menos
-`p_k`, y la cota del corte crece con él:
-
-```
-n  ≥  p_k · a_f(p_k) · (producto de los k−2 primos más chicos)
-```
-
-Se arranca ahí, se duplica hasta que aparezca algo, y **lo primero que aparece
-es el mínimo**: nada más chico está por debajo de este `N`, y nada en absoluto
-estaba por debajo de los anteriores, que ya se barrieron. Duplicar es una
-técnica vieja; lo que la vuelve una demostración acá es la exhaustividad que
-tiene debajo.
-
-```bash
-python src/exact.py "sigma*" 9 --no-seed     # sin darle ningún testigo
-```
-
-No saber la respuesta cuesta un factor de alrededor de **4** en nodos visitados,
-medido sobre los términos donde los dos métodos pueden correr. Se paga una sola
-vez por cintura.
-
-## Dónde termina, con un número
-
-Los dos términos siguientes no salieron, y la versión 3 puede decir exactamente
-por qué. La búsqueda barrió todo lo que hay por debajo de `1,24·10²¹` para `sigma`
-con cintura 9 y por debajo de `1,3·10¹⁸` para `phi*` con cintura 6, y no encontró
-nada: eso son teoremas. La cirugía exhibe testigos en `1,23·10²⁴` y `4,2·10²²`:
-eso está verificado, pero no es mínimo. Así que los dos términos quedan
-**acorralados**, y cerrar el cerco exigiría examinar todos los primos por debajo
-de **2200 millones** y de **14 000 millones**. Eso no entra en memoria.
-
-El primero de esos dos números era **5700 millones**: el testigo de cintura 9
-para `sigma` que exhibía la versión 3.1 valía `8,3·10²⁴`, y la cirugía lo baja a
-`1,23·10²⁴`, un factor de **6,75**. La pared se corrió un factor 2,6, y sigue
-siendo una pared.
-
-Antes el límite era «hace falta un testigo conocido», que es una condición sobre
-lo que otros hayan publicado. Ahora es un número de primos: una condición sobre
-la máquina.
-
-## Otra cosa que vale la pena mirar
-
-Con `phi*`, cada mínimo **divide** al siguiente:
-
-```
-cintura 3:  3^5  → 11 → 5^2                 66825
-cintura 4:  3^11 → 23 → 11 → 5^2            1120454775
-cintura 5:  3^11 → 23 → 11 → 5^9 → 19       1663175056640625
-```
-
-Cada ciclo es el anterior con **un vértice insertado y un exponente subido**, y
-de ahí sale la divisibilidad. El testigo exhibido de cintura 6 continúa la
-cadena. **Predicción:** el mínimo verdadero de cintura 6 también será múltiplo de
-`1663175056640625`. Lo refuta cualquier testigo más chico que no lo sea.
-
-Y la lectura que parecía obvia —*el salto es chico cuando los dos testigos
-comparten mucho*— es **falsa**: el salto más grande de los veintidós pares
-consecutivos es uno donde el término anterior divide al siguiente. `verify.py`
-recalcula esa tabla.
-
-## Cuándo el siguiente es más chico
-
-Pedir un ciclo más largo suele costar más. Dos veces en la tabla cuesta
-**menos**. El mecanismo es un solo movimiento local sobre el ciclo, y es un
-teorema.
-
-Tomá un testigo de cintura `k` cuyo digrafo es el ciclo puro
-`q_1 -> ... -> q_k -> q_1`. Elegí una flecha `q_i -> q_{i+1}`, un primo `p` fuera
-del ciclo y exponentes `e'`, `a` tales que `p | f(q_i^e')`, `q_{i+1} | f(p^a)` y
-**no aparezca ninguna cuerda**: ningún `q_j` distinto de `p` recibe flecha de
-`q_i^e'`, ningún `q_j` distinto de `q_{i+1}` la recibe de `p^a`, y ningún otro
-vértice apunta a `p`. Entonces
-
-```
-n' = n * q_i^(e'-e_i) * p^a
-```
-
-es un testigo de **cintura k+1**, así que `m_f(k+1) <= m_f(k) * q_i^(e'-e_i) * p^a`.
-
-Las tres condiciones de cuerda no son trámite. Sacalas y el mismo movimiento
-sobre el mínimo de cintura 5 de `sigma` da `1103602500`, cuya cintura es **2**.
-`verify.py` fija ese número.
-
-**El certificado.** Si el tramo nuevo cuesta menos que el exponente que ahorra
-—`q_i^e' * p^a < q_i^e_i`— entonces `m_f(k+1) < m_f(k)`, **demostrado sin
-calcular `m_f(k+1)`**. Y se decide con una búsqueda finita y chica: la desigualdad
-obliga `e' < e_i`, así que `e'` recorre `1 .. e_i-1`, `p` recorre los divisores
-primos de `f(q_i^e')` —que la primera condición ya nombra, así que los primos no
-se recorren nunca— y `a` recorre `p^a < q_i^(e_i-e')`.
-
-Sobre los **22** pares consecutivos de la tabla el certificado dispara
-**exactamente dos veces**, que son exactamente las dos veces que la sucesión
-baja, y las dos veces devuelve el mínimo siguiente clavado:
-
-| | `m_f(k)` | corta | inserta | razón | mínimo siguiente |
-|---|---:|---|---|---:|---:|
-| `sigma*`, 5→6 | 540765225 | `7^5 → 7^3` | `43` | `43/49` | 474549075 |
-| `sigma**`, 5→6 | 10762773021 | `3^6 → 3^2` | `5^2` | `25/81` | 3321843525 |
-
-```bash
-python src/surgery.py "sigma*" 540765225 5
-```
-
-**Vale en una sola dirección, y eso importa.** Que no haya ninguna inserción con
-razón menor que 1 *no* demuestra que el mínimo siguiente sea mayor: podría venir
-de un ciclo sin relación con éste. Que eso no pase en ninguno de los 22 pares es
-una medición, no una demostración.
-
-**Y el premio, medido.** Aunque la inserción no salga más barata, igual exhibe un
-testigo de verdad de cintura `k+1`, y un testigo exhibido es justo el `N` que la
-búsqueda exhaustiva necesita: convierte todas las duplicaciones en una sola
-vuelta. Corrido de las dos formas sobre los dos términos nuevos:
-
-| | sin semilla | desde la cota de la cirugía | ahorra |
+| | demostrado mayor que | testigo exhibido en | primos para cerrarlo |
 |---|---:|---:|---:|
-| `sigma*`, cintura 10 | 206.680.700 nodos, 1125 s, 42 vueltas | 48.321.070 nodos, 252 s | **4,28×** |
-| `sigma**`, cintura 7 | 4.266.506 nodos, 23 s, 31 vueltas | 930.082 nodos, 5 s | **4,59×** |
+| `m_sigma(9)` | `1,24e21` | `1,23e24` | `2,20e9` |
+| `m_phi*(6)` | `1,3e18` | `4,15e22` | `1,4e10` |
 
-Es el mismo factor de alrededor de 4 que la versión 3 midió como precio de no
-saber la respuesta. **Compra velocidad, no posibilidad**: la búsqueda sin semilla
-también llega.
+Las dos cotas son teoremas: la inferior porque la búsqueda por debajo fue
+exhaustiva, la superior porque el testigo está exhibido y verificado. Cerrar
+cualquiera de las dos exige enumerar esa cantidad de primos, que no entra en
+memoria acá. Varios términos más quedan fuera de alcance por costo y no por
+principio: `sigma*_6` en cintura 5 y `phi*_5` en cintura 5 se estiman en 184 y 18
+días sobre seis núcleos, y `sigma*_4` en cintura 4 exigiría `1,5e12` primos.
 
-## Repartirlo entre los núcleos
+## Los métodos, y cómo se contrastan
 
-Los primos de arranque son independientes —cada uno abre un árbol que no toca a
-los demás—, así que la búsqueda se reparte de forma exacta. Lo único que se
-pierde es la poda compartida, y el mínimo no puede cambiar: la cota de cada
-proceso vale siempre al menos el mínimo verdadero, así que el corte nunca
-descarta nada por debajo de él.
+Tres implementaciones que no comparten lógica. Una criba halla testigos por
+búsqueda exhaustiva sobre enteros y no sabe nada de ciclos; un constructor los
+arma a partir de ciclos sobre primos chicos y nunca mira un entero que no venga
+de uno; la búsqueda exacta demuestra minimalidad por el Teorema 2 y no acepta
+nada sin recalcular la cintura desde el entero mismo. Coinciden en todos los
+términos que más de una alcanza.
 
-    python src/parallel.py sigma 7 7746928876851256 --cores 8 --control
+Hay además un control externo. La criba cuenta **5327** elementos de `S(sigma)`
+por debajo de `10^9` sin contar `n = 1`; Pollack y Pomerance cuentan **5328**
+contándolo. La coincidencia contrasta este código contra un resultado con
+revisión de pares obtenido de forma independiente.
 
-**4,54×** con ocho núcleos ahí, con nodos **idénticos** y la misma respuesta;
-**4,13×** en `sigma*` cintura 10, donde los nodos suben un 9,3 % porque la cota
-deja de compartirse. No llega a ocho —el trabajo está desbalanceado y cada
-proceso criba una vez— y **no** mueve la pared de la sección anterior, que es de
-memoria y que repartir empeora.
+Las búsquedas de trabajo previo —OEIS y seis bases bibliográficas, cada una con
+un control positivo que sí devuelve la literatura relevante— están registradas
+con su fecha y sus términos de consulta en [`PRIOR_ART.md`](PRIOR_ART.md). *No
+haberlo encontrado no es lo mismo que ser nuevo.*
 
-La demostración, con sus límites, está en [RESULT.md](RESULT.md) (en inglés).
+## Qué hay acá
 
-## Algo que vale la pena mirar
+| | |
+|---|---|
+| [`RESULT.md`](RESULT.md) | el informe completo: enunciados, demostraciones, tablas, límites |
+| [`PRIOR_ART.md`](PRIOR_ART.md) | qué se buscó de trabajo previo, dónde y cuándo |
+| `verify.py` | todas las comprobaciones, una orden, sin dependencias |
+| `src/arithmetic.py` | las definiciones, en Python liso |
+| `src/exact.py` | demuestra minimalidad con el lema de corte |
+| `src/construct.py` | arma testigos desde ciclos sobre primos chicos |
+| `src/sieve.py` | búsqueda exhaustiva sobre enteros (necesita numpy) |
+| `src/surgery.py` | el Teorema 3 y su certificado |
+| `src/parallel.py` | la misma búsqueda exacta, repartida entre núcleos |
+| `src/make_terms.py` | regenera `data/terms.json` por cálculo |
 
-Entre la cintura 7 y la 8 con `sigma`, el menor testigo crece por un factor de
-apenas **4,09** — después de haber crecido por un factor de **43 005** en el paso
-anterior.
+La versión en inglés de esta página: [`README.md`](README.md).
 
-```
-sigma, cintura 7:  3² · 5 · 7⁴ · 13 · 19 · 37 · 2801²
-sigma, cintura 8:  5³ · 7² · 13² · 19 · 31² · 61 · 83 · 331
-```
+## Cómo citar
 
-Con siete primos no se cierra ningún ciclo barato, y el mínimo está **obligado a
-usar 2801²** — 7,8 millones sólo por ese factor. Con ocho primos disponibles, el
-ciclo cierra sin pasar de 331. **El vértice de más sale casi gratis, y con él se
-compra la salida del primo caro.**
-
-Y eso importa más allá de la curiosidad: `ln n / k²` se queda entre 0,72 y 0,78
-para `k = 4, 5, 6, 7`, lo que invita a leer `n ≈ exp(0,75 k²)` y predice
-`n₈ ≈ 7 × 10²⁰`. El valor real es `3,2 × 10¹⁶`. **Cuatro términos sostenían una
-ley y el quinto la rompió.**
-
-## La sucesión que baja
-
-Con `sigma*`, la sucesión de mínimos **baja** una vez:
-
-```
-6,  6615,  4380453,  540765225,  474549075,  4485174218525,  2386830845734335
-                          ↑ más chico que el anterior
-```
-
-Los dos números comparten el esqueleto `3² × 5² × 11 × 13`, y toda la diferencia
-está en un factor:
-
-| | factor | valor |
-|---|---|---:|
-| cintura 6 | `7³ × 43` | **14749** |
-| cintura 5 | `7⁵` | 16807 |
-
-Cerrar el ciclo de 5 obliga a `7⁵`. Alargarlo a 6 deja entrar un primo nuevo, el
-43, **y eso permite bajar el exponente a `7³`**. Agregar un vértice salió más
-barato que subir un exponente.
-
-Pasa una vez en ocho pares consecutivos. Lo que agrega la versión 2 es que el
-mismo mecanismo funciona **sin** producir una bajada: en `sigma` de 7 a 8 sólo
-aplana el crecimiento.
-
-## Cómo está comprobado
-
-Los tres métodos **no comparten ninguna lógica** — la criba no sabe nada de
-ciclos, la construcción nunca mira un entero que no venga de uno, y la búsqueda
-exacta no acepta nada sin recalcular la cintura desde el entero mismo — y
-coinciden en todos los términos que más de uno alcanza.
-
-Y hay un control externo: la criba cuenta **5327** elementos hasta 10⁹ sin
-contar `n = 1`. Pollack y Pomerance publicaron **5328** contándolo. Coinciden
-exactamente. Eso prueba este código contra un resultado con referato, calculado
-por gente que nunca lo vio.
-
-## Lo que este trabajo NO afirma
-
-- **No afirma ser nuevo.** Se buscó en OEIS y en cuatro bases bibliográficas y
-  no apareció — con un control positivo que sí encuentra los trabajos
-  relevantes. *No encontrar no es lo mismo que no existir.* Está detallado en
-  [PRIOR_ART.md](PRIOR_ART.md).
-- **No afirma que las sucesiones sean infinitas.** Si existe testigo de toda
-  cintura es otra pregunta, que no se toca acá.
-- **No afirma minimalidad más allá de la tabla.** Ya no queda ningún obstáculo
-  de principio —la búsqueda sin semilla saca la necesidad de un testigo de
-  arranque— pero cada cintura de más cuesta tiempo de máquina, y sólo se afirman
-  las cinturas efectivamente calculadas.
-- **No afirma que duplicar sea la mejor forma de arrancar.** Es la más simple que
-  conserva la demostración; una búsqueda por mejor-primero no repetiría trabajo.
-- **No afirma que el crecimiento tenga una ley.** Afirma lo contrario, y el
-  término nuevo agrega a la causa: `sigma*` crece por un factor de apenas
-  **4,16** de la cintura 8 a la 9.
-- **No afirma tener interés matemático.** Eso lo juzga quien lo lea.
+Ver [`CITATION.cff`](CITATION.cff). Licencia: MIT para el código, CC BY 4.0 para
+texto y datos.
 
 ## Autor
 
-**Jorge Ellena Godoy**, responsable de la corrección de todo lo que hay acá.
-
-## Cómo se produjo
+**Jorge Ellena Godoy**.
 
 El diseño del sistema y la dirección de la investigación son del autor. Los
-resultados matemáticos los produjo un sistema automático (Claude, de Anthropic)
-bajo esa dirección. Todos los cálculos se verificaron con implementaciones
-independientes y se cruzaron contra trabajo publicado. El autor responde por la
-corrección de todo lo que hay acá.
-
-## Licencia
-
-Código bajo [MIT](LICENSE); texto y datos bajo
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+resultados matemáticos fueron producidos por un sistema automatizado (Claude,
+Anthropic) bajo esa dirección. Todos los cálculos fueron verificados por
+implementaciones independientes y contrastados contra trabajo publicado. El autor
+es responsable de la corrección de todo lo publicado acá.
