@@ -737,8 +737,13 @@ def main(argv=None):
     # instead of hard-coding how many there are makes the next page free.
     paginas = [pg for pg in pages
                if os.path.exists(os.path.join(here, pg))]
+    #: RESULT.md announces the count too, and was left out when the READMEs
+    #: were added in 3.3.1: it still said 396 for a run of 413. A rule that
+    #: covers only some of the documents that state a fact breaks in the one
+    #: left out, which is exactly what happened.
     lecturas = [(rd, pat) for rd, pat in (("README.md", CHECKS_EN),
-                                          ("README.es.md", CHECKS_ES))
+                                          ("README.es.md", CHECKS_ES),
+                                          ("RESULT.md", CHECKS_EN))
                 if os.path.exists(os.path.join(here, rd))]
     total = passed[0] + len(failures) + len(paginas) + len(lecturas)
     if args.exact or args.full:
