@@ -192,6 +192,37 @@ this shape can live inside a paper without reaching its title or abstract.
 studied bi-unitary perfect numbers in 1972 -- and nothing about the function
 itself is claimed here. What is computed is the same graph invariant over it.
 
+## 6c. The parametric families specifically (version 3.3)
+
+Searched on 2026-09-05, before publishing the 26 terms of `sigma*_3`,
+`sigma*_5`, `sigma*_6`, `phi*_3`, `phi*_4`, `phi*_5` and `phi*_6`.
+
+**OEIS, by sequence.** Every query carried a positive control beside it — a
+search that *had* to find something — so that a "not found" means the arbiter
+was working and not merely silent.
+
+| sequence | terms | verdict | positive control |
+|---|---:|---|---|
+| `sigma*_3`: 6, 2565, 9933, 2175327, 1278999267 | 5 | not in OEIS | primes -> A000040 |
+| `phi*_3`: 12, 16891, 26217125, 76670443861 | 4 | not in OEIS | perfect -> A000396 |
+| `phi*_4`: 6, 207553, 16099333, 2534414641 | 4 | not in OEIS | squares -> A000290 |
+| `sigma*_5`: 6, 2013, 32175, 3910725 | 4 | not in OEIS | Fibonacci -> A000045 |
+| `phi*_5`: 12, 27951, 161994931 | 3 | **too short** | idem |
+| `phi*_6`: 6, 17501, 4176227 | 3 | **too short** | idem |
+| `sigma*_6`: 10, 207553, 237133 | 3 | **too short** | idem |
+
+**The three marked "too short" are not claimed either way.** With three terms no
+query distinguishes anything, and the tool refuses to answer rather than
+returning a "not found" that would read as a claim. To decide them one needs
+their girth-5 term, and that costs an estimated 18 days (`phi*_5`) and 184 days
+(`sigma*_6`) of six cores.
+
+**Bibliographic databases.** Same two queries as section 4, run again on
+2026-09-05 against OpenAlex, Crossref, arXiv, zbMATH, Zenodo and DataCite:
+`girth` + `multiplicative function`, and `radical` + `unitary`. Both returned
+`NO_APARECE_EN_LO_CONSULTADO`. Positive control beside them: `abundant` +
+Pollack-Pomerance, which does return work on prime-abundant numbers.
+
 ## 7. Analogous sequences that do exist
 
 Sequences of the form "smallest object of girth n" are an established genre:

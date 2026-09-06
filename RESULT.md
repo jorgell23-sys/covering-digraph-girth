@@ -980,6 +980,147 @@ beside it.
 
 ---
 
+## 12c. Release 3.3.0 — the families, and where the descents are not
+
+Everything above uses four functions with no parameter. Nothing in the cutoff
+lemma or in the pure-cycle theorem mentions **which** `f` is used, so the same
+machinery applies to the three classical families
+
+    sigma_s(q^e)  = (q^{s(e+1)} - 1)/(q^s - 1)      sigma*_s(q^e) = q^{se} + 1
+    phi*_s(q^e)   = q^{se} - 1                       with s = 1..6
+
+What was missing was not mathematics: `arithmetic.py` and `exact.py` each kept
+their own hand-written list of four names. Release 3.3.0 replaces both by the
+closed forms above, and `verify.py` checks that the two implementations agree on
+all 19 functions.
+
+### 26 terms in seven functions, 22 of them computed here
+
+| f | k=2 | k=3 | k=4 | k=5 | k=6 |
+|---|---:|---:|---:|---:|---:|
+| `sigma*_3` | 6 | 2,565 | 9,933 | 2,175,327 | **1,278,999,267** |
+| `sigma*_5` | 6 | 2,013 | 32,175 | 3,910,725 | |
+| `sigma*_6` | 10 | 207,553 | 237,133 | | |
+| `phi*_3` | 12 | 16,891 | 26,217,125 | 76,670,443,861 | |
+| `phi*_4` | 6 | 207,553 | 16,099,333 | 2,534,414,641 | |
+| `phi*_5` | 12 | 27,951 | 161,994,931 | | |
+| `phi*_6` | 6 | 17,501 | 4,176,227 | | |
+
+Every one is proved minimal the same way as the rest: exhaustive enumeration
+below an exhibited upper bound, with the cutoff lemma bounding the largest prime
+a smaller witness could use. Twenty-two of the twenty-six were computed for this
+release; the four `sigma*_3` terms at girth 2 to 5 were computed earlier in the
+same project and are published here for the first time.
+
+**What is out of reach, with the number.** `sigma*_6` at girth 5 would need an
+estimated 184 days of six cores, `phi*_5` at girth 5 about 18 days, and
+`sigma*_4` at girth 4 is a hard wall: the cutoff lemma demands 1.5 * 10^12
+primes. Those are not gaps in the method, they are its cost, and the cost is
+now estimated before a search is launched rather than discovered by running it.
+
+### The descents are still only two, and both at 5 -> 6
+
+Section 9 exhibited two functions where `m_f(k+1) < m_f(k)`, and both descents
+happen at the same step. With the families the table goes from 48 consecutive
+pairs to **64**, and the count does not move:
+
+| f | step | ratio `m_f(k+1)/m_f(k)` |
+|---|---|---:|
+| `sigma**` | 5 -> 6 | **0.309** |
+| `sigma*` | 5 -> 6 | **0.878** |
+| `sigma*_6` | 3 -> 4 | 1.143 |
+| `sigma_3` | 3 -> 4 | 2.538 |
+| `sigma*_3` | 3 -> 4 | 3.873 |
+
+The median of the 64 ratios is **587**, so the two descents are not the tail of
+a distribution that grazes 1: they are isolated. The closest miss, `sigma*_6`
+from girth 3 to 4, **is** outside the 5 -> 6 step, and is the only non-descent
+below 1.2 — which is where to look next.
+
+### The surgery certificate is sufficient and NOT necessary
+
+Section 9 gives a certificate that proves `m_f(k+1) < m_f(k)` without computing
+`m_f(k+1)`, and it agreed with the data in 48 out of 48 pairs. It is **not** a
+characterisation.
+
+> **Theorem.** For every `k >= 2` and every `C > 0` there is a multiplicative
+> and local `f` with `m_f(k+1) < m_f(k)/C`, with `m_f(k)` squarefree — so no
+> certificate can fire — and with the cycles of the two minima **disjoint**.
+
+*Proof.* Let `p_1 < ... < p_{k+1}` be the `k+1` smallest primes and let
+`P_1 < ... < P_k` be any `k` primes distinct from them. Put
+`f(p_i^e) = p_{i+1}` and `f(P_j^e) = P_{j+1}` cyclically, and `f(q^e) = 1` for
+every other prime. This is multiplicative by construction and local, because no
+prime is its own image, and the digraph of possible arcs is exactly the union of
+two disjoint cycles, one of length `k+1` and one of length `k`. So a witness of
+girth `k` must contain the `P_j` cycle and `m_f(k) = P_1...P_k`, while
+`m_f(k+1) = p_1...p_{k+1}`. Taking the `P_j` large makes the ratio unbounded. []
+
+Checked by brute force in three cases, the minimum found matching the predicted
+one digit for digit: `(77, 30)`, `(10403, 30)` and `(1113121, 210)`.
+
+This also settles the other half of the question: a descent does **not** force
+the two cycles to share all but one arc. Here they share nothing.
+
+### The surgery is exact exactly when the distance is 2
+
+Measured over the 49 pairs with both minima known, comparing the factorisations
+of `m_f(k)` and `m_f(k+1)`:
+
+| primes removed | exponents changed | pairs | of those, surgery exact |
+|---:|---:|---:|---:|
+| 0 | 1 | **13** | **13** |
+| 0 | 3 | 1 | 0 |
+| 1 | 0 | 5 | 0 |
+| 1 | 1 | 10 | 0 |
+| 1 | 2-4 | 4 | 0 |
+| 2 | 0-3 | 14 | 0 |
+| 3 | 3 | 2 | 0 |
+
+The 13 pairs at distance 2 are exactly the 13 the surgery gets right: 49 out of
+49. And since `m_f(k+1)` always has exactly one prime more than `m_f(k)` — a
+consequence of Theorem 1 — inserting **two** vertices cannot give the next
+minimum. What would help is removing one prime while adding two, which would
+take the coverage from 13 to 28 of 49.
+
+### The conditions do not become impossible as k grows
+
+Section 9 suspected that conditions 3, 4 and 5 of the surgery — which must hold
+against **every** vertex — become impossible as `k` grows. Measured over 6,661
+candidate insertions that satisfy conditions 1 and 2:
+
+| k | candidates | surviving | rate |
+|---:|---:|---:|---:|
+| 2 | 1,465 | 124 | 8.46 % |
+| 3 | 1,369 | 91 | 6.65 % |
+| 4 | 1,214 | 29 | 2.39 % |
+| 5 | 1,341 | 24 | 1.79 % |
+| 6 | 565 | 6 | 1.06 % |
+| 7 | 274 | 5 | 1.82 % |
+| 8 | 193 | 0 | 0.00 % |
+| 9 | 116 | 2 | 1.72 % |
+| 10 | 124 | 0 | 0.00 % |
+
+There is one drop and only one: from 7.59 % at girth `<= 3` to 1.72 % at
+`>= 4`, with `chi^2 = 138.5` on 1 degree of freedom. **Within `k >= 4` there is
+no trend**: the homogeneity `chi^2` is 10.2 on 6 degrees of freedom, so the
+seven values are consistent with a **constant** rate, and the two zeros are what
+that rate predicts on samples of 193 and 124. What runs out as `k` grows is not
+admissibility but *cheap* admissibility.
+
+### Three functions with the same minimum, and why
+
+`sigma*_2`, `phi*_4` and `sigma*_6` all have `m(3) = 207,553 = 17 * 29 * 421`.
+With `a = q^s`, `a + 1` divides both `a^2 - 1` and `a^3 + 1`, so
+
+    sigma*_s(q) | phi*_{2s}(q)       and       sigma*_s(q) | sigma*_{3s}(q)
+
+every arc of `sigma*_s` between distinct primes is an arc of the other two, and
+a squarefree witness of `sigma*_s` is a witness of both — unless the extra arcs
+open a chord. The algebra is elementary; what is not obvious is that the
+*minimal* witness survives the change of family, and it does at girth 3 for all
+three, and does not at girth 4.
+
 ## 13. Reproducing everything
 
     python verify.py            # all checks, ~2 seconds, no dependencies

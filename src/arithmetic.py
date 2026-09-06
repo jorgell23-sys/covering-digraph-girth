@@ -25,6 +25,8 @@ For n in S(f) the digraph cannot be acyclic, so the girth always exists; if
 this code ever returns None for a member of S(f), the code is wrong.
 """
 
+import re as _re
+
 from collections import deque
 
 __all__ = [
@@ -35,7 +37,12 @@ __all__ = [
 ]
 
 #: The multiplicative functions studied here, by name.
-FUNCTIONS = ("sigma", "sigma*", "phi*", "sigma**")
+#: The four with no parameter, kept first because the published terms use them,
+#: plus the three families with s = 1..6 that release 3.3.0 adds.
+FUNCTIONS = (("sigma", "sigma*", "phi*", "sigma**")
+             + tuple("sigma%d" % s for s in range(2, 7))
+             + tuple("sigma*%d" % s for s in range(2, 7))
+             + tuple("phi*%d" % s for s in range(2, 7)))
 
 
 def factorize(n):
@@ -82,26 +89,50 @@ def biunitary_divisors(q, e):
             if max(unitary(i) & unitary(e - i)) == 1]
 
 
+#: ``sigma``, ``sigma*``, ``phi*`` and their families with a parameter:
+#: ``sigma3``, ``phi*2``, ``sigma*5`` and so on.
+_NAME = _re.compile(r"(sigma|phi)(\*?)(\d*)")
+
+
 def f_of_prime_power(q, e, f):
-    """Evaluate f at the prime power q^e, for the four functions studied.
+    """Evaluate f at the prime power q^e.
 
-    These are the standard closed forms:
+    The three classical families have a parameter s, and the closed forms are
 
-        sigma(q^e)   = (q^(e+1) - 1) / (q - 1) = 1 + q + ... + q^e
-        sigma*(q^e)  = q^e + 1       (the unitary divisors of q^e are 1 and q^e)
-        phi*(q^e)    = q^e - 1
+        sigma_s(q^e)  = (q^(s(e+1)) - 1) / (q^s - 1)   sum of the s-th powers
+                                                       of the divisors
+        sigma*_s(q^e) = q^(se) + 1                     idem, unitary divisors
+        phi*_s(q^e)   = q^(se) - 1                     unitary Jordan J*_s
+
+    with s = 1 written without a suffix, so ``sigma`` is ``sigma_1``. Outside
+    the families,
+
         sigma**(q^e) = sigma(q^e) - q^(e/2) for e even, sigma(q^e) for e odd
+
+    Releases up to 3.2.0 accepted only the four functions with no parameter.
+    That was not a mathematical limit: nothing in the cutoff lemma or in the
+    pure-cycle theorem mentions which f is being used, and release 3.3.0 adds
+    the families for that reason.
     """
-    if f == "sigma":
-        return (q ** (e + 1) - 1) // (q - 1)
-    if f == "sigma*":
-        return q ** e + 1
-    if f == "phi*":
-        return q ** e - 1
     if f == "sigma**":
         s = (q ** (e + 1) - 1) // (q - 1)
         return s - q ** (e // 2) if e % 2 == 0 else s
-    raise ValueError("unknown function: %r (expected one of %r)" % (f, FUNCTIONS))
+    m = _NAME.fullmatch(f)
+    if m is None:
+        raise ValueError("unknown function: %r (expected one of %r)"
+                         % (f, FUNCTIONS))
+    base, star, suffix = m.group(1), bool(m.group(2)), m.group(3)
+    if base == "phi" and not star:
+        #: Euler's totient is q^e - q^(e-1), NOT q^e - 1. It is not in the
+        #: registry and it is not invented here.
+        raise ValueError("unknown function: %r (expected one of %r)"
+                         % (f, FUNCTIONS))
+    s = int(suffix) if suffix else 1
+    if s < 1:
+        raise ValueError("unknown function: %r" % (f,))
+    if star:
+        return q ** (s * e) + 1 if base == "sigma" else q ** (s * e) - 1
+    return (q ** (s * (e + 1)) - 1) // (q ** s - 1)
 
 
 def _evaluate(n, f):

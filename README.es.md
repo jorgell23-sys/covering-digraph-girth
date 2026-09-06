@@ -11,12 +11,13 @@ que hay en él y `f` la suma de divisores o una pariente suya. Quedate con los
 números donde **todo primo recibe una flecha**. Ese dibujo siempre contiene un
 ciclo dirigido, y el largo del más corto es un invariante del número.
 
-Este trabajo calcula, para cuatro de esas funciones, **el menor número cuyo
-ciclo más corto tiene cada largo** — 26 valores, cada uno *demostradamente* el
-menor que existe y no el menor que alguien alcanzó a mirar, doce de ellos
+Este trabajo calcula, para once de esas funciones, **el menor número cuyo
+ciclo más corto tiene cada largo** — 52 valores, cada uno *demostradamente* el
+menor que existe y no el menor que alguien alcanzó a mirar, 38 de ellos
 calculados acá por primera vez. Y da una **operación local sobre ese ciclo** que
 decide, mirando un solo valor, si el siguiente va a ser **más chico** — dos
-veces en esta tabla lo es.
+veces en 64 pasos consecutivos lo es, las dos en el mismo paso, y la operación
+resulta suficiente pero **no** necesaria.
 
 <!-- hallazgo:enunciado -->
 ## El enunciado
