@@ -134,7 +134,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-413 checks, no dependencies, `PASS` or `FAIL` on each, exit code 1 if any fails.
+414 checks, no dependencies, `PASS` or `FAIL` on each, exit code 1 if any fails.
 They re-derive every published value from the definitions, re-prove the reachable
 ones exhaustively, build the `f` of Theorem 4 and locate its minima by brute
 force, and cross-check the count of `S(sigma)` below `10^9` against Pollack and
