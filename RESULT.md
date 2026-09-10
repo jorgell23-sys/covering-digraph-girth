@@ -1,5 +1,9 @@
 # Smallest witnesses by girth for rad(n) | f(n)
 
+<!-- explicacion -->
+**New to this? It is explained from scratch, assuming nothing:**
+[English](https://jorgell23-sys.github.io/covering-digraph-girth/) · [Español](https://jorgell23-sys.github.io/covering-digraph-girth/es/)
+
 <!-- hallazgo:que -->
 ## What was found
 

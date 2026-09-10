@@ -1,5 +1,9 @@
 # Menores testigos por cintura para `rad(n) | f(n)`
 
+<!-- explicacion -->
+**¿No sos del tema? Esto está explicado desde cero, sin dar nada por sabido:**
+[English](https://jorgell23-sys.github.io/covering-digraph-girth/) · [Español](https://jorgell23-sys.github.io/covering-digraph-girth/es/)
+
 <!-- hallazgo:que -->
 ## Qué se encontró
 
