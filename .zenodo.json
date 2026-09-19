@@ -15,6 +15,7 @@
     "covering digraph",
     "girth",
     "integer sequences",
+    "unitary divisors",
     "biunitary divisors",
     "non-monotonicity"
   ],
@@ -35,6 +36,6 @@
       "scheme": "doi"
     }
   ],
-  "version": "3.3.3",
-  "description": "Smallest members of S(f) = {n : rad(n) | f(n)} by the girth of their covering digraph, for f = sigma, sigma*, phi* and sigma** (the sum of the biunitary divisors). Twenty-six values, all proved minimal. A cutoff lemma bounds the largest prime a smaller witness could use; a per-arc strengthening of it makes the search several times cheaper; and a floor that mentions no witness at all, combined with doubling over an exhaustive search, removes the need for a known witness entirely. A surgery theorem inserts one vertex into the cycle of a witness of girth k to obtain a witness of girth k+1: it bounds the next smallest witness from above, and when the inserted stretch costs less than the exponent it saves it certifies, without computing anything further, that the next smallest witness is strictly smaller -- which over the twenty-two consecutive pairs of the table happens exactly where the sequence goes down. Twelve values had not been computed before; two of them, sigma* at girth 10 and sigma** at girth 7, were reachable only with the upper bound surgery supplies, and the upper bound for sigma at girth 9 improves by a factor of 6.75. Verified by independent implementations and cross-checked against Pollack and Pomerance (2012)."
+  "version": "3.4.0",
+  "description": "Smallest members of S(f) = {n : rad(n) | f(n)} by the girth of their covering digraph, for fifteen multiplicative functions: sigma, sigma*, phi*, sigma** (the sum of the biunitary divisors) and eleven members of the families sigma_s, sigma*_s and phi*_s -- sigma_s for s = 2, 3; sigma*_s for s = 2, 3, 5, 6; phi*_s for s = 2, ..., 6. Sixty-nine values, all proved minimal, fifty-five of them computed here for the first time. A cutoff lemma bounds the largest prime a smaller witness could use, which makes the enumeration finite; it requires no closed form and holds for every multiplicative function. A second bound, on the covering cost rather than the size and obtained by sieving rather than by formula, is about ten times stronger and makes the search 1.8 to 3.5 times cheaper while returning identical values. A per-arc strengthening makes the search several times cheaper still, and a floor that mentions no witness at all, combined with doubling over an exhaustive search, removes the need for a known witness entirely. A surgery theorem inserts one vertex into the cycle of a witness of girth k to obtain a witness of girth k+1: it bounds the next smallest witness from above, and when the inserted stretch costs less than the exponent it saves it certifies, without computing anything further, that the next smallest witness is strictly smaller. Everything is verified by one dependency-free command, including brute force that shares no code with the search, a term-by-term comparison of every function against its OEIS entry, and a cross-check against Pollack and Pomerance (2012)."
 }

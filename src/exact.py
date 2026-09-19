@@ -91,91 +91,13 @@ from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from arithmetic import f_of_prime_power, covering_digraph, girth  # noqa: E402
+from arithmetic import (FUNCTIONS, f_of_prime_power, covering_digraph,  # noqa: E402
+                        girth)
+from covering_cost import (CoveringCost, SizeFloor,  # noqa: E402
+                           factor as _factor, is_prime as _is_prime)
 
-__all__ = ["exact_smallest", "prime_cutoff", "cycle_floor", "predecessor_floor"]
-
-_BASES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37)
-
-
-def _is_prime(n):
-    """Deterministic Miller-Rabin for n < 3.3e24."""
-    if n < 2:
-        return False
-    for p in _BASES:
-        if n % p == 0:
-            return n == p
-    d, s = n - 1, 0
-    while d % 2 == 0:
-        d //= 2
-        s += 1
-    for a in _BASES:
-        x = pow(a, d, n)
-        if x in (1, n - 1):
-            continue
-        for _ in range(s - 1):
-            x = x * x % n
-            if x == n - 1:
-                break
-        else:
-            return False
-    return True
-
-
-def _gcd(a, b):
-    while b:
-        a, b = b, a % b
-    return a
-
-
-def _pollard(n):
-    """A non-trivial factor of composite n."""
-    if n % 2 == 0:
-        return 2
-    while True:
-        c = random.randrange(1, n)
-        x = random.randrange(0, n)
-        y, d = x, 1
-        while d == 1:
-            x = (x * x + c) % n
-            y = (y * y + c) % n
-            y = (y * y + c) % n
-            d = _gcd(abs(x - y), n)
-        if d != n:
-            return d
-
-
-_SMALL = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47)
-
-
-def _factor(n):
-    """Full factorisation. Trial division by small primes, then Pollard rho.
-
-    ``arithmetic.factorize`` is plain trial division, which is the right choice
-    there -- it is the code a reader checks by eye. Here the numbers factored
-    are ``f(q^e)`` for large ``q``, which reach 10^13 and beyond, so rho is
-    needed. The two agree; ``verify.py`` checks that they do.
-    """
-    out = {}
-    for p in _SMALL:
-        while n % p == 0:
-            out[p] = out.get(p, 0) + 1
-            n //= p
-    if n == 1:
-        return out
-    stack = [n]
-    while stack:
-        m = stack.pop()
-        if m == 1:
-            continue
-        if _is_prime(m):
-            out[m] = out.get(m, 0) + 1
-            continue
-        d = _pollard(m)
-        stack.append(d)
-        stack.append(m // d)
-    return out
-
+__all__ = ["exact_smallest", "prime_cutoff", "cycle_floor", "predecessor_floor",
+           "Cutoff", "cutoff_for", "smallest_without_seed"]
 
 def primes_up_to(n):
     if n < 2:
@@ -208,7 +130,8 @@ def primorial(j):
 def predecessor_floor(P, f):
     """Exact lower bound for q^e when the prime P divides f(q^e).
 
-    Integers only, no floating point: see the module docstring.
+    Integers only, no floating point: see the module docstring. This is the
+    published closed form; `Cutoff` below is the general version.
     """
     if f == "sigma":
         return (P + 1) // 2
@@ -256,9 +179,89 @@ def _integer_root_up(x, s):
     return r
 
 
+def has_published_floor(f):
+    """Whether `predecessor_floor` has a closed form for f (releases 2 and 3.3.0)."""
+    try:
+        predecessor_floor(3, f)
+    except ValueError:
+        return False
+    return True
+
+
+class Cutoff:
+    """The lower bounds on a covering prime power, in their three modes.
+
+    All three are valid; each dominates the one before it.
+
+    - ``published`` -- the closed forms of `predecessor_floor`: version 2 for
+      sigma, sigma* and phi*, and release 3.3.0 for sigma** and the families.
+    - ``size`` -- ``a_f(P) = min{ m a prime power : f(m) >= P }``. Valid for
+      **every** multiplicative f with no hypothesis whatever, and at least as
+      large as the published form, since it also demands that m be a prime
+      power.
+    - ``exact`` -- ``max(size, A_f(P))`` with ``A_f(P) = min{ m a prime power,
+      base != P : P divides f(m) }``, sieved to M and truncated at M + 1.
+
+    **`a` is monotone and `A` is not.** `a` is the one that may cut short a walk
+    ordered by P -- the bisection of the cutoff, the `break` over starting
+    primes, the universal floor. `A` may only discard one particular prime and
+    lower the floor of one particular node. Mixing them up yields a search that
+    skips legitimate witnesses and returns a wrong minimum without failing.
+    """
+
+    def __init__(self, f, mode="auto", M=0, prime_limit=0, verbose=False):
+        self.f = f
+        if mode == "auto":
+            mode = "published" if has_published_floor(f) else "size"
+        if mode == "published" and not has_published_floor(f):
+            raise ValueError("no published closed form for %r" % (f,))
+        self.mode = mode
+        self._size = SizeFloor(f)
+        self._exact = None
+        self.exact_prime_limit = 0
+        if mode == "exact":
+            if M <= 0 or prime_limit <= 0:
+                raise ValueError("exact mode needs M and prime_limit")
+            self._exact = CoveringCost(f, M, prime_limit, verbose=verbose)
+            self.exact_prime_limit = prime_limit
+
+    def a(self, P):
+        """The MONOTONE bound. The only one that may cut short a walk."""
+        if self.mode == "published":
+            return predecessor_floor(P, self.f)
+        return self._size(P)
+
+    def A(self, P):
+        """The best bound for this P. NOT monotone in P."""
+        base = self.a(P)
+        if self._exact is None:
+            return base
+        return max(base, self._exact(P))
+
+    def monotone_floor(self, P, k):
+        """(*) with the monotone bound: increases with P, so it may cut."""
+        return P * self.a(P) * primorial(k - 2)
+
+    def floor(self, P, k):
+        """(*) with the best bound. Discards this P; never cuts the walk."""
+        return P * self.A(P) * primorial(k - 2)
+
+    def prime_cutoff(self, bound, k):
+        lo, hi = 2, 4
+        while self.monotone_floor(hi, k) < bound:
+            hi *= 2
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if self.monotone_floor(mid, k) < bound:
+                lo = mid
+            else:
+                hi = mid - 1
+        return lo
+
+
 def cycle_floor(P, k, f):
     """(*) Lower bound for n, for a k-cycle whose largest prime is P."""
-    return P * predecessor_floor(P, f) * primorial(k - 2)
+    return Cutoff(f).monotone_floor(P, k)
 
 
 def prime_cutoff(bound, k, f):
@@ -267,16 +270,24 @@ def prime_cutoff(bound, k, f):
     Every prime of a witness of girth k smaller than `bound` is at most this.
     Computed by bisection so the answer is exact.
     """
-    lo, hi = 2, 4
-    while cycle_floor(hi, k, f) < bound:
-        hi *= 2
-    while lo < hi:
-        mid = (lo + hi + 1) // 2
-        if cycle_floor(mid, k, f) < bound:
-            lo = mid
-        else:
-            hi = mid - 1
-    return lo
+    return Cutoff(f).prime_cutoff(bound, k)
+
+
+#: How much deeper than the prime cutoff the covering cost is sieved. The
+#: filter ``P * A_f(P) * primorial(k-2) < N`` can only exclude primes above
+#: ``N / (primorial * M)``, so with M equal to the cutoff it excludes nobody:
+#: the sieve has to go DEEPER than the cutoff to be worth anything.
+SIEVE_DEPTH = 20
+
+
+def cutoff_for(f, k, bound, mode="auto", M=0, verbose=False):
+    """The `Cutoff` that goes with a bound N, sieving whatever it takes."""
+    if mode != "exact":
+        return Cutoff(f, mode=mode)
+    base = Cutoff(f, mode="published" if has_published_floor(f) else "size")
+    limit = base.prime_cutoff(bound, k)
+    return Cutoff(f, mode="exact", M=(M if M > 0 else max(1000, SIEVE_DEPTH * limit)),
+                  prime_limit=limit, verbose=verbose)
 
 
 #: Whether the per-arc cost lemma is applied on top of (*). A switch and not
@@ -291,8 +302,10 @@ class _Search:
 
     heartbeat = 0
 
-    def __init__(self, f, k, prime_limit, bound):
+    def __init__(self, f, k, prime_limit, bound, cutoff=None):
         self.f = f
+        self.cutoff = cutoff if cutoff is not None else Cutoff(f)
+        self.discarded = 0            # starting primes that A_f ruled out
         self.k = k
         self.bound = bound              # best product known (exclusive)
         self.best = None
@@ -361,15 +374,22 @@ class _Search:
             by_primes *= x
         if missing < 1 or not PER_ARC_LEMMA:
             return by_primes
-        by_closure = predecessor_floor(max(used), self.f)
+        by_closure = self.cutoff.A(max(used))
         for x in free[:missing - 1]:
             by_closure *= x
         return max(by_primes, by_closure)
 
     def run(self):
         for i, start in enumerate(self.primes):
-            if cycle_floor(start, self.k, self.f) >= self.bound:
+            # the `break` goes with the MONOTONE bound: it is the only one
+            # that guarantees every later prime is out too.
+            if self.cutoff.monotone_floor(start, self.k) >= self.bound:
                 break
+            # the pointwise discard goes with the best bound, which is not
+            # monotone -- hence `continue` and not `break`.
+            if self.cutoff.floor(start, self.k) >= self.bound:
+                self.discarded += 1
+                continue
             self._from(start)
             if self.heartbeat and i % self.heartbeat == 0:
                 print("    ... start %d of %d, best=%s, nodes=%d"
@@ -401,7 +421,7 @@ class _Search:
         closing = (m + 1 == self.k)
         # the closing vertex has to pay a_f(q_1): its prime power is what makes
         # q_1 | f(q^e). Same per-arc lemma, applied to the last vertex.
-        least = (predecessor_floor(path[0][0], self.f)
+        least = (self.cutoff.A(path[0][0])
                  if (closing and PER_ARC_LEMMA) else 1)
         for p, e, power in self.successors(nxt, budget):
             total = product * power
@@ -463,10 +483,13 @@ def universal_floor(k, f):
     below which nothing exists.
     """
     p_k = primes_up_to(100 * (k + 3))[k - 1]
-    return cycle_floor(p_k, k, f)
+    # with the MONOTONE bound: the argument is "P >= p_k and the floor grows
+    # with P", and A_f does not grow with P, so it is of no use here.
+    return Cutoff(f, mode="published" if has_published_floor(f) else "size"
+                  ).monotone_floor(p_k, k)
 
 
-def _search_below(f, k, bound, heartbeat=0):
+def _search_below(f, k, bound, heartbeat=0, cutoff=None):
     """Exhaustive search for the smallest witness of girth k below `bound`.
 
     Returns ``(n, factorisation, cycle, prime_limit, nodes)`` or
@@ -474,8 +497,9 @@ def _search_below(f, k, bound, heartbeat=0):
     cutoff lemma bounds the largest prime any witness below `bound` could use,
     so "nothing found" means "there is none", not "we did not look far enough".
     """
-    limit = prime_cutoff(bound, k, f)
-    search = _Search(f, k, limit, bound)
+    cutoff = cutoff if cutoff is not None else Cutoff(f)
+    limit = cutoff.prime_cutoff(bound, k)
+    search = _Search(f, k, limit, bound, cutoff=cutoff)
     search.heartbeat = heartbeat
     found = search.run()
     if found is None:
@@ -500,7 +524,8 @@ def exact_smallest(f, k, known_witness, heartbeat=0):
     return out[:4]
 
 
-def smallest_without_seed(f, k, heartbeat=0, trace=None):
+def smallest_without_seed(f, k, heartbeat=0, trace=None, mode="auto", M=0,
+                          cap=0):
     """The smallest witness of girth k, **with no known witness to start from**.
 
     The search of `exact_smallest` needs a witness N so that the cutoff lemma
@@ -526,14 +551,25 @@ def smallest_without_seed(f, k, heartbeat=0, trace=None):
     """
     bound = universal_floor(k, f) + 1
     rounds, nodes = 0, 0
+    cutoff = None
     while True:
         rounds += 1
+        if cutoff is None or mode != "exact" or                 cutoff.prime_cutoff(bound, k) > cutoff.exact_prime_limit:
+            cutoff = cutoff_for(f, k, bound, mode, M)
         if trace is not None:
-            trace(rounds, bound, prime_cutoff(bound, k, f))
-        out = _search_below(f, k, bound, heartbeat)
+            trace(rounds, bound, cutoff.prime_cutoff(bound, k))
+        out = _search_below(f, k, bound, heartbeat, cutoff=cutoff)
         nodes += out[-1]
         if out[0] is not None:
             return out[0], out[1], out[2], out[3], nodes, rounds
+        if cap and bound >= cap:
+            # Not a failure and not an exhausted heuristic: the search WAS
+            # exhaustive below `bound`, so what is known is a PROVED LOWER
+            # BOUND -- there is no witness of girth k below this number. It is
+            # returned as such rather than as a bare None, because a None that
+            # can mean either "there is none" or "we did not look far enough"
+            # is exactly the datum that is of no use.
+            return None, None, None, bound, nodes, rounds
         bound *= 2
 
 
@@ -552,7 +588,7 @@ KNOWN = {
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("function", choices=("sigma", "sigma*", "phi*"))
+    parser.add_argument("function", choices=list(FUNCTIONS))
     parser.add_argument("girths", nargs="+", type=int)
     parser.add_argument("--bound", type=int, default=0,
                         help="a known witness of that girth, to seed the "
@@ -565,7 +601,41 @@ def main(argv=None):
     parser.add_argument("--measure-lemma", action="store_true",
                         help="run each girth twice, with and without the "
                              "per-arc lemma, and compare the search trees")
+    parser.add_argument("--mode", default="auto",
+                        choices=("auto", "published", "size", "exact"),
+                        help="which lower bound on the covering prime power to "
+                             "use (default: the published closed form where "
+                             "there is one, the generic size bound otherwise)")
+    parser.add_argument("--sieve", type=int, default=0,
+                        help="how far to sieve the covering cost in --mode "
+                             "exact (default: 20 times the prime cutoff)")
+    parser.add_argument("--cap", type=float, default=0,
+                        help="stop doubling at this bound and report the proved "
+                             "lower bound instead of running forever")
+    parser.add_argument("--measure-cutoff", action="store_true",
+                        help="run each girth under all three bounds and compare "
+                             "values, cutoffs and search trees")
     args = parser.parse_args(argv)
+
+    if args.measure_cutoff:
+        print("%-9s %2s | %-10s %10s %13s %8s | value"
+              % ("f", "k", "mode", "cutoff P", "nodes", "sec"))
+        for k in args.girths:
+            seed = args.bound or KNOWN.get((args.function, k))
+            if not seed:
+                print("girth %d: not in the control table" % k)
+                continue
+            for mode in ("published", "size", "exact"):
+                if mode == "published" and not has_published_floor(args.function):
+                    continue
+                cut = cutoff_for(args.function, k, seed + 1, mode, args.sieve)
+                started = time.time()
+                out = _search_below(args.function, k, seed + 1, cutoff=cut)
+                print("%-9s %2d | %-10s %10d %13d %8.2f | %s"
+                      % (args.function, k, mode, cut.prime_cutoff(seed + 1, k),
+                         out[-1], time.time() - started,
+                         "ok" if out[0] == seed else "DISAGREES %d" % out[0]))
+        return 0
 
     if args.measure_lemma:
         global PER_ARC_LEMMA
@@ -600,7 +670,12 @@ def main(argv=None):
 
             started = time.time()
             n, factors, cycle, limit, nodes, rounds = smallest_without_seed(
-                args.function, k, args.heartbeat, trace)
+                args.function, k, args.heartbeat, trace, mode=args.mode,
+                M=args.sieve, cap=int(args.cap))
+            if n is None:
+                print("  NO WITNESS below %d -- proved lower bound "
+                      "(%d rounds, %d nodes)" % (limit, rounds, nodes))
+                continue
             shown = " * ".join("%d^%d" % (q, e) if e > 1 else str(q)
                                for q, e in sorted(factors.items()))
             print("  MINIMUM n = %d   (%d rounds, %d nodes, %.0fs)"

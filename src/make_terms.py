@@ -41,6 +41,15 @@ TERMS = {
     "phi*4":   {2: 6, 3: 207553, 4: 16099333, 5: 2534414641},
     "phi*5":   {2: 12, 3: 27951, 4: 161994931},
     "phi*6":   {2: 6, 3: 17501, 4: 4176227},
+    #: Release 3.4.0: the families with s = 2 and 3 that 3.3.0 had not computed.
+    #: The cutoff needs no closed form (`covering_cost.py`), and these were first
+    #: computed with the general bound; the minimal witnesses do not depend on
+    #: which valid bound prunes the search.
+    "sigma2":  {2: 10, 3: 468, 4: 44550, 5: 141376950},
+    "sigma3":  {2: 6, 3: 3913, 4: 9933, 5: 268696035, 6: 119317927575},
+    "sigma*2": {2: 10, 3: 207553, 4: 200728169},
+    "phi*2":   {2: 6, 3: 15925, 4: 2118025, 5: 1549787470231,
+                6: 30597817101379},
 }
 
 #: The ones this project computed for the first time, and the release that did.
@@ -56,6 +65,9 @@ FIRST_HERE = {
 FIRST_HERE.update({(f, k): "3.3.0"
                    for f in ("sigma*3", "sigma*5", "sigma*6",
                              "phi*3", "phi*4", "phi*5", "phi*6")
+                   for k in TERMS[f]})
+FIRST_HERE.update({(f, k): "3.4.0"
+                   for f in ("sigma2", "sigma3", "sigma*2", "phi*2")
                    for k in TERMS[f]})
 
 #: The ones for which no seed was available at all, so they could only be
@@ -116,7 +128,9 @@ def build():
             "Smallest n in S(f) = {n : rad(n) divides f(n)} whose covering "
             "digraph has girth k. Every term is proved minimal: the cutoff "
             "lemma bounds the largest prime a smaller witness could use, so "
-            "the enumeration is exhaustive.",
+            "the enumeration is exhaustive. The bound needs no closed form and "
+            "holds for every multiplicative function, which is why eight of "
+            "them appear here.",
         "generated_by": "python src/make_terms.py",
         "reproduce_one": "python src/exact.py <function> <girth> --no-seed",
         "reference": "https://doi.org/10.1515/integers-2012-0044",

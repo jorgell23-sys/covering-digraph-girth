@@ -14,7 +14,7 @@ between primes dividing `n` whenever `p | f(q^e)`, with `q^e` the exact power of
 invariant of `n`.
 
 This repository computes **the least `n` whose shortest cycle has length `k`**,
-for eleven functions and `k = 2, ..., 10`: **52 values, each proved minimal**, 38
+for fifteen functions and `k = 2, ..., 10`: **69 values, each proved minimal**, 55
 of them computed here for the first time. It also proves a local operation on the
 cycle that yields an upper bound for the next value, and a **certificate**
 derived from it deciding `m_f(k+1) < m_f(k)` without computing `m_f(k+1)`. The
@@ -36,11 +36,15 @@ an incoming arc, so `D_f(n)` always contains a directed cycle. Its **girth**
 
     m_f(k) = min { n in S(f) : g_f(n) = k }.
 
-The eleven functions are `sigma`, `sigma*` (unitary), `phi*` (unitary totient),
-`sigma**` (biunitary), and the parametric families
+The fifteen functions are `sigma`, `sigma*` (unitary), `phi*` (unitary totient),
+`sigma**` (biunitary), and eleven members of the parametric families
 
     sigma_s(q^e)  = (q^{s(e+1)} - 1)/(q^s - 1),    sigma*_s(q^e) = q^{se} + 1,
-    phi*_s(q^e)   = q^{se} - 1,                    for s = 3, 4, 5, 6.
+    phi*_s(q^e)   = q^{se} - 1,
+
+namely `sigma_s` for s = 2, 3; `sigma*_s` for s = 2, 3, 5, 6; and `phi*_s` for
+s = 2, ..., 6. Every one of them is catalogued, and `verify.py` checks each that
+has an OEIS entry against it term by term.
 
 > **Theorem 1 (shape of a minimum).** `m_f(k)` has exactly `k` distinct primes,
 > and `D_f(m_f(k))` is a pure `k`-cycle.
@@ -111,7 +115,11 @@ the cycle contributes a prime power `q^e` with `P | f(q^e)`, so `q^e >= a_f(P)`
 by the definition of `a_f`; the remaining `k-2` primes are pairwise distinct and
 distinct from `P` and `q`, so their product is at least the primorial. The bound
 is evaluated in integer arithmetic throughout: a floating-point value at the
-boundary could discard a legitimate witness.
+boundary could discard a legitimate witness. Nothing in the argument uses a
+formula for `f`, so the lemma holds for every multiplicative function (release
+3.4.0); a second bound on the covering cost, obtained by sieving rather than by
+formula, is about ten times stronger and returns identical minima (`RESULT.md`,
+section 4).
 
 **Theorem 3** is a count of arcs. In `n'` the vertices `q_j` with `j != i` keep
 their exponents, so they still point only to `q_{j+1}`, and condition 5 says they
@@ -138,11 +146,12 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-414 checks, no dependencies, `PASS` or `FAIL` on each, exit code 1 if any fails.
+471 checks, no dependencies, `PASS` or `FAIL` on each, exit code 1 if any fails.
 They re-derive every published value from the definitions, re-prove the reachable
 ones exhaustively, build the `f` of Theorem 4 and locate its minima by brute
-force, and cross-check the count of `S(sigma)` below `10^9` against Pollack and
-Pomerance (2012).
+force, compare every function against its OEIS entry term by term, run a brute
+force that shares no code with the search, and cross-check the count of
+`S(sigma)` below `10^9` against Pollack and Pomerance (2012).
 
 <!-- hallazgo:nodice -->
 ## What is not claimed
@@ -305,4 +314,5 @@ to the latest version:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22288593.svg)](https://doi.org/10.5281/zenodo.22288593)
 
-The DOI of this specific version is [`10.5281/zenodo.22459593`](https://doi.org/10.5281/zenodo.22459593).
+Every release also has its own version DOI; they are all listed on the Zenodo
+record that the concept DOI resolves to.

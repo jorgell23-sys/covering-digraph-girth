@@ -14,8 +14,8 @@ recibe flecha**, ese dibujo siempre contiene un ciclo dirigido, y el largo del
 más corto es un invariante de `n`.
 
 Este repositorio calcula **el menor `n` cuyo ciclo más corto tiene largo `k`**,
-para once funciones y `k = 2, ..., 10`: **52 valores, cada uno demostradamente
-mínimo**, 38 de ellos calculados acá por primera vez. Demuestra además una
+para quince funciones y `k = 2, ..., 10`: **69 valores, cada uno demostradamente
+mínimo**, 55 de ellos calculados acá por primera vez. Demuestra además una
 operación local sobre el ciclo que da una cota superior para el valor siguiente,
 y un **certificado** derivado de ella que decide `m_f(k+1) < m_f(k)` **sin
 calcular** `m_f(k+1)`. El certificado resulta **suficiente y no necesario**.
@@ -36,11 +36,15 @@ flecha entrante, así que `D_f(n)` siempre contiene un ciclo dirigido. Su
 
     m_f(k) = min { n en S(f) : g_f(n) = k }.
 
-Las once funciones son `sigma`, `sigma*` (unitaria), `phi*` (totiente unitaria),
-`sigma**` (biunitaria) y las familias con parámetro
+Las quince funciones son `sigma`, `sigma*` (unitaria), `phi*` (totiente unitaria),
+`sigma**` (biunitaria) y once miembros de las familias con parámetro
 
     sigma_s(q^e)  = (q^{s(e+1)} - 1)/(q^s - 1),    sigma*_s(q^e) = q^{se} + 1,
-    phi*_s(q^e)   = q^{se} - 1,                    para s = 3, 4, 5, 6.
+    phi*_s(q^e)   = q^{se} - 1,
+
+a saber `sigma_s` para s = 2, 3; `sigma*_s` para s = 2, 3, 5, 6; y `phi*_s` para
+s = 2, ..., 6. Todas están catalogadas, y `verify.py` compara término a término
+cada una que tiene entrada en OEIS contra ella.
 
 > **Teorema 1 (forma de un mínimo).** `m_f(k)` tiene exactamente `k` primos
 > distintos, y `D_f(m_f(k))` es un ciclo puro de largo `k`.
@@ -113,7 +117,10 @@ ser `m_{sigma*}(6)`.
 `q^e >= a_f(P)` por definición de `a_f`; los `k-2` primos restantes son distintos
 entre sí y distintos de `P` y de `q`, así que su producto es al menos el
 primorial. La cota se evalúa en enteros: un flotante en el borde podría descartar
-un testigo legítimo.
+un testigo legítimo. Nada en el argumento usa una fórmula de `f`, así que el lema
+vale para toda función multiplicativa (versión 3.4.0); una segunda cota, sobre el
+costo de cubrimiento, obtenida por criba y no por fórmula, es unas diez veces más
+fuerte y devuelve los mismos mínimos (`RESULT.md`, sección 4).
 
 **Teorema 3:** es una cuenta de flechas. En `n'` los vértices `q_j` con `j != i`
 conservan su exponente, así que siguen apuntando sólo a `q_{j+1}`, y la condición
@@ -141,11 +148,13 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-414 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
+471 comprobaciones, sin instalar nada, `PASS` o `FAIL` en cada una y código de
 salida 1 si alguna falla. Rederivan cada valor publicado desde las definiciones,
 redemuestran exhaustivamente los alcanzables, construyen la `f` del Teorema 4 y
-localizan sus mínimos por fuerza bruta, y contrastan el conteo de `S(sigma)` por
-debajo de `10^9` contra Pollack y Pomerance (2012).
+localizan sus mínimos por fuerza bruta, comparan cada función término a término
+contra su entrada de OEIS, corren una fuerza bruta que no comparte código con la
+búsqueda, y contrastan el conteo de `S(sigma)` por debajo de `10^9` contra
+Pollack y Pomerance (2012).
 
 <!-- hallazgo:nodice -->
 ## Qué no se afirma
@@ -307,4 +316,5 @@ resuelve a la última versión:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22288593.svg)](https://doi.org/10.5281/zenodo.22288593)
 
-El DOI de esta versión concreta es [`10.5281/zenodo.22459593`](https://doi.org/10.5281/zenodo.22459593).
+Cada versión tiene además su propio DOI de versión; están todos en el registro
+de Zenodo al que lleva el DOI concepto.

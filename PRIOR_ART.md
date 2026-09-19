@@ -5,7 +5,8 @@ exactly what was searched so that a reader can judge how much the absence is
 worth — and repeat it.
 
 Searches performed **2026-09-03** (versions 1 and 2), and repeated and extended
-**2026-09-04** for **version 3** and again for **version 3.2**.
+**2026-09-04** for **version 3**, again for **version 3.2**, and for the four
+families of **release 3.4.0**, whose searches are in section 7.
 
 ---
 
@@ -223,7 +224,62 @@ their girth-5 term, and that costs an estimated 18 days (`phi*_5`) and 184 days
 `NO_APARECE_EN_LO_CONSULTADO`. Positive control beside them: `abundant` +
 Pollack-Pomerance, which does return work on prime-abundant numbers.
 
-## 7. Analogous sequences that do exist
+## 7. The four further families (release 3.4.0)
+
+Release 3.4.0 runs the same machinery over `sigma_2`, `sigma_3`, `sigma*_2` and
+`phi*_2`, the families with s = 2 and 3 that 3.3.0 had not computed. **The
+functions themselves are catalogued and old**; what is new is the set `S(f)`
+built from each, and its smallest witnesses by girth. The search below was run
+with `sigma**` among them, so its row stays; that function is covered in 6b.
+
+**The functions, and the entries they reproduce term by term** (section 13 of
+`verify.py`):
+[A001157](https://oeis.org/A001157) (sum of squares of divisors),
+[A001158](https://oeis.org/A001158) (sum of cubes),
+[A188999](https://oeis.org/A188999) (bi-unitary sigma),
+[A034676](https://oeis.org/A034676) (squares of unitary divisors),
+[A191414](https://oeis.org/A191414) (unitary Jordan function `J*_2`).
+Bi-unitary divisors have their own literature; the standard reference is
+Charles R. Wall, *Bi-unitary perfect numbers*, Proceedings of the American
+Mathematical Society **33** (1972), 39–42,
+[doi:10.1090/S0002-9939-1972-0289403-9](https://doi.org/10.1090/S0002-9939-1972-0289403-9).
+
+**The sets, queried by their first twenty terms.** `S(sigma)` returns
+[A175200](https://oeis.org/A175200), *"Numbers k such that rad(k) divides
+sigma(k)"* — that is the **positive control**, and it is exactly the object, so
+the query discriminates. The other five return nothing:
+
+| set | first terms | result |
+|---|---|---|
+| `S(sigma)` | 6, 24, 28, 40, 54, 96, 120, 135 | **A175200** (control) |
+| `S(sigma_2)` | 10, 12, 28, 40, 60, 65, 75, 84 | not in OEIS |
+| `S(sigma_3)` | 6, 24, 40, 42, 54, 96, 104, 120 | not in OEIS |
+| `S(sigma**)` | 6, 18, 20, 24, 40, 45, 48, 54 | not in OEIS |
+| `S(sigma*_2)` | 10, 40, 50, 65, 68, 104, 130, 160 | not in OEIS |
+| `S(phi*_2)` | 6, 12, 18, 20, 24, 36, 45, 48 | not in OEIS |
+
+**Bibliographic search, 2026-09-04**, over zbMATH Open, OpenAlex, Crossref and
+arXiv, requiring the terms to occur **together** in one title or abstract:
+
+| query | terms required together | result |
+|---|---|---|
+| radical divides sum of squares of divisors | `radical`, `divisors` | nothing |
+| numbers whose radical divides bi-unitary sigma | `bi-unitary`, `radical` | nothing |
+| covering digraph girth multiplicative arithmetic function | `girth`, `arithmetic function` | nothing |
+| lower bound on the smallest prime power whose sigma a given prime divides | `prime power`, `divisible` | two works, **neither about this** |
+| bi-unitary perfect numbers | `bi-unitary`, `perfect` | **ten works** (control) |
+
+The control returns Wall (1972) from all four sources, so the search
+discriminates. The fourth row is reported rather than hidden: its two hits are
+*Weights Modulo a Prime Power in Divisible Codes and a Related Bound* (coding
+theory) and *Primary decomposition of the ideal of polynomials whose fixed
+divisor is divisible by a prime power* (commutative algebra). Neither concerns
+the least prime power covered by a given prime. The automatic verdict for that
+row is "appears in the literature", and it is left standing with its two hits
+shown, because turning a coincidence into "not found" by hand is the failure
+this file exists to prevent.
+
+## 8. Analogous sequences that do exist
 
 Sequences of the form "smallest object of girth n" are an established genre:
 
@@ -235,7 +291,7 @@ Sequences of the form "smallest object of girth n" are an established genre:
 They are about **graphs**; this one is about **divisibility**. The shape of the
 question is the same.
 
-## 8. What all this is worth
+## 9. What all this is worth
 
 `NOT FOUND IN WHAT WAS SEARCHED` — and that is the strongest statement
 available.
@@ -247,6 +303,15 @@ cycle would produce a shorter one — and is likely known under another name. Wh
 did not appear is the conjunction: the girth of the covering digraph **of a
 multiplicative function**, a cutoff that turns its computation into a proof, and
 a floor that lets that computation start from nothing.
+
+The same caveat covers release 3.4.0 and is worth stating twice, because it is
+the release most likely to look bigger than it is. Theorem 2' is four lines
+over a definition; the observation it rests on — that a prime power determines
+its own base and exponent — is not deep, and its only merit is that nobody in
+this project had made it, so three functions were being treated as a special
+family for two versions. The four further families are old and catalogued. What
+is new is seventeen integers, each of them checkable in a second by anybody who
+disagrees.
 
 Proving that something has never been known is not possible by searching. What
 is possible is to say precisely where one looked, to say when the looking was

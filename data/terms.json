@@ -1,5 +1,5 @@
 {
-  "description": "Smallest n in S(f) = {n : rad(n) divides f(n)} whose covering digraph has girth k. Every term is proved minimal: the cutoff lemma bounds the largest prime a smaller witness could use, so the enumeration is exhaustive.",
+  "description": "Smallest n in S(f) = {n : rad(n) divides f(n)} whose covering digraph has girth k. Every term is proved minimal: the cutoff lemma bounds the largest prime a smaller witness could use, so the enumeration is exhaustive. The bound needs no closed form and holds for every multiplicative function, which is why eight of them appear here.",
   "generated_by": "python src/make_terms.py",
   "reproduce_one": "python src/exact.py <function> <girth> --no-seed",
   "reference": "https://doi.org/10.1515/integers-2012-0044",
@@ -1397,6 +1397,446 @@
         "largest_prime": 331,
         "first_computed_here": true,
         "first_computed_in_release": "3.3.0",
+        "no_seed_existed": false
+      }
+    ],
+    "sigma2": [
+      {
+        "girth": 2,
+        "n": 10,
+        "factorization": "2 * 5",
+        "omega": 2,
+        "cycle": [
+          2,
+          5
+        ],
+        "edges": {
+          "2": 5,
+          "5": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 5,
+        "largest_prime": 5,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 3,
+        "n": 468,
+        "factorization": "2^2 * 3^2 * 13",
+        "omega": 3,
+        "cycle": [
+          2,
+          3,
+          13
+        ],
+        "edges": {
+          "2": 3,
+          "3": 13,
+          "13": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 46,
+        "largest_prime": 13,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 4,
+        "n": 44550,
+        "factorization": "2 * 3^4 * 5^2 * 11",
+        "omega": 4,
+        "cycle": [
+          2,
+          5,
+          3,
+          11
+        ],
+        "edges": {
+          "2": 5,
+          "3": 11,
+          "5": 3,
+          "11": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 464,
+        "largest_prime": 11,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 5,
+        "n": 141376950,
+        "factorization": "2 * 3^2 * 5^2 * 11 * 13^4",
+        "omega": 5,
+        "cycle": [
+          2,
+          5,
+          3,
+          13,
+          11
+        ],
+        "edges": {
+          "2": 5,
+          "3": 13,
+          "5": 3,
+          "11": 2,
+          "13": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 35378,
+        "largest_prime": 13,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      }
+    ],
+    "sigma3": [
+      {
+        "girth": 2,
+        "n": 6,
+        "factorization": "2 * 3",
+        "omega": 2,
+        "cycle": [
+          2,
+          3
+        ],
+        "edges": {
+          "2": 3,
+          "3": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 3,
+        "largest_prime": 3,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 3,
+        "n": 3913,
+        "factorization": "7 * 13 * 43",
+        "omega": 3,
+        "cycle": [
+          7,
+          43,
+          13
+        ],
+        "edges": {
+          "7": 43,
+          "13": 7,
+          "43": 13
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 326,
+        "largest_prime": 43,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 4,
+        "n": 9933,
+        "factorization": "3 * 7 * 11 * 43",
+        "omega": 4,
+        "cycle": [
+          3,
+          7,
+          43,
+          11
+        ],
+        "edges": {
+          "3": 7,
+          "7": 43,
+          "11": 3,
+          "43": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 275,
+        "largest_prime": 43,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 5,
+        "n": 268696035,
+        "factorization": "3^5 * 5 * 37 * 43 * 139",
+        "omega": 5,
+        "cycle": [
+          3,
+          37,
+          43,
+          139,
+          5
+        ],
+        "edges": {
+          "3": 37,
+          "5": 3,
+          "37": 43,
+          "43": 139,
+          "139": 5
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 194672,
+        "largest_prime": 139,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 6,
+        "n": 119317927575,
+        "factorization": "3 * 5^2 * 7 * 11^4 * 19^2 * 43",
+        "omega": 6,
+        "cycle": [
+          3,
+          7,
+          43,
+          11,
+          5,
+          19
+        ],
+        "edges": {
+          "3": 7,
+          "5": 19,
+          "7": 43,
+          "11": 5,
+          "19": 3,
+          "43": 11
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 4370620,
+        "largest_prime": 43,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      }
+    ],
+    "sigma*2": [
+      {
+        "girth": 2,
+        "n": 10,
+        "factorization": "2 * 5",
+        "omega": 2,
+        "cycle": [
+          2,
+          5
+        ],
+        "edges": {
+          "2": 5,
+          "5": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 5,
+        "largest_prime": 5,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 3,
+        "n": 207553,
+        "factorization": "17 * 29 * 421",
+        "omega": 3,
+        "cycle": [
+          17,
+          29,
+          421
+        ],
+        "edges": {
+          "17": 29,
+          "29": 421,
+          "421": 17
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 2208,
+        "largest_prime": 421,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 4,
+        "n": 200728169,
+        "factorization": "29 * 41 * 401 * 421",
+        "omega": 4,
+        "cycle": [
+          29,
+          421,
+          401,
+          41
+        ],
+        "edges": {
+          "29": 421,
+          "41": 29,
+          "401": 41,
+          "421": 401
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 103685,
+        "largest_prime": 421,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      }
+    ],
+    "phi*2": [
+      {
+        "girth": 2,
+        "n": 6,
+        "factorization": "2 * 3",
+        "omega": 2,
+        "cycle": [
+          2,
+          3
+        ],
+        "edges": {
+          "2": 3,
+          "3": 2
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 3,
+        "largest_prime": 3,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 3,
+        "n": 15925,
+        "factorization": "5^2 * 7^2 * 13",
+        "omega": 3,
+        "cycle": [
+          5,
+          13,
+          7
+        ],
+        "edges": {
+          "5": 13,
+          "7": 5,
+          "13": 7
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 398,
+        "largest_prime": 13,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 4,
+        "n": 2118025,
+        "factorization": "5^2 * 7^3 * 13 * 19",
+        "omega": 4,
+        "cycle": [
+          5,
+          13,
+          7,
+          19
+        ],
+        "edges": {
+          "5": 13,
+          "7": 19,
+          "13": 7,
+          "19": 5
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 4971,
+        "largest_prime": 19,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 5,
+        "n": 1549787470231,
+        "factorization": "7^5 * 11^2 * 13 * 31^2 * 61",
+        "omega": 5,
+        "cycle": [
+          7,
+          11,
+          61,
+          31,
+          13
+        ],
+        "edges": {
+          "7": 11,
+          "11": 61,
+          "13": 7,
+          "31": 13,
+          "61": 31
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 13868344,
+        "largest_prime": 61,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
+        "no_seed_existed": false
+      },
+      {
+        "girth": 6,
+        "n": 30597817101379,
+        "factorization": "11^2 * 23 * 31^2 * 37^2 * 61 * 137",
+        "omega": 6,
+        "cycle": [
+          11,
+          61,
+          31,
+          37,
+          137,
+          23
+        ],
+        "edges": {
+          "11": 61,
+          "23": 11,
+          "31": 37,
+          "37": 137,
+          "61": 31,
+          "137": 23
+        },
+        "in_S": true,
+        "is_pure_cycle": true,
+        "proved_minimal": true,
+        "primes_searched_up_to": 27688643,
+        "largest_prime": 137,
+        "first_computed_here": true,
+        "first_computed_in_release": "3.4.0",
         "no_seed_existed": false
       }
     ]

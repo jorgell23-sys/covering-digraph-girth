@@ -32,13 +32,15 @@ from collections import deque
 __all__ = [
     "factorize", "rad", "sigma", "unitary_sigma", "unitary_phi",
     "biunitary_sigma", "biunitary_divisors",
-    "f_of_prime_power", "in_S", "covering_digraph", "girth", "is_pure_cycle",
+    "f_of_prime_power", "evaluate", "in_S", "covering_digraph", "girth", "is_pure_cycle",
     "FUNCTIONS",
 ]
 
-#: The multiplicative functions studied here, by name.
-#: The four with no parameter, kept first because the published terms use them,
-#: plus the three families with s = 1..6 that release 3.3.0 adds.
+#: Every function the machinery accepts, by name: the four with no parameter,
+#: kept first because the published terms use them, plus the three families with
+#: s = 2..6 that release 3.3.0 adds. The cutoff lemma needs no closed form
+#: (release 3.4.0, `covering_cost.py`), so this list is open-ended: adding a case
+#: to `f_of_prime_power` below is all it takes to bring a new function in.
 FUNCTIONS = (("sigma", "sigma*", "phi*", "sigma**")
              + tuple("sigma%d" % s for s in range(2, 7))
              + tuple("sigma*%d" % s for s in range(2, 7))
@@ -109,6 +111,13 @@ def f_of_prime_power(q, e, f):
 
         sigma**(q^e) = sigma(q^e) - q^(e/2) for e even, sigma(q^e) for e odd
 
+    All of these are standard, catalogued arithmetic functions; none is an
+    invention of this repository. Where the OEIS has the sequence, this is it,
+    and `verify.py` checks the reproduction term by term:
+
+        sigma A000203, sigma* A034448, phi* A047994, sigma** A188999,
+        sigma2 A001157, sigma3 A001158, sigma*2 A034676, phi*2 A191414.
+
     Releases up to 3.2.0 accepted only the four functions with no parameter.
     That was not a mathematical limit: nothing in the cutoff lemma or in the
     pure-cycle theorem mentions which f is being used, and release 3.3.0 adds
@@ -135,8 +144,8 @@ def f_of_prime_power(q, e, f):
     return (q ** (s * (e + 1)) - 1) // (q ** s - 1)
 
 
-def _evaluate(n, f):
-    """Evaluate the multiplicative function f at n."""
+def evaluate(n, f):
+    """Evaluate the multiplicative function f at n, from its prime powers."""
     result = 1
     for q, e in factorize(n).items():
         result *= f_of_prime_power(q, e, f)
@@ -145,27 +154,27 @@ def _evaluate(n, f):
 
 def sigma(n):
     """Sum of the divisors of n."""
-    return _evaluate(n, "sigma")
+    return evaluate(n, "sigma")
 
 
 def unitary_sigma(n):
     """Sum of the unitary divisors of n: prod (q^e + 1)."""
-    return _evaluate(n, "sigma*")
+    return evaluate(n, "sigma*")
 
 
 def unitary_phi(n):
     """The unitary analogue of Euler's phi: prod (q^e - 1)."""
-    return _evaluate(n, "phi*")
+    return evaluate(n, "phi*")
 
 
 def biunitary_sigma(n):
     """Sum of the biunitary divisors of n."""
-    return _evaluate(n, "sigma**")
+    return evaluate(n, "sigma**")
 
 
 def in_S(n, f):
     """Does n belong to S(f) = {n : rad(n) divides f(n)}?"""
-    return _evaluate(n, f) % rad(n) == 0
+    return evaluate(n, f) % rad(n) == 0
 
 
 def covering_digraph(n, f):

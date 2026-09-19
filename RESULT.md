@@ -13,10 +13,10 @@ the sum of divisors or a relative of it. Keep the integers where **every prime
 receives an arrow**. That drawing always contains a directed cycle, and the
 length of its shortest one is an invariant of the integer.
 
-This work computes, for four such functions, **the smallest integer whose
-shortest cycle has each given length** -- 26 values, every one *proved* to be
+This work computes, for fifteen such functions, **the smallest integer whose
+shortest cycle has each given length** -- 69 values, every one *proved* to be
 the smallest that exists and not merely the smallest anyone looked far enough to
-find, twelve of them computed here for the first time. And it gives a **local
+find, 55 of them computed here for the first time. And it gives a **local
 operation on that cycle** which decides, from one value alone, whether the next
 one will be **smaller** -- twice in this table it is.
 
@@ -92,7 +92,7 @@ bookkeeping: drop them and the same move on `m_sigma(5)` yields `1103602500`,
 whose girth is **2**.
 
 <!-- hallazgo:comprobar -->
-## Check it yourself, in five seconds
+## Check it yourself, in about a minute
 
 ```bash
 git clone https://github.com/jorgell23-sys/covering-digraph-girth
@@ -100,10 +100,12 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-414 checks, no dependencies, `PASS` or `FAIL` on each and exit code 1 if any
+471 checks, no dependencies, `PASS` or `FAIL` on each and exit code 1 if any
 fails. They re-derive every published value from the definitions, re-prove the
-reachable ones exhaustively, and cross-check the count of `S(sigma)` below `10^9`
-against Pollack and Pomerance (2012), who never saw this repository.
+reachable ones exhaustively, compare each function against its OEIS entry, run a
+brute force that shares no code with the search, and cross-check the count of
+`S(sigma)` below `10^9` against Pollack and Pomerance (2012), who never saw this
+repository.
 
 <!-- hallazgo:nodice -->
 ## What it does not say
@@ -121,9 +123,9 @@ stops where the computation stopped -- empty cells are empty, not zero.
 
 ---
 
-**Version 3.2 — 2026-09-04.** Every number in this document is checked by
-`python verify.py`, in about five seconds and with nothing installed. The
-change log is at the end.
+**Release 3.4.0 — 2026-09-18.** Every number in this document is checked by
+`python verify.py`, in about a minute and with nothing installed. The change log is
+at the end.
 
 ---
 
@@ -270,7 +272,132 @@ cutoff derived from it — check 7 of `verify.py`. If that ever failed, every
 
 ---
 
-## 4. Theorem 3 — the per-arc cost lemma
+## 4. Theorem 2' — the cutoff needs no closed form, and a sharper one
+
+Version 2 stated Theorem 2 for `sigma`, `sigma*` and `phi*`, and said it held
+*because those three have a closed form on prime powers from which
+`q^e >= a_f(P)` can be read off*. That reading made the whole machinery look
+like a property of three particular functions. It is not, and what follows is
+the correction, together with a bound that is stronger than any of the three
+closed forms.
+
+> **Theorem 2' (general cutoff).** Let `f` be **any** multiplicative function
+> with `f(m) >= 1` on every prime power `m`. For a prime `P` put
+>
+>     a_f(P)  =  min { m a prime power : f(m) >= P }
+>
+> Then `a_f(P)` is well defined, non-decreasing in `P`, computable, and every
+> prime power `m` with `P | f(m)` satisfies `m >= a_f(P)`. Consequently (*)
+> holds for every multiplicative `f`, with this `a_f`.
+
+*Proof.* On a prime power `m = q^e` the base `q` and the exponent `e` are
+determined by `m`, so `f` restricted to the prime powers is a function of one
+argument and the set `{ m : f(m) >= P }` is well defined; it is non-empty
+whenever `f` is unbounded on prime powers, which is the only thing assumed.
+If `P | f(m)` then `f(m)` is a positive multiple of `P`, so `f(m) >= P` and `m`
+belongs to that set, hence `m >= a_f(P)`. Monotonicity: for `P <= P'` the set
+of `P'` is contained in the set of `P`, so its minimum is not smaller. The rest
+of the proof of Theorem 2 uses only that `a_f(P)` bounds the predecessor's
+prime power, so it goes through unchanged. ∎
+
+No growth condition, no monotonicity of `f`, no closed form. The three formulas
+of Theorem 2 are the case where the minimum happens to have one — and the
+generic minimum is **at least as large as all three**, because it also demands
+that `m` be a prime power. For `sigma` and `P = 11` the formula gives `6` and
+the generic minimum gives `8`; over the 303 primes below 2000 the generic bound
+is strictly larger in 299 of them for `sigma` and `sigma*`, and in 298 for
+`phi*` (check 15 of `verify.py`).
+
+### The bound that is not about size at all
+
+The size bound throws away the divisibility and keeps only the inequality. Keep
+both and the bound is far stronger.
+
+> **Theorem 2'' (covering cost).** Put
+>
+>     A_f(P)  =  min { m a prime power with base != P : P divides f(m) }
+>
+> Then `A_f(P) >= a_f(P)`, and every prime power that covers `P` in a cycle is
+> at least `A_f(P)`.
+
+*Proof.* If `P | f(m)` then `f(m) >= P`, so the set defining `A_f` is contained
+in the one defining `a_f` and its minimum is not smaller. The predecessor of `P`
+in a pure cycle is a prime power of a base distinct from `P` whose `f` is
+divisible by `P`, which is exactly the defining condition. ∎
+
+`A_f` has no formula. It is **sieved**: walk the prime powers `m <= M` in
+increasing order, factor `f(m)`, and let each prime `P` that appears keep the
+first `m` that produced it — which, by the ordering, is the least. Primes that
+never appear satisfy `A_f(P) > M`, and `M + 1` is then a valid bound for them;
+in practice that is the case that excludes the most.
+
+For `sigma`, over the 1229 primes below `10^4` with prime powers sieved to
+`10^5`, the ratio `A_f(P) / a_f(P)` has **median 10.5 and mean 12.6**. The
+bound in use since version 2 was about ten times slacker than the same data
+allowed.
+
+### The trap, which costs a false theorem and gives no symptom
+
+    A_sigma(11) = 43        A_sigma(13) = 9
+
+`a_f` is non-decreasing — proved above — and **`A_f` is not**. That decides
+where each may be used:
+
+| use | bound | why |
+|---|---|---|
+| bisection for the prime cutoff | `a_f` | assumes the floor grows with `P` |
+| cutting the walk over starting primes (`break`) | `a_f` | a `break` claims every later `P` is out too |
+| discarding one starting prime (`continue`) | `A_f` | claims nothing about the others |
+| floor of the node that closes the cycle | `A_f` | one concrete `P`, not a walk |
+| the universal floor of Theorem 4 | `a_f` | the argument is "`P >= p_k` and the floor grows with `P`" |
+
+Using `A_f` in either of the first two would produce a search that skips
+legitimate witnesses and reports a **wrong minimum without ever failing**. A
+second trap has the same shape: a table sieved only up to some prime limit says
+nothing about primes beyond it, so reporting "no cheap cover" there would
+exclude them on no evidence. Both are pinned by checks, not by comments
+(check 15 of `verify.py`).
+
+### What it buys, measured
+
+Same searches, same code, one switch. Values identical in all twelve rows;
+if any bound had returned a different value it would be cutting off a
+legitimate witness.
+
+| `f` | `k` | nodes, closed form | nodes, generic `a_f` | nodes, `A_f` | saved |
+|---|---:|---:|---:|---:|---:|
+| `sigma` | 4 | 588 | 512 | 270 | 2.2x |
+| `sigma` | 5 | 11 751 | 10 505 | 4 364 | 2.7x |
+| `sigma` | 6 | 100 043 | 85 296 | 34 038 | 2.9x |
+| `sigma` | 7 | 4 658 867 | 3 935 134 | **1 329 394** | **3.5x** |
+| `sigma*` | 4 | 2 260 | 2 244 | 1 227 | 1.8x |
+| `sigma*` | 5 | 10 333 | 10 315 | 5 154 | 2.0x |
+| `sigma*` | 6 | 4 397 | 4 383 | 2 325 | 1.9x |
+| `sigma*` | 7 | 97 608 | 97 553 | 43 684 | 2.2x |
+| `sigma*` | 8 | 547 002 | 546 887 | 227 468 | 2.4x |
+| `phi*` | 3 | 439 | 426 | 274 | 1.6x |
+| `phi*` | 4 | 23 430 | 23 351 | 11 373 | 2.1x |
+| `phi*` | 5 | 7 442 712 | 7 442 146 | **2 728 740** | **2.7x** |
+
+In wall-clock, `sigma` girth 7 goes from 21.1 to 7.6 seconds and `phi*` girth 5
+from 39.5 to 19.9. The middle column says that the generic size bound **buys
+almost nothing on its own** — between 1.00x and 1.15x — so the gain is the
+covering cost and not the change of formula. The left column reproduces the
+node counts published in version 3 digit for digit, which is what says the
+switch turns off exactly what is new here and nothing else.
+
+    python src/exact.py sigma 4 5 6 7 --measure-cutoff
+
+**Where it does not help.** The filter `P * A_f(P) * primorial(k-2) < N` can
+only exclude primes above `N / (primorial * M)`, so sieving no deeper than the
+cutoff excludes nobody: the sieve has to go **deeper** than the cutoff to be
+worth anything, and the measurements above sieve to twenty times it. For the
+two bracketed terms of section 11 the cutoff is in the tens of millions and a
+factor of three does not move the wall.
+
+---
+
+## 5. Theorem 3 — the per-arc cost lemma
 
 Theorem 2 keeps two factors of the witness and bounds the rest by a primorial.
 Every arc of the cycle carries the same kind of information, and using all of
@@ -349,7 +476,7 @@ of reaching it.
 
 ---
 
-## 5. Theorem 4 — the universal floor, and a search that needs no seed
+## 6. Theorem 4 — the universal floor, and a search that needs no seed
 
 Theorem 2 bounds the primes **in terms of a witness already known**. Version 2
 therefore could not touch a girth for which no witness had ever been exhibited,
@@ -415,7 +542,7 @@ that check.
 
 ---
 
-## 6. The search, and a correction to version 1
+## 7. The search, and a correction to version 1
 
 `src/construct.py` fixed, for each edge `q -> p`, the **smallest** exponent `e`
 with `p | f(q^e)`; assembled `n`; checked the girth; and if a chord appeared, it
@@ -449,13 +576,13 @@ accepted.
 
 ---
 
-## 7. The terms
+## 8. The terms
 
 **All twenty-six are proved minimal.** The twelve in bold had not been computed
 before; the one marked with a dagger is the first that **had no seed at all**,
 so it could not have been computed by the method of version 2; the two marked
 with a double dagger are the ones that version 3 could not reach in practice and
-that the surgery of section 9 unlocked.
+that the surgery of section 10 unlocked.
 
 | girth | `sigma` | `sigma*` | `phi*` | `sigma**` |
 |---:|---:|---:|---:|---:|
@@ -499,7 +626,7 @@ to the end gives the comparison:
 | `sigma*`, girth 10 | 206680700 nodes, 1125 s, 42 rounds | 48321070 nodes, 252 s | **4.28x** |
 | `sigma**`, girth 7 | 4266506 nodes, 23 s, 31 rounds | 930082 nodes, 5 s | **4.59x** |
 
-That factor is exactly the price of not knowing the answer that section 5
+That factor is exactly the price of not knowing the answer that section 6
 measured at about 4, now confirmed on two cases where the two methods can be run
 side by side. An exhibited upper bound replaces every doubling round with one.
 
@@ -543,7 +670,7 @@ say the answer uses the one on the right.
 The largest run — `sigma`, girth 7 — walked 74.7 million nodes of the search
 tree in 341 seconds under version 2. **Under version 3 the same run visits
 4 658 867 nodes**, sixteen times fewer, because of the per-arc lemma of section
-4. Re-proving all nineteen, seeded *and* seedless, now takes
+5. Re-proving all nineteen, seeded *and* seedless, now takes
 `python verify.py --exact` — **571 seconds** and 223 checks when this was
 written, against 1098 seconds and fewer checks in version 2, and with two other
 searches competing for the machine at the time.
@@ -556,9 +683,57 @@ proves nothing, and that is precisely why `prime_cutoff()` bisects over
 integers. The minimality claims here rest on the verifier's runs, which
 recompute the cutoff by bisection and sweep the full range.
 
+### Four further families (release 3.4.0)
+
+Theorem 2' removes the closed form from the hypotheses, so the same machinery
+runs over any multiplicative function. Release 3.3.0 had computed seven members
+of the families of section 13c; release 3.4.0 adds the four with `s = 2` and
+`s = 3` that were missing, **all of them standard catalogued functions and none
+an invention of this repository**:
+
+| `f` | `f(q^e)` | catalogue |
+|---|---|---|
+| `sigma_2` | `1 + q^2 + ... + q^(2e)` | sum of squares of divisors, [A001157](https://oeis.org/A001157) |
+| `sigma_3` | `1 + q^3 + ... + q^(3e)` | sum of cubes of divisors, [A001158](https://oeis.org/A001158) |
+| `sigma*_2` | `q^(2e) + 1` | squares of unitary divisors, [A034676](https://oeis.org/A034676) |
+| `phi*_2` | `q^(2e) - 1` | unitary Jordan function `J*_2`, [A191414](https://oeis.org/A191414) |
+
+`verify.py` checks each of the four against its OEIS entry term by term
+(section 13 of `verify.py`). Every one of these 17 smallest witnesses is new;
+none had been computed before, and every one is proved minimal.
+
+| girth | `sigma_2` | `sigma_3` | `sigma*_2` | `phi*_2` |
+|---:|---:|---:|---:|---:|
+| 2 | 10 | 6 | 10 | 6 |
+| 3 | 468 | 3913 | 207553 | 15925 |
+| 4 | 44550 | 9933 | 200728169 | 2118025 |
+| 5 | 141376950 | 268696035 |  | 1549787470231 |
+| 6 |  | 119317927575 |  | 30597817101379 |
+
+    sigma_2,  girth 5:  141376950      = 2 * 3^2 * 5^2 * 11 * 13^4
+                        cycle 13 -> 11 -> 2 -> 5 -> 3 -> 13
+    sigma_3,  girth 6:  119317927575   = 3 * 5^2 * 7 * 11^4 * 19^2 * 43
+                        cycle 43 -> 11 -> 5 -> 19 -> 3 -> 7 -> 43
+    sigma*_2, girth 4:  200728169      = 29 * 41 * 401 * 421
+                        cycle 421 -> 401 -> 41 -> 29 -> 421
+    phi*_2,   girth 4:  2118025        = 5^2 * 7^3 * 13 * 19
+                        cycle 19 -> 5 -> 13 -> 7 -> 19
+    phi*_2,   girth 5:  1549787470231  = 7^5 * 11^2 * 13 * 31^2 * 61
+                        cycle 61 -> 31 -> 13 -> 7 -> 11 -> 61
+    phi*_2,   girth 6:  30597817101379 = 11^2 * 23 * 31^2 * 37^2 * 61 * 137
+                        cycle 137 -> 23 -> 11 -> 61 -> 31 -> 37 -> 137
+
+The 13 consecutive pairs they add are all increasing, so the count of descents
+in section 13c does not move: still two, both at `5 -> 6`.
+
+*Cycles can be cheap.* In `sigma_3` the step from girth 3 to girth 4 costs a
+factor of **2.5** (3913 to 9933), where in `sigma` it costs 586 and in `phi*`
+16762. Functions whose values factor a lot — `1 + q^3 = (1+q)(q^2-q+1)` is never
+prime — offer far more edges. No law is claimed; the observation is recorded.
+
 ---
 
-## 8. Growth: no law, and the eighth term is what shows it
+## 9. Growth: no law, and the eighth term is what shows it
 
 Version 1 could not address how fast the smallest witness grows. With eight
 terms for `sigma` it can be addressed, and the answer is negative:
@@ -596,7 +771,7 @@ one was the sample.**
 
 ---
 
-## 9. Non-monotonicity, and how the extra vertex is paid for
+## 10. Non-monotonicity, and how the extra vertex is paid for
 
 The sequence of smallest witnesses is **not** increasing for `sigma*`:
 
@@ -631,7 +806,7 @@ of `25/81`. Across the consecutive pairs of the first three functions:
 | `phi*` (4 → 5) | 1120454775 | 1663175056640625 | no |
 
 One decrease in nine consecutive pairs there, two in the twenty-two of the full
-table. What section 8 adds is that the same mechanism operates without producing
+table. What section 9 adds is that the same mechanism operates without producing
 a decrease: at `sigma` from 7 to 8 it merely flattens the growth.
 
 **The new pair shows the mechanism exactly**, because unlike `sigma` 7 → 8 the
@@ -739,10 +914,10 @@ That is precisely why (C) is useful as a **bound** and not as a prediction.
 
 ### What the bound unlocks
 
-An upper bound that is *exhibited* is what the exhaustive search of section 5
+An upper bound that is *exhibited* is what the exhaustive search of section 6
 needs to start, and it replaces every doubling round with one. That is how the
-two terms marked with a double dagger in section 7 were computed. It also
-improves the girth-9 bound for `sigma` -- see section 10 -- and produces bounds
+two terms marked with a double dagger in section 8 were computed. It also
+improves the girth-9 bound for `sigma` -- see section 11 -- and produces bounds
 where there were none:
 
 | | upper bound from surgery | ratio |
@@ -758,7 +933,7 @@ improve that one.
 
 ---
 
-## 10. Bounds on the next two terms, and where the wall is
+## 11. Bounds on the next two terms, and where the wall is
 
 With the seed gone, the obvious next targets are `sigma` at girth 9 and `phi*`
 at girth 6. Neither finished, and the reason is worth stating precisely, because
@@ -795,7 +970,7 @@ Both upper bounds are **stable**: they do not drop when the constructor is given
 more primes -- `phi*` girth 6 gives the same value with primes up to 101, 173 and
 281; `sigma` girth 9, with primes up to 101 and 131. That does not make them
 minima -- the constructor proves no minimality, and stability is not a proof --
-but it is the same check section 6 already applies to the published terms.
+but it is the same check section 8 already applies to the published terms.
 
 **And stability is not the same as being the best available.** Surgery on the
 girth-8 minimum for `sigma` gives a strictly better witness:
@@ -845,7 +1020,7 @@ published. Now it is a number of primes, which is a condition on the machine.
 
 ---
 
-## 11. In `phi*`, each minimum divides the next
+## 12. In `phi*`, each minimum divides the next
 
 Laid out with their cycles, the `phi*` terms show something the factorizations
 alone do not:
@@ -867,7 +1042,7 @@ As a consequence rather than a coincidence:
 
     m(3) | m(4) | m(5)     (66825 | 1120454775 | 1663175056640625)
 
-**A falsifiable prediction.** The girth-6 witness exhibited in section 10
+**A falsifiable prediction.** The girth-6 witness exhibited in section 11
 continues the chain: `3^23 * 5^9 * 11 * 19 * 23 * 47` equals `m(5) * 3^12 * 47`,
 and its cycle is the girth-5 cycle with `47` inserted behind `3`. The prediction
 is that the **true** minimum of girth 6 is also a multiple of `m(5)`. Any witness
@@ -891,25 +1066,25 @@ half -- is one of those that shares *everything*: the previous term divides the
 next. And the two smallest jumps have opposite sharing, 0.30 and 0.86. Sharing
 and jump size are **unrelated**. `verify.py` recomputes the whole table.
 
-What does survive is section 9: when the jump is small, the ratio is explained
+What does survive is section 10: when the jump is small, the ratio is explained
 **to the digit** by one stretch of the cycle changing. Whether it is small or
 large is decided by which exponent has to rise for the detour to exist, not by
 how much is kept.
 
 ---
 
-## 12. What this does not claim
+## 13. What this does not claim
 
 - **It does not claim the sequences are infinite.** Whether a witness of every
   girth exists is a separate question, untouched here.
 - **It does not claim minimality for girths beyond the table.** There is no
   longer any obstacle of principle -- Theorem 5 removes the need for a seed --
-  but section 10 gives the number of primes that would have to be sieved for the
+  but section 11 gives the number of primes that would have to be sieved for the
   next two terms, and it is in the billions.
-  **The upper bounds in section 10 are not minima**: they come from the
+  **The upper bounds in section 11 are not minima**: they come from the
   constructor or from surgery, neither of which proves minimality. What is proved
   there is that a witness of that size exists, and that is verified.
-- **The inversion certificate of section 9 is one-directional.** Finding no
+- **The inversion certificate of section 10 is one-directional.** Finding no
   insertion of ratio below 1 does not prove that the next minimum is larger; the
   next minimum could come from a cycle unrelated to this one. That this never
   happens over the 22 consecutive pairs of the table is a measurement, not a
@@ -929,6 +1104,22 @@ how much is kept.
 - **It does not explain why the eighth term is cheap.** The mechanism is visible
   in the factorizations, but that describes one case; it does not predict when
   it recurs.
+- **The general cutoff does not claim to be the best bound.** `A_f(P)` is the
+  exact minimum over prime powers, but the floor of the whole cycle still bounds
+  the remaining vertices by a primorial, and that is slack.
+- **It does not claim the four new families have witnesses of every girth.**
+  For `sigma`, `sigma*` and `phi*` that every digraph is realised was proved
+  earlier by recipes that read off each closed form; for the four it is open.
+  So **the seedless search is not guaranteed to terminate on them**: if a girth
+  has no witness, the doubling never stops. That is why the runs carry a cap and
+  what they return on reaching it is a proved lower bound, not a failure.
+- **The speed-up was measured on twelve rows, not proved.** It runs from 1.8x to
+  3.5x and grows with the girth under `sigma`, but that is four points.
+- **The covering-cost filter depends on how deep the sieve went.** With prime
+  powers to `M` it can only exclude primes above `N / (primorial * M)`; sieving
+  no further than the cutoff excludes nobody.
+- **The observation about `sigma_3` is not a theorem.** That functions whose
+  values factor heavily have cheap cycles is a reading of two columns.
 - **It does not claim novelty.** See [PRIOR_ART.md](PRIOR_ART.md): searches of
   OEIS and four bibliographic sources found nothing, with a positive control
   that does find the relevant literature. **Not found is not the same as new**,
@@ -942,7 +1133,7 @@ how much is kept.
 
 ---
 
-## 12b. Splitting the search across cores
+## 13b. Splitting the search across cores
 
 The enumeration walks **starting primes** -- the largest prime of the cycle --
 and each opens a tree that touches no other, because the walk always begins at
@@ -968,7 +1159,7 @@ with a tight bound there was nothing left to share.
 
 It does not reach twelve for two measured reasons: the work is skewed, so the
 busiest process sets the time; and each process sieves its primes once, which
-does not parallelise. **And it does not move the wall of section 10.** That wall
+does not parallelise. **And it does not move the wall of section 11.** That wall
 is 2197597268 primes, and splitting makes it worse, because each process would
 sieve its own table. A factor of four does not turn an infeasible search into a
 feasible one.
@@ -984,7 +1175,7 @@ beside it.
 
 ---
 
-## 12c. Release 3.3.0 — the families, and where the descents are not
+## 13c. Release 3.3.0 — the families, and where the descents are not
 
 Everything above uses four functions with no parameter. Nothing in the cutoff
 lemma or in the pure-cycle theorem mentions **which** `f` is used, so the same
@@ -1024,7 +1215,7 @@ now estimated before a search is launched rather than discovered by running it.
 
 ### The descents are still only two, and both at 5 -> 6
 
-Section 9 exhibited two functions where `m_f(k+1) < m_f(k)`, and both descents
+Section 10 exhibited two functions where `m_f(k+1) < m_f(k)`, and both descents
 happen at the same step. With the families the table goes from 48 consecutive
 pairs to **64**, and the count does not move:
 
@@ -1043,7 +1234,7 @@ below 1.2 — which is where to look next.
 
 ### The surgery certificate is sufficient and NOT necessary
 
-Section 9 gives a certificate that proves `m_f(k+1) < m_f(k)` without computing
+Section 10 gives a certificate that proves `m_f(k+1) < m_f(k)` without computing
 `m_f(k+1)`, and it agreed with the data in 48 out of 48 pairs. It is **not** a
 characterisation.
 
@@ -1089,7 +1280,7 @@ take the coverage from 13 to 28 of 49.
 
 ### The conditions do not become impossible as k grows
 
-Section 9 suspected that conditions 3, 4 and 5 of the surgery — which must hold
+Section 10 suspected that conditions 3, 4 and 5 of the surgery — which must hold
 against **every** vertex — become impossible as `k` grows. Measured over 6,661
 candidate insertions that satisfy conditions 1 and 2:
 
@@ -1125,14 +1316,16 @@ open a chord. The algebra is elementary; what is not obvious is that the
 *minimal* witness survives the change of family, and it does at girth 3 for all
 three, and does not at girth 4.
 
-## 13. Reproducing everything
+## 14. Reproducing everything
 
-    python verify.py            # all checks, ~2 seconds, no dependencies
+    python verify.py            # all 471 checks, no dependencies
     python verify.py --exact    # also re-proves the large terms (~25 minutes)
     python verify.py --full     # also re-derives the sieved terms (needs numpy)
+                                # and sweeps brute force to 3*10^6
 
     python src/exact.py "sigma*" 9 --no-seed     # no witness given: it finds it
     python src/exact.py sigma 5 6 --measure-lemma
+    python src/exact.py sigma 4 5 6 7 --measure-cutoff   # the three bounds
     python src/exact.py sigma 8
     python src/construct.py sigma 6
     python src/sieve.py 1000000000
@@ -1145,6 +1338,13 @@ three, and does not at girth 4.
     python src/surgery.py sigma 31674203849435875 8 1000000000
     python src/surgery.py "phi*" 1663175056640625 5 100000000
 
+Release 3.4.0:
+
+    python src/covering_cost.py sigma 100000 10000       # a_f against A_f
+    python src/exact.py sigma2 2 3 4 5 --no-seed --cap 1e15
+    python src/exact.py sigma3 5 6 --no-seed --cap 1e15
+    python src/exact.py "phi*2" 5 6 --no-seed --cap 1e15
+
 The sieve counts 5327 members of `S(sigma)` below 10^9, excluding `n = 1`.
 Pollack and Pomerance count 5328 prime-abundant numbers below 10^9 including
 `n = 1` [1]. **The two agree exactly** — this is the strongest external check in
@@ -1154,6 +1354,19 @@ independently.
 ---
 
 ## Version history
+
+**What changed in release 3.4.0.** Earlier versions stated the cutoff lemma for
+`sigma`, `sigma*` and `phi*` and attributed it to those three having a closed
+form on prime powers. That was the wrong reading: the lemma holds for **every**
+multiplicative function, because on a prime power the base and the exponent are
+determined by the number itself. Release 3.4.0 proves that (Theorem 2', section
+4), adds a second bound that is not about size but about divisibility and is
+about ten times stronger, measures both — the search visits 1.8 to 3.5 times
+fewer nodes and returns identical values in all twelve control rows — and
+computes the smallest witnesses by girth for **four further catalogued
+families**, 17 values none of which had been computed before (section 8). It
+also adds two external controls to `verify.py`: every function against its OEIS
+entry, and a brute force that shares no code with the search.
 
 **What changed in version 3.2.** Version 3 could prove a term minimal and could
 start with no seed, but it could not say **in advance** whether the next term
@@ -1233,4 +1446,5 @@ to the latest version:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22288593.svg)](https://doi.org/10.5281/zenodo.22288593)
 
-The DOI of this specific version is [`10.5281/zenodo.22459593`](https://doi.org/10.5281/zenodo.22459593).
+Every release also has its own version DOI; they are all listed on the Zenodo
+record that the concept DOI resolves to.

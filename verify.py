@@ -2,7 +2,7 @@
 
     python verify.py
 
-Runs in a few seconds and prints PASS or FAIL for each check. If anything
+Runs in about a minute and prints PASS or FAIL for each check. If anything
 fails, the exit code is 1 and the claims in RESULT.md should not be trusted
 until it is explained.
 
@@ -16,13 +16,22 @@ What is checked
 5. The counts of S(sigma) match a published result (Pollack & Pomerance 2012).
 6. The cutoff lemma holds for every published term.
 7. The exact search reproduces the smaller terms, exhaustively.
+8. Each function reproduces its OEIS entry term by term (release 3.4.0).
+9. The three lower bounds order as claimed, and only one of them is monotone.
+10. All three bounds return the same minimum, so the faster one is safe.
+11. Brute force, sharing no code with the search, agrees wherever it reaches.
 
-Check 5 is the one that matters most: it cross-checks this code against a
-peer-reviewed paper, by an author who has never seen this repository.
+Two checks matter more than the rest, and for the same reason: they are the
+ones this repository could fail. Check 5 cross-checks the code against a
+peer-reviewed paper by an author who has never seen it. Check 8 cross-checks
+each arithmetic function against the catalogue entry it is named after, so a
+function implemented wrongly cannot hide behind results that agree with each
+other.
 
 Optional, slower:
 
-    python verify.py --full     also re-derives the sieved terms from scratch
+    python verify.py --full     re-derives the sieved terms from scratch and
+                                raises the brute-force sweep to 3*10^6
     python verify.py --exact    also re-proves the large terms
 
 Both slow modes together took 2419 seconds -- about 40 minutes -- on the machine
@@ -40,14 +49,16 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
 from arithmetic import (biunitary_divisors, covering_digraph,  # noqa: E402
-                        factorize, f_of_prime_power, girth, in_S,
+                        evaluate, factorize, f_of_prime_power, girth, in_S,
                         is_pure_cycle, rad)
 from construct import smallest_witness  # noqa: E402
-from exact import (cycle_floor, exact_smallest, per_arc_floor,  # noqa: E402
-                   prime_cutoff, primorial, predecessor_floor,
-                   smallest_without_seed, universal_floor)
+from exact import (_search_below, cutoff_for, cycle_floor,  # noqa: E402
+                   exact_smallest, per_arc_floor, prime_cutoff, primorial,
+                   predecessor_floor, primes_up_to, smallest_without_seed,
+                   universal_floor)
 from surgery import (insertions, inversion_certificate,  # noqa: E402
                      prime_divisors_up_to)
+from covering_cost import CoveringCost, SizeFloor  # noqa: E402
 
 # --------------------------------------------------------------------------
 # The published claims. Everything below is checked, nothing is assumed.
@@ -126,6 +137,46 @@ BRACKETS = {
 #: so they are bounds and not brackets.
 SURGERY_BOUNDS = {
     ("sigma**", 8): 247135929796462577545675,
+}
+
+#: Release 3.4.0. Smallest n in S(f) of girth k, for the families with s = 2
+#: and 3 that 3.3.0 had not computed. The cutoff lemma needs no closed form, so
+#: these needed no new theory -- only the general bound. (sigma** was already
+#: here, in TERMS, since release 3.2.0.)
+NEW_TERMS = {
+    "sigma2":  {2: 10, 3: 468, 4: 44550, 5: 141376950},
+    "sigma3":  {2: 6, 3: 3913, 4: 9933, 5: 268696035, 6: 119317927575},
+    "sigma*2": {2: 10, 3: 207553, 4: 200728169},
+    "phi*2":   {2: 6, 3: 15925, 4: 2118025, 5: 1549787470231,
+                6: 30597817101379},
+}
+
+#: How far the brute-force sweep goes. It shares no code with the search -- no
+#: cutoff lemma, no pruning, no pure cycles -- and it is the check that can
+#: DISPROVE, so it runs by default; but it is plain Python over every integer,
+#: so the default reach is the one that keeps `verify.py` in seconds. `--full`
+#: raises it to 3*10^6, which reaches every term of girth 4 that has one.
+BRUTE_REACH = 250_000
+BRUTE_REACH_FULL = 3 * 10 ** 6
+
+#: EXTERNAL CONTROL, release 3.4.0. The first terms of each function **as the
+#: OEIS catalogue gives them**, copied from the entry and not produced by this
+#: code. If `f_of_prime_power` had implemented something other than the
+#: function it is named after, this is what would catch it -- and it is the
+#: only check here that cannot be satisfied by internally consistent nonsense.
+OEIS_TERMS = {
+    "sigma":    ("A000203", [1, 3, 4, 7, 6, 12, 8, 15, 13, 18, 12, 28, 14, 24]),
+    "sigma*":   ("A034448", [1, 3, 4, 5, 6, 12, 8, 9, 10, 18, 12, 20, 14, 24]),
+    "phi*":     ("A047994", [1, 1, 2, 3, 4, 2, 6, 7, 8, 4, 10, 6, 12, 6]),
+    "sigma2":   ("A001157", [1, 5, 10, 21, 26, 50, 50, 85, 91, 130, 122, 210,
+                             170, 250]),
+    "sigma3":   ("A001158", [1, 9, 28, 73, 126, 252, 344, 585, 757, 1134, 1332,
+                             2044, 2198, 3096]),
+    "sigma**":  ("A188999", [1, 3, 4, 5, 6, 12, 8, 15, 10, 18, 12, 20, 14, 24]),
+    "sigma*2":  ("A034676", [1, 5, 10, 17, 26, 50, 50, 65, 82, 130, 122, 170,
+                             170, 250]),
+    "phi*2":    ("A191414", [1, 3, 8, 15, 24, 24, 48, 63, 80, 72, 120, 120,
+                             168, 144]),
 }
 
 #: Which terms were found by exhaustive sieving up to 10^9, and so can be
@@ -579,9 +630,102 @@ def main(argv=None):
               "%-7s girth %d: the exhibited bound %d is in S(f), has girth %d "
               "and is a pure cycle" % (f, k, n, k))
 
+    print("\n13. External control: each function reproduces its OEIS entry")
+    # ----------------------------------------------------------------------
+    # The one check here that internally consistent nonsense could not pass.
+    for f, (entry, terms) in sorted(OEIS_TERMS.items()):
+        mine = [evaluate(n, f) for n in range(1, len(terms) + 1)]
+        check(mine == terms,
+              "%-9s reproduces %s term by term (%d terms)"
+              % (f, entry, len(terms)))
+
+    # ----------------------------------------------------------------------
+    print("\n14. The four new functions: every term is in S(f), with its girth")
+    # ----------------------------------------------------------------------
+    for f, by_girth in sorted(NEW_TERMS.items()):
+        for k, n in sorted(by_girth.items()):
+            digraph = covering_digraph(n, f)
+            omega = len(factorize(n))
+            check(in_S(n, f) and girth(digraph) == k and omega == k
+                  and is_pure_cycle(digraph),
+                  "%-9s girth %d: %d is in S(f), has girth %d, %d primes, "
+                  "pure cycle" % (f, k, n, k, omega))
+
+    # ----------------------------------------------------------------------
+    print("\n15. The three bounds order as claimed, and only one is monotone")
+    # ----------------------------------------------------------------------
+    # a_f >= the published closed form, A_f >= a_f. And A_f is NOT monotone,
+    # which is why it may never cut short a walk ordered by P.
+    for f in ("sigma", "sigma*", "phi*"):
+        size = SizeFloor(f)
+        worse = [P for P in primes_up_to(2000) if size(P) < predecessor_floor(P, f)]
+        better = sum(1 for P in primes_up_to(2000) if size(P) > predecessor_floor(P, f))
+        check(not worse and better > 0,
+              "%-9s generic size bound never below the closed form, and above "
+              "it in %d of %d primes" % (f, better, len(primes_up_to(2000))))
+    for f in ("sigma", "sigma2", "sigma**"):
+        size = SizeFloor(f)
+        cost = CoveringCost(f, 200000, 3000)
+        check(all(cost(P) >= size(P) for P in primes_up_to(3000)),
+              "%-9s A_f >= a_f on every prime below 3000" % f)
+    cost = CoveringCost("sigma", 200000, 100)
+    check(cost(11) == 43 and cost(13) == 9,
+          "A_f is NOT monotone: A_sigma(11) = %d and A_sigma(13) = %d, so it "
+          "may only discard one prime, never cut the walk"
+          % (cost(11), cost(13)))
+    truncated = CoveringCost("sigma", 300, 1000)
+    uncovered = [P for P in primes_up_to(1000) if P not in truncated.table]
+    check(uncovered and all(truncated(P) == truncated.M + 1 for P in uncovered)
+          and truncated(9973) == 1,
+          "a sieved-but-uncovered prime gives M+1 (%d of them) while one "
+          "outside the sieved range gives 1, so it excludes nobody"
+          % len(uncovered))
+
+    # ----------------------------------------------------------------------
+    print("\n16. All three bounds return the same minimum")
+    # ----------------------------------------------------------------------
+    # If any of them returned a different value, that bound would be cutting
+    # off a legitimate witness. This is the check that makes the speed-up safe.
+    for f, k in (("sigma", 4), ("sigma", 5), ("sigma*", 4), ("sigma*", 6),
+                 ("phi*", 3)):
+        seed = TERMS[f][k]
+        got = []
+        for mode in ("published", "size", "exact"):
+            cut = cutoff_for(f, k, seed + 1, mode, 0)
+            got.append(_search_below(f, k, seed + 1, cutoff=cut)[0])
+        check(got == [seed] * 3,
+              "%-9s girth %d: %d by all three bounds" % (f, k, seed))
+
+    # ----------------------------------------------------------------------
+    print("\n17. Brute force, sharing no code with the search")
+    # ----------------------------------------------------------------------
+    # No cutoff lemma, no pruning, no pure cycles: every n up to the reach is
+    # factored, tested and measured. It is the check that can DISPROVE.
+    reach = BRUTE_REACH_FULL if args.full else BRUTE_REACH
+    small = {}
+    for f, by_girth in list(NEW_TERMS.items()) + list(TERMS.items()):
+        for k, n in by_girth.items():
+            if n <= reach:
+                small.setdefault(f, {})[k] = n
+    for f in sorted(small):
+        found = {}
+        for n in range(2, reach + 1):
+            factors = factorize(n)
+            if len(factors) < 2:
+                continue
+            if not in_S(n, f):
+                continue
+            g = girth(covering_digraph(n, f))
+            if g is not None and g not in found:
+                found[g] = n
+        for k, n in sorted(small[f].items()):
+            check(found.get(k) == n,
+                  "%-9s girth %d: brute force below %d gives %s, search gave %d"
+                  % (f, k, reach, found.get(k), n))
+
     # ----------------------------------------------------------------------
     if args.full:
-        print("\n13. Re-deriving the sieved terms from scratch (slow)")
+        print("\n18. Re-deriving the sieved terms from scratch (slow)")
         try:
             from sieve import sieve_terms
         except ImportError as exc:
@@ -593,7 +737,7 @@ def main(argv=None):
                     check(found.get(f, {}).get(k) == TERMS[f][k],
                           "%-7s girth %d re-derived by sieving" % (f, k))
     else:
-        print("\n13. Full re-derivation by sieving: skipped (use --full)")
+        print("\n18. Full re-derivation by sieving: skipped (use --full)")
 
     # ----------------------------------------------------------------------
     # 14. The explainer page cannot go stale in silence.
@@ -604,7 +748,7 @@ def main(argv=None):
     # explanation is not updated, THIS FAILS -- which is the point: a rule
     # written in prose gets broken again.
     # ----------------------------------------------------------------------
-    print("\n13b. The surgery certificate is sufficient and NOT necessary")
+    print("\n19. The surgery certificate is sufficient and NOT necessary")
     # ----------------------------------------------------------------------
     # Section 12c of RESULT.md: for every k and every C there is a
     # multiplicative, local f with m_f(k+1) < m_f(k)/C, m_f(k) squarefree --
@@ -666,7 +810,7 @@ def main(argv=None):
         check(not (set(factorize(here_n)) & set(factorize(next_n))),
               "counterexample k=%d: the two cycles are disjoint" % k)
 
-    print("\n14. The explainer page is in sync with the data")
+    print("\n20. The explainer page is in sync with the data")
     here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(here, "data", "terms.json"), encoding="utf-8") as fh:
         terms = json.load(fh)["functions"]
