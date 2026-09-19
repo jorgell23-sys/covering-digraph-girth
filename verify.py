@@ -865,6 +865,42 @@ def main(argv=None):
     check(not stale, "the 8 figures are what their generator produces today%s"
           % ("" if not stale else " -- stale: %s" % stale))
 
+    # ----------------------------------------------------------------------
+    print("\n13c. Primality beyond what twelve bases decide")
+    # ----------------------------------------------------------------------
+    # Until 3.3.3 the primality test used the twelve bases 2..37 and was called
+    # deterministic to 3.3e24. psi_12 and psi_13 are the smallest strong
+    # pseudoprimes to the first twelve and thirteen prime bases.
+    from exact import _factor as _factor_large, _is_prime as _prime
+    psi12, psi13 = 318665857834031151167461, 3317044064679887385961981
+    check(not _prime(psi12) and not _prime(psi13)
+          and _factor_large(psi12) == {399165290221: 1, 798330580441: 1}
+          and _factor_large(psi13) == {1287836182261: 1, 2575672364521: 1},
+          "psi_12 and psi_13 are composite, and the factoriser splits them")
+    check(all(_prime(2 ** e - 1) for e in (89, 127, 521)) and not _prime(2 ** 67 - 1),
+          "Mersenne primes stay prime (2^89-1, 2^127-1, 2^521-1); 2^67-1 does not")
+
+    def twelve_bases(n):
+        """The test as it was: Miller-Rabin to the twelve bases 2..37 alone."""
+        d, s = n - 1, 0
+        while d % 2 == 0:
+            d //= 2
+            s += 1
+        for a in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
+            x = pow(a, d, n)
+            if x in (1, n - 1):
+                continue
+            for _ in range(s - 1):
+                x = x * x % n
+                if x == n - 1:
+                    break
+            else:
+                return False
+        return True
+
+    check(twelve_bases(psi12),
+          "negative control: twelve bases alone call psi_12 prime")
+
     # The page announces how many checks this file runs; self-referential on
     # purpose, so that adding one and forgetting the text breaks the count.
     #

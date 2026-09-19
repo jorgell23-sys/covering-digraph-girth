@@ -100,7 +100,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-471 checks, no dependencies, `PASS` or `FAIL` on each and exit code 1 if any
+474 checks, no dependencies, `PASS` or `FAIL` on each and exit code 1 if any
 fails. They re-derive every published value from the definitions, re-prove the
 reachable ones exhaustively, compare each function against its OEIS entry, run a
 brute force that shares no code with the search, and cross-check the count of
@@ -1318,7 +1318,7 @@ three, and does not at girth 4.
 
 ## 14. Reproducing everything
 
-    python verify.py            # all 471 checks, no dependencies
+    python verify.py            # all 474 checks, no dependencies
     python verify.py --exact    # also re-proves the large terms (~25 minutes)
     python verify.py --full     # also re-derives the sieved terms (needs numpy)
                                 # and sweeps brute force to 3*10^6
@@ -1367,6 +1367,20 @@ computes the smallest witnesses by girth for **four further catalogued
 families**, 17 values none of which had been computed before (section 8). It
 also adds two external controls to `verify.py`: every function against its OEIS
 entry, and a brute force that shares no code with the search.
+
+**What changed in version 3.3.4.** The primality test was described as
+deterministic Miller-Rabin to 3.3·10^24 and used the twelve prime bases 2 to 37.
+Twelve bases decide primality only below ψ12 = 318665857834031151167461, which is
+composite (399165290221 × 798330580441) and passes all twelve; 3.3·10^24 is ψ13
+and needs the base 41 as well (Sorenson and Webster, 2015). It now uses thirteen
+bases — a proof below ψ13 — and adds the strong Lucas test above, which makes it
+BPSW: no known counterexample, which is not a proof, and is said so. Section 13c
+of `verify.py` checks both pseudoprimes and carries a negative control.
+**No published number changed, and this was measured.** `verify.py --exact`,
+which re-proves the large terms, was run with the old test wrapped: 24,092,867
+calls, the largest 12,315,087,685,601 (14 digits), all below ψ12 where twelve
+bases are already exact, and no call on which the old and the new test disagree.
+The four surgery commands of section 13 stay below 9 digits.
 
 **What changed in version 3.2.** Version 3 could prove a term minimal and could
 start with no seed, but it could not say **in advance** whether the next term

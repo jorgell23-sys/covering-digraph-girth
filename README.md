@@ -146,7 +146,7 @@ cd covering-digraph-girth
 python verify.py
 ```
 
-471 checks, no dependencies, `PASS` or `FAIL` on each, exit code 1 if any fails.
+474 checks, no dependencies, `PASS` or `FAIL` on each, exit code 1 if any fails.
 They re-derive every published value from the definitions, re-prove the reachable
 ones exhaustively, build the `f` of Theorem 4 and locate its minima by brute
 force, compare every function against its OEIS entry term by term, run a brute

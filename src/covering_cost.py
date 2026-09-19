@@ -46,6 +46,7 @@ returns a wrong minimum without ever failing.
 
 import random
 import sys
+from math import gcd as _gcd_lucas, isqrt as _isqrt
 from bisect import bisect_left
 from os.path import abspath, dirname
 
@@ -57,11 +58,83 @@ __all__ = ["primes_up_to", "prime_powers_up_to", "SizeFloor", "covering_cost",
            "CoveringCost", "factor", "is_prime"]
 
 
-_BASES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37)
+# Until version 3.3.3 this was "deterministic Miller-Rabin for n < 3.3e24"
+# with the twelve bases 2..37. Twelve bases decide primality only below
+# psi_12 = 318665857834031151167461, which is composite and passes all twelve;
+# 3.3e24 is psi_13 and needs the base 41 as well (Sorenson and Webster, 2015).
+# Above psi_13 no set of bases is known to suffice, so the strong Lucas test is
+# added: Miller-Rabin to base 2 plus strong Lucas is BPSW, with no known
+# counterexample -- which is not a proof, and is said so. No published number
+# depended on it: RESULT.md, "What changed in version 3.3.4".
+_BASES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41)
+
+#: psi_13: the smallest strong pseudoprime to the first thirteen prime bases.
+#: Below it, Miller-Rabin with _BASES decides primality without error.
+_PROVEN_BELOW = 3317044064679887385961981
+
+
+def _jacobi(a, n):
+    """The Jacobi symbol (a/n), for odd n > 0."""
+    a %= n
+    result = 1
+    while a:
+        while a % 2 == 0:
+            a //= 2
+            if n % 8 in (3, 5):
+                result = -result
+        a, n = n, a
+        if a % 4 == 3 and n % 4 == 3:
+            result = -result
+        a %= n
+    return result if n == 1 else 0
+
+
+def _half(x, n):
+    """x / 2 modulo odd n."""
+    if x % 2:
+        x += n
+    return (x // 2) % n
+
+
+def _strong_lucas(n):
+    """Strong Lucas probable-prime test, Selfridge's parameters (method A).
+
+    n must be odd, greater than 2, and free of the small prime factors.
+    """
+    r = _isqrt(n)
+    if r * r == n:
+        return False                      # no D with (D/n) = -1 exists
+    d = 5
+    while True:
+        j = _jacobi(d, n)
+        if j == -1:
+            break
+        if j == 0 and _gcd_lucas(abs(d), n) not in (1, n):
+            return False
+        d = -d - 2 if d > 0 else -d + 2
+    p, q = 1, (1 - d) // 4
+    k, s = n + 1, 0
+    while k % 2 == 0:
+        k //= 2
+        s += 1
+    u, v, qk = 1, p % n, q % n           # U_1, V_1, Q^1
+    for bit in bin(k)[3:]:
+        u, v, qk = u * v % n, (v * v - 2 * qk) % n, qk * qk % n
+        if bit == "1":
+            u, v = _half(p * u + v, n), _half(d * u + p * v, n)
+            qk = qk * q % n
+    if u == 0 or v == 0:
+        return True
+    for _ in range(s - 1):
+        v = (v * v - 2 * qk) % n
+        qk = qk * qk % n
+        if v == 0:
+            return True
+    return False
 
 
 def is_prime(n):
-    """Deterministic Miller-Rabin for n < 3.3e24."""
+    """Proven below psi_13; BPSW, with no known counterexample, above."""
     if n < 2:
         return False
     for p in _BASES:
@@ -81,7 +154,9 @@ def is_prime(n):
                 break
         else:
             return False
-    return True
+    if n < _PROVEN_BELOW:
+        return True
+    return _strong_lucas(n)
 
 
 def _gcd(a, b):
